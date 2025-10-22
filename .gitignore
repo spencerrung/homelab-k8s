@@ -1,0 +1,31 @@
+# Secrets and sensitive data
+*.secret.yaml
+*.secret.yml
+secrets/
+secret-*.yaml
+
+# Flux system generated files (managed by Flux)
+clusters/*/flux-system/gotk-components.yaml
+clusters/*/flux-system/gotk-sync.yaml
+clusters/*/flux-system/kustomization.yaml
+
+# SOPS keys (if using SOPS for secret management)
+.sops.yaml
+*.key
+*.asc
+
+# Temporary files
+*.tmp
+*.swp
+*.bak
+*~
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+*.claude/*
