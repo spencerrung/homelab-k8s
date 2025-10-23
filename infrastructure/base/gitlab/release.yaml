@@ -198,7 +198,8 @@ spec:
 
     # Minio (object storage)
     minio:
-      image: minio/minio:RELEASE.2024-10-13T13-34-11Z  # Use newer ARM64-compatible image
+      image: minio/minio
+      imageTag: RELEASE.2024-10-13T13-34-11Z  # Use newer ARM64-compatible image
       persistence:
         enabled: true
         size: 10Gi
