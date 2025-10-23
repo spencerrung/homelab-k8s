@@ -16,6 +16,12 @@ spec:
         namespace: flux-system
       interval: 12h
   values:
+    # Controller image (supports ARM64)
+    image:
+      repository: ghcr.io/weaveworks/tf-controller
+      tag: v0.16.0-rc.4
+      pullPolicy: IfNotPresent
+
     # Resource limits for Raspberry Pi
     resources:
       requests:
@@ -30,6 +36,7 @@ spec:
       image:
         repository: ghcr.io/weaveworks/tf-runner
         tag: v0.16.0-rc.4
+        pullPolicy: IfNotPresent
       resources:
         requests:
           cpu: 100m

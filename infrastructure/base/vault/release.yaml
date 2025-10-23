@@ -16,8 +16,18 @@ spec:
         namespace: flux-system
       interval: 12h
   values:
+    # Global settings for ARM64 (Raspberry Pi)
+    global:
+      enabled: true
+
     # Standalone mode for homelab (single instance)
     server:
+      # ARM64 image configuration
+      image:
+        repository: hashicorp/vault
+        tag: "1.15.6"
+        pullPolicy: IfNotPresent
+
       # Run in dev mode for easy setup (WARNING: not for production!)
       # Remove this and configure proper storage for production use
       dev:
@@ -72,6 +82,13 @@ spec:
     # Injector for automatic secret injection (optional)
     injector:
       enabled: true
+      image:
+        repository: hashicorp/vault-k8s
+        tag: "1.4.1"
+        pullPolicy: IfNotPresent
+      agentImage:
+        repository: hashicorp/vault
+        tag: "1.15.6"
       resources:
         requests:
           memory: 64Mi
