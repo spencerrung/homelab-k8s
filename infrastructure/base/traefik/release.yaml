@@ -24,11 +24,11 @@ spec:
       - "--global.checknewversion=false"
       - "--global.sendanonymoususage=false"
 
-    # ARM64 compatible image for Raspberry Pi
+    # ARM64 compatible image for Raspberry Pi (Traefik v3)
     image:
       registry: docker.io
       repository: traefik
-      tag: "v2.11"
+      tag: "v3.3"
 
     # Deployment configuration
     deployment:
