@@ -16,11 +16,6 @@ spec:
         namespace: flux-system
       interval: 12h
   values:
-    # ARM64 compatible images for Raspberry Pi
-    image:
-      repository: quay.io/jetstack/cert-manager-controller
-      tag: v1.13.3
-
     # Install CRDs with the chart
     installCRDs: true
 
@@ -34,9 +29,6 @@ spec:
         memory: 128Mi
 
     webhook:
-      image:
-        repository: quay.io/jetstack/cert-manager-webhook
-        tag: v1.13.3
       resources:
         requests:
           cpu: 10m
@@ -46,9 +38,6 @@ spec:
           memory: 128Mi
 
     cainjector:
-      image:
-        repository: quay.io/jetstack/cert-manager-cainjector
-        tag: v1.13.3
       resources:
         requests:
           cpu: 10m
