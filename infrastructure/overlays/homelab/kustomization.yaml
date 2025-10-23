@@ -4,6 +4,6 @@ kind: Kustomization
 resources:
   - ../../base/sources
   - ../../base/tf-controller
-  - ./vault  # Use vault overlay with auto-unseal
+  - ../../base/vault  # Use base vault (dev mode, no auto-unseal)
   # - ../../base/external-secrets  # Temporarily disabled to fix Vault first
 # Add homelab-specific patches and resources here
