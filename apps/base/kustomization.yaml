@@ -2,7 +2,8 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - podinfo/  # Example application - remove when adding your own
+  - podinfo/    # Example application - remove when adding your own
+  - eso-test/   # Test External Secrets Operator integration
 # Add applications here as you create them
 # Example:
 # - homer/
