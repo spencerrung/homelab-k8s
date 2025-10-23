@@ -57,8 +57,8 @@ spec:
       enabled: true
       type: NodePort  # Use NodePort so external Traefik can route to it
       spec:
-        # Fix NodePort ports for consistent external routing
-        externalTrafficPolicy: Local
+        # Allow access from any node (not just where pod is running)
+        externalTrafficPolicy: Cluster
 
     # IngressRoute configuration
     ingressRoute:
@@ -77,9 +77,9 @@ spec:
     # Logs
     logs:
       general:
-        level: INFO
+        level: DEBUG
       access:
-        enabled: false  # Can enable for debugging
+        enabled: true  # Enabled for debugging
 
     # Enable Prometheus metrics (optional)
     metrics:
