@@ -1,0 +1,109 @@
+terraform {
+  required_version = ">= 1.0"
+
+  required_providers {
+    vault = {
+      source  = "hashicorp/vault"
+      version = "~> 4.0"
+    }
+  }
+}
+
+provider "vault" {
+  # Address will be configured via environment variable or Terraform resource
+  # VAULT_ADDR and VAULT_TOKEN will be provided by the Terraform resource
+  address = var.vault_address
+  token   = var.vault_token
+
+  # Skip TLS verification for internal cluster communication
+  skip_tls_verify = true
+}
+
+variable "vault_address" {
+  description = "Vault server address"
+  type        = string
+  default     = "http://vault.vault.svc.cluster.local:8200"
+}
+
+variable "vault_token" {
+  description = "Vault root or admin token"
+  type        = string
+  sensitive   = true
+}
+
+# Enable KV v2 secrets engine
+resource "vault_mount" "kv" {
+  path        = "secret"
+  type        = "kv"
+  options     = { version = "2" }
+  description = "KV v2 Secrets Engine for application secrets"
+}
+
+# Enable Kubernetes auth method
+resource "vault_auth_backend" "kubernetes" {
+  type = "kubernetes"
+  path = "kubernetes"
+}
+
+# Configure Kubernetes auth backend
+resource "vault_kubernetes_auth_backend_config" "kubernetes" {
+  backend            = vault_auth_backend.kubernetes.path
+  kubernetes_host    = "https://kubernetes.default.svc.cluster.local:443"
+  disable_local_ca_jwt = false
+}
+
+# Policy for External Secrets Operator
+resource "vault_policy" "external_secrets" {
+  name = "external-secrets"
+
+  policy = <<EOT
+# Read secrets from KV v2
+path "secret/data/*" {
+  capabilities = ["read", "list"]
+}
+
+# List secrets metadata
+path "secret/metadata/*" {
+  capabilities = ["list"]
+}
+EOT
+}
+
+# Kubernetes auth role for External Secrets Operator
+resource "vault_kubernetes_auth_backend_role" "external_secrets" {
+  backend                          = vault_auth_backend.kubernetes.path
+  role_name                        = "external-secrets"
+  bound_service_account_names      = ["external-secrets-sa"]
+  bound_service_account_namespaces = ["*"]
+  token_ttl                        = 3600
+  token_policies                   = [vault_policy.external_secrets.name]
+}
+
+# Example: Create a test secret
+resource "vault_kv_secret_v2" "test" {
+  mount               = vault_mount.kv.path
+  name                = "test"
+  cas                 = 1
+  delete_all_versions = true
+
+  data_json = jsonencode({
+    username = "testuser"
+    password = "changeme"
+  })
+}
+
+# Output useful information
+output "kv_mount_path" {
+  value       = vault_mount.kv.path
+  description = "Path where KV v2 secrets engine is mounted"
+}
+
+output "kubernetes_auth_path" {
+  value       = vault_auth_backend.kubernetes.path
+  description = "Path where Kubernetes auth is mounted"
+}
+
+output "external_secrets_role" {
+  value       = vault_kubernetes_auth_backend_role.external_secrets.role_name
+  description = "Kubernetes auth role for External Secrets Operator"
+}

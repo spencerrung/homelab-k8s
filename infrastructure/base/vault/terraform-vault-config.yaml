@@ -1,0 +1,66 @@
+---
+# Terraform resource for configuring Vault
+# This will be applied by Flux Terraform Controller
+apiVersion: infra.contrib.fluxcd.io/v1alpha2
+kind: Terraform
+metadata:
+  name: vault-config
+  namespace: flux-system
+spec:
+  # How often to check for drift and reconcile
+  interval: 10m
+
+  # Retry configuration
+  retryInterval: 20s
+
+  # Source of Terraform code
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+
+  # Path to Terraform code within the repository
+  path: ./infrastructure/base/vault/terraform
+
+  # Apply on creation
+  approvePlan: auto
+
+  # Destroy on deletion (be careful!)
+  destroyResourcesOnDeletion: false
+
+  # Run Terraform with these variables
+  varsFrom:
+    - kind: Secret
+      name: vault-terraform-vars
+      varsKeys:
+        - vault_token
+
+  vars:
+    - name: vault_address
+      value: "http://vault.vault.svc.cluster.local:8200"
+
+  # Dependencies - only run after Vault is deployed
+  dependsOn:
+    - name: infrastructure
+      namespace: flux-system
+
+  # Write plan output to this ConfigMap (optional)
+  writeOutputsToSecret:
+    name: vault-terraform-outputs
+    outputs:
+      - kv_mount_path
+      - kubernetes_auth_path
+      - external_secrets_role
+
+  # Runner pod configuration
+  runnerPodTemplate:
+    spec:
+      containers:
+        - name: tf-runner
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

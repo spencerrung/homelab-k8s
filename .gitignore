@@ -3,6 +3,8 @@
 *.secret.yml
 secrets/
 secret-*.yaml
+vault-token-secret.yaml
+*-token-secret.yaml
 
 # Flux system generated files (managed by Flux)
 clusters/*/flux-system/gotk-components.yaml

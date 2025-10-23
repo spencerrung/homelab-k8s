@@ -6,6 +6,12 @@ GitOps repository for managing Kubernetes applications on the homelab k3s cluste
 
 This repository uses [Flux](https://fluxcd.io/) to manage application deployments on a Raspberry Pi k3s cluster. All cluster state is defined declaratively in Git, and Flux automatically reconciles the cluster to match.
 
+**Key Components:**
+- **Flux**: GitOps continuous delivery
+- **Terraform Controller**: GitOps for Terraform (infrastructure as code)
+- **Vault**: Secret management
+- **External Secrets Operator**: Syncs secrets from Vault to Kubernetes
+
 ## Repository Structure
 
 ```
@@ -39,28 +45,20 @@ This repository uses [Flux](https://fluxcd.io/) to manage application deployment
    ./bootstrap/flux-bootstrap.sh
    ```
 
-   Or manually:
+2. **Initialize Vault and Terraform:**
 
    ```bash
-   flux bootstrap github \
-     --owner=<your-github-username> \
-     --repository=homelab-k8s \
-     --branch=main \
-     --path=clusters/homelab \
-     --personal
+   ./bootstrap/init-vault-terraform.sh
    ```
 
-2. **Verify Flux installation:**
+   This will initialize Vault and set up Terraform to automatically configure it.
+
+3. **Verify everything is running:**
 
    ```bash
    flux check
-   kubectl get pods -n flux-system
-   ```
-
-3. **Watch Flux reconcile:**
-
-   ```bash
    flux get kustomizations --watch
+   kubectl get terraform -n flux-system
    ```
 
 ## Adding Infrastructure Components
@@ -123,10 +121,23 @@ flux logs --follow --all-namespaces
 - **Namespaces**: Each app/component creates its own namespace
 - **Helm**: Use `HelmRepository` and `HelmRelease` CRDs for Helm charts
 
+## Infrastructure Components
+
+### Terraform Controller
+Manages infrastructure as code using Terraform, running in-cluster via Flux. See [infrastructure/base/tf-controller/README.md](infrastructure/base/tf-controller/README.md)
+
+### Vault
+HashiCorp Vault for centralized secret management. Configured automatically via Terraform. See [infrastructure/base/vault/README.md](infrastructure/base/vault/README.md)
+
+### External Secrets Operator
+Syncs secrets from Vault into Kubernetes Secrets. See [infrastructure/base/external-secrets/README.md](infrastructure/base/external-secrets/README.md)
+
 ## Security Notes
 
-- Secrets should be encrypted using SOPS or sealed-secrets (to be configured)
+- Secrets managed via Vault and External Secrets Operator
+- Vault tokens stored as Kubernetes secrets (gitignored)
 - Never commit plain-text credentials
+- Terraform automatically configures Vault security policies
 - Use read-only deploy keys where possible
 
 ## Links
