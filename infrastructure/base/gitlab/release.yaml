@@ -200,6 +200,9 @@ spec:
     minio:
       image: minio/minio
       imageTag: RELEASE.2024-10-13T13-34-11Z  # Use newer ARM64-compatible image
+      minioMc:
+        image: minio/mc
+        tag: RELEASE.2024-10-08T09-37-26Z  # Use newer ARM64-compatible MC image
       persistence:
         enabled: true
         size: 10Gi
