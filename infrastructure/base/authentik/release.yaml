@@ -87,7 +87,7 @@ spec:
           memory: 256Mi
         limits:
           cpu: 500m
-          memory: 512Mi
+          memory: 1Gi
 
       ingress:
         enabled: false  # Enable later with Traefik/nginx
@@ -102,4 +102,4 @@ spec:
           memory: 256Mi
         limits:
           cpu: 500m
-          memory: 512Mi
+          memory: 1Gi
