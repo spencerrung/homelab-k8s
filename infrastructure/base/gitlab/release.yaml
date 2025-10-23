@@ -1,0 +1,207 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: gitlab
+  namespace: gitlab
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: gitlab
+      version: '>=8.0.0'
+      sourceRef:
+        kind: HelmRepository
+        name: gitlab
+        namespace: flux-system
+      interval: 12h
+  values:
+    # Global settings
+    global:
+      edition: ce
+      hosts:
+        domain: alucard.dev
+        https: true
+        gitlab:
+          name: code.alucard.dev
+        registry:
+          name: registry.alucard.dev
+        minio:
+          name: minio.alucard.dev
+
+      # Use external ingress controller (Traefik)
+      ingress:
+        enabled: false
+        configureCertmanager: false
+
+      # Time zone
+      time_zone: America/New_York
+
+      # Email settings (configure later)
+      email:
+        from: 'gitlab@alucard.dev'
+        display_name: GitLab
+        reply_to: 'noreply@alucard.dev'
+
+      # SMTP disabled for now, can enable later
+      smtp:
+        enabled: false
+
+      # Container registry settings
+      registry:
+        enabled: true
+
+      # Minio for object storage
+      minio:
+        enabled: true
+
+      # Grafana disabled (use external Grafana)
+      grafana:
+        enabled: false
+
+      # AppArmor disabled (not available on some systems)
+      appConfig:
+        enableUsagePing: false
+        enableSeatLink: false
+        enableImpersonation: true
+        defaultCanCreateGroup: true
+        usernameChangingEnabled: false
+
+        # OIDC configuration for Authentik
+        omniauth:
+          enabled: true
+          allowSingleSignOn: ['openid_connect']
+          blockAutoCreatedUsers: false
+          autoLinkUser: ['openid_connect']
+          providers:
+            - secret: gitlab-oidc
+              key: provider
+
+    # PostgreSQL - use built-in
+    postgresql:
+      install: true
+      persistence:
+        enabled: true
+        size: 8Gi
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: 500m
+          memory: 1Gi
+
+    # Redis settings
+    redis:
+      install: true
+      master:
+        persistence:
+          enabled: true
+          size: 2Gi
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+
+    # Cert-manager disabled (using external)
+    certmanager:
+      install: false
+
+    # Nginx ingress disabled (using Traefik)
+    nginx-ingress:
+      enabled: false
+
+    # Prometheus disabled (use external)
+    prometheus:
+      install: false
+
+    # GitLab Runner (can enable later)
+    gitlab-runner:
+      install: false
+
+    # GitLab components with resource limits
+    gitlab:
+      # Webservice
+      webservice:
+        replicas: 1
+        resources:
+          requests:
+            cpu: 200m
+            memory: 1Gi
+          limits:
+            cpu: 1000m
+            memory: 2Gi
+
+      # Sidekiq (background jobs)
+      sidekiq:
+        replicas: 1
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+
+      # Gitaly (Git repository storage)
+      gitaly:
+        persistence:
+          enabled: true
+          size: 20Gi
+        resources:
+          requests:
+            cpu: 100m
+            memory: 512Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+
+      # GitLab Shell
+      gitlab-shell:
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+
+      # Migrations
+      migrations:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+
+    # Registry
+    registry:
+      enabled: true
+      persistence:
+        enabled: true
+        size: 10Gi
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          cpu: 200m
+          memory: 512Mi
+
+    # Minio (object storage)
+    minio:
+      persistence:
+        enabled: true
+        size: 10Gi
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          cpu: 200m
+          memory: 512Mi
