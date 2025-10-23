@@ -16,85 +16,16 @@ spec:
         namespace: flux-system
       interval: 12h
   values:
-    # Global settings for ARM64 (Raspberry Pi)
-    global:
-      enabled: true
-
-    # Standalone mode for homelab (single instance)
     server:
-      # ARM64 image configuration
       image:
         repository: hashicorp/vault
         tag: "1.15.6"
-        pullPolicy: IfNotPresent
 
-      # Run in dev mode for easy setup (WARNING: not for production!)
-      # Dev mode auto-initializes and auto-unseals - data stored in memory!
-      # TODO: Switch to standalone mode with proper storage for production
+      # Simple dev mode - auto-init, auto-unseal
       dev:
         enabled: true
-        devRootToken: "root"  # Use simple root token in dev mode
+        devRootToken: "root"
 
-      # HA mode disabled for homelab
-      ha:
-        enabled: false
-
-      # Standalone mode with file storage
-      standalone:
-        enabled: true
-        config: |
-          ui = true
-
-          listener "tcp" {
-            tls_disable = 1
-            address = "[::]:8200"
-            cluster_address = "[::]:8201"
-          }
-
-          storage "file" {
-            path = "/vault/data"
-          }
-
-      # Resource limits for Raspberry Pi
-      resources:
-        requests:
-          memory: 256Mi
-          cpu: 250m
-        limits:
-          memory: 512Mi
-          cpu: 500m
-
-      # Data persistence
-      dataStorage:
-        enabled: true
-        size: 10Gi
-        storageClass: null  # Use default storage class
-
-      # Enable service
-      service:
-        enabled: true
-        type: ClusterIP
-        port: 8200
-
-    # UI configuration
-    ui:
-      enabled: true
-      serviceType: ClusterIP
-
-    # Injector for automatic secret injection (optional)
+      # Disable injector to keep it simple
     injector:
-      enabled: true
-      image:
-        repository: hashicorp/vault-k8s
-        tag: "1.4.1"
-        pullPolicy: IfNotPresent
-      agentImage:
-        repository: hashicorp/vault
-        tag: "1.15.6"
-      resources:
-        requests:
-          memory: 64Mi
-          cpu: 50m
-        limits:
-          memory: 128Mi
-          cpu: 100m
+      enabled: false

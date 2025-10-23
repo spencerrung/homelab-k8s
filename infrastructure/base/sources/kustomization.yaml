@@ -4,4 +4,4 @@ kind: Kustomization
 resources:
   - hashicorp.yaml
   - external-secrets.yaml
-  - weaveworks.yaml
+  - tofu-controller.yaml
