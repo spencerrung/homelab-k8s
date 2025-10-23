@@ -92,9 +92,40 @@ else
     # Check if sealed
     SEALED=$(echo "$VAULT_STATUS" | grep -o '"sealed":[^,}]*' | cut -d':' -f2 | tr -d ' ')
     if [ "$SEALED" = "true" ]; then
-        echo -e "${YELLOW}Vault is sealed. Please unseal it first.${NC}"
-        echo "Run: kubectl exec -it -n vault vault-0 -- vault operator unseal"
-        exit 1
+        echo -e "${YELLOW}Vault is sealed.${NC}"
+        echo ""
+        echo "Please provide 3 unseal keys to unseal Vault."
+        echo ""
+
+        read -p "Enter unseal key 1: " UNSEAL_KEY_1
+        read -p "Enter unseal key 2: " UNSEAL_KEY_2
+        read -p "Enter unseal key 3: " UNSEAL_KEY_3
+
+        if [ -z "$UNSEAL_KEY_1" ] || [ -z "$UNSEAL_KEY_2" ] || [ -z "$UNSEAL_KEY_3" ]; then
+            echo -e "${RED}All 3 unseal keys are required${NC}"
+            exit 1
+        fi
+
+        echo ""
+        echo -e "${BLUE}Unsealing Vault...${NC}"
+        kubectl exec -n vault vault-0 -- vault operator unseal "$UNSEAL_KEY_1" > /dev/null
+        echo -e "${GREEN}✓${NC} Unsealed with key 1"
+        kubectl exec -n vault vault-0 -- vault operator unseal "$UNSEAL_KEY_2" > /dev/null
+        echo -e "${GREEN}✓${NC} Unsealed with key 2"
+        kubectl exec -n vault vault-0 -- vault operator unseal "$UNSEAL_KEY_3" > /dev/null
+        echo -e "${GREEN}✓${NC} Unsealed with key 3"
+
+        echo ""
+        echo -e "${BLUE}Storing unseal keys for auto-unseal...${NC}"
+        # Create secret with unseal keys for auto-unseal
+        kubectl create secret generic vault-unseal-keys \
+            --from-literal=key1="$UNSEAL_KEY_1" \
+            --from-literal=key2="$UNSEAL_KEY_2" \
+            --from-literal=key3="$UNSEAL_KEY_3" \
+            --namespace=vault \
+            --dry-run=client -o yaml | kubectl apply -f -
+        echo -e "${GREEN}✓${NC} Unseal keys stored in vault namespace"
+        echo -e "${YELLOW}⚠${NC}  Note: Keys are stored in Kubernetes secrets (homelab convenience)"
     fi
 
     echo ""
