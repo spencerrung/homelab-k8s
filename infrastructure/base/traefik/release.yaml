@@ -1,0 +1,97 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: traefik
+  namespace: traefik
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: traefik
+      version: '>=26.0.0'
+      sourceRef:
+        kind: HelmRepository
+        name: traefik
+        namespace: flux-system
+      interval: 12h
+  dependsOn:
+    - name: cert-manager
+      namespace: cert-manager
+  values:
+    # Global arguments
+    globalArguments:
+      - "--global.checknewversion=false"
+      - "--global.sendanonymoususage=false"
+
+    # ARM64 compatible image for Raspberry Pi
+    image:
+      registry: docker.io
+      repository: traefik
+      tag: "v2.11"
+
+    # Deployment configuration
+    deployment:
+      replicas: 1
+
+    # Ports configuration
+    ports:
+      web:
+        port: 80
+        exposedPort: 80
+        # Redirect HTTP to HTTPS
+        redirectTo:
+          port: websecure
+      websecure:
+        port: 443
+        exposedPort: 443
+        http3:
+          enabled: false
+        tls:
+          enabled: true
+          # cert-manager will provide certificates
+      metrics:
+        port: 9100
+        exposedPort: 9100
+
+    # Service configuration
+    service:
+      enabled: true
+      type: NodePort  # Use NodePort so external Traefik can route to it
+      spec:
+        # Fix NodePort ports for consistent external routing
+        externalTrafficPolicy: Local
+
+    # IngressRoute configuration
+    ingressRoute:
+      dashboard:
+        enabled: false  # Disable dashboard for now, can enable later
+
+    # Resource limits for Raspberry Pi
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 256Mi
+
+    # Logs
+    logs:
+      general:
+        level: INFO
+      access:
+        enabled: false  # Can enable for debugging
+
+    # Enable Prometheus metrics (optional)
+    metrics:
+      prometheus:
+        enabled: false
+
+    # Additional arguments
+    additionalArguments:
+      # Enable Kubernetes Ingress provider
+      - "--providers.kubernetesingress=true"
+      - "--providers.kubernetesingress.ingressclass=traefik"
+      # Enable Kubernetes CRD provider (IngressRoute, etc.)
+      - "--providers.kubernetescrd=true"

@@ -9,3 +9,4 @@ resources:
   - externalsecrets.yaml
   - postgresql.yaml
   - release.yaml
+  - ingress.yaml

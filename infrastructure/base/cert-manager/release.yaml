@@ -1,0 +1,66 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: cert-manager
+  namespace: cert-manager
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: cert-manager
+      version: '>=1.13.0'
+      sourceRef:
+        kind: HelmRepository
+        name: jetstack
+        namespace: flux-system
+      interval: 12h
+  values:
+    # ARM64 compatible images for Raspberry Pi
+    image:
+      repository: quay.io/jetstack/cert-manager-controller
+      tag: v1.13.3
+
+    webhook:
+      image:
+        repository: quay.io/jetstack/cert-manager-webhook
+        tag: v1.13.3
+
+    cainjector:
+      image:
+        repository: quay.io/jetstack/cert-manager-cainjector
+        tag: v1.13.3
+
+    # Install CRDs with the chart
+    installCRDs: true
+
+    # Resource limits for Raspberry Pi
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
+
+    webhook:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          cpu: 100m
+          memory: 128Mi
+
+    cainjector:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          cpu: 100m
+          memory: 128Mi
+
+    # Enable prometheus metrics (optional)
+    prometheus:
+      enabled: false

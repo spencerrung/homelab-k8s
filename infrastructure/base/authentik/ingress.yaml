@@ -1,0 +1,30 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: authentik
+  namespace: authentik
+  annotations:
+    # Use Traefik ingress class
+    kubernetes.io/ingress.class: traefik
+    # Use cert-manager to provision certificate
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    # Traefik-specific annotations
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  tls:
+    - hosts:
+        - auth.alucard.dev  # UPDATE THIS to your domain
+      secretName: authentik-tls
+  rules:
+    - host: auth.alucard.dev  # UPDATE THIS to your domain
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: authentik-server
+                port:
+                  number: 80
