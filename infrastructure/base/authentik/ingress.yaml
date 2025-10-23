@@ -9,9 +9,8 @@ metadata:
     kubernetes.io/ingress.class: traefik
     # Use cert-manager to provision certificate
     cert-manager.io/cluster-issuer: letsencrypt-prod
-    # Traefik-specific annotations
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    traefik.ingress.kubernetes.io/router.tls: "true"
+    # Allow both HTTP and HTTPS entrypoints (external Traefik handles TLS)
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
 spec:
   tls:
     - hosts:
