@@ -29,9 +29,11 @@ spec:
         pullPolicy: IfNotPresent
 
       # Run in dev mode for easy setup (WARNING: not for production!)
-      # Remove this and configure proper storage for production use
+      # Dev mode auto-initializes and auto-unseals - data stored in memory!
+      # TODO: Switch to standalone mode with proper storage for production
       dev:
-        enabled: false
+        enabled: true
+        devRootToken: "root"  # Use simple root token in dev mode
 
       # HA mode disabled for homelab
       ha:
