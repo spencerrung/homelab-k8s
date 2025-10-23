@@ -41,23 +41,27 @@ spec:
           value: "true"
         - name: AUTHENTIK_AVATARS
           value: "gravatar,initials"
-
-    # Use external PostgreSQL
-    postgresql:
-      enabled: false
-
-    # External PostgreSQL configuration
-    authentik:
-      postgresql:
-        host: postgresql.authentik.svc.cluster.local
-        port: 5432
-        name: authentik
-        user: authentik
-        password:
+        # PostgreSQL configuration via environment variables
+        - name: AUTHENTIK_POSTGRESQL__HOST
+          value: "postgresql.authentik.svc.cluster.local"
+        - name: AUTHENTIK_POSTGRESQL__PORT
+          value: "5432"
+        - name: AUTHENTIK_POSTGRESQL__NAME
+          value: "authentik"
+        - name: AUTHENTIK_POSTGRESQL__USER
+          valueFrom:
+            secretKeyRef:
+              name: authentik-postgresql
+              key: username
+        - name: AUTHENTIK_POSTGRESQL__PASSWORD
           valueFrom:
             secretKeyRef:
               name: authentik-postgresql
               key: password
+
+    # Use external PostgreSQL
+    postgresql:
+      enabled: false
 
     # Redis configuration (embedded for simplicity)
     redis:
