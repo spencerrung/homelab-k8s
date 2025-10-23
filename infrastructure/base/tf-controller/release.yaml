@@ -16,10 +16,10 @@ spec:
         namespace: flux-system
       interval: 12h
   values:
-    # Controller image (supports ARM64)
+    # Controller image (supports ARM64) - now under flux-iac org
     image:
-      repository: ghcr.io/weaveworks/tf-controller
-      tag: v0.16.0-rc.4
+      repository: ghcr.io/flux-iac/tofu-controller
+      tag: v0.16.0-rc.5
       pullPolicy: IfNotPresent
 
     # Resource limits for Raspberry Pi
@@ -34,8 +34,8 @@ spec:
     # Runner pod resources (pods that run terraform)
     runner:
       image:
-        repository: ghcr.io/weaveworks/tf-runner
-        tag: v0.16.0-rc.4
+        repository: ghcr.io/flux-iac/tf-runner
+        tag: v0.16.0-rc.5
         pullPolicy: IfNotPresent
       resources:
         requests:
