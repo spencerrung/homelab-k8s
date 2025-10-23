@@ -13,10 +13,13 @@ spec:
     privateKeySecretRef:
       name: letsencrypt-staging
     solvers:
-      # HTTP-01 challenge solver
-      - http01:
-          ingress:
-            class: traefik
+      # DNS-01 challenge solver using Cloudflare
+      - dns01:
+          cloudflare:
+            email: spencerrung@alucard.dev
+            apiTokenSecretRef:
+              name: cloudflare-api-token
+              key: api-token
 ---
 # Let's Encrypt Production Issuer
 apiVersion: cert-manager.io/v1
@@ -27,12 +30,15 @@ spec:
   acme:
     # Production server
     server: https://acme-v02.api.letsencrypt.org/directory
-    # Email for Let's Encrypt notifications - UPDATE THIS
+    # Email for Let's Encrypt notifications
     email: spencerrung@alucard.dev
     privateKeySecretRef:
       name: letsencrypt-prod
     solvers:
-      # HTTP-01 challenge solver
-      - http01:
-          ingress:
-            class: traefik
+      # DNS-01 challenge solver using Cloudflare
+      - dns01:
+          cloudflare:
+            email: spencerrung@alucard.dev
+            apiTokenSecretRef:
+              name: cloudflare-api-token
+              key: api-token

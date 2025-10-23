@@ -113,6 +113,10 @@ resource "vault_kv_secret_v2" "authentik_secret_key" {
   })
 }
 
+# Cloudflare API token for cert-manager DNS-01 challenges
+# NOTE: This secret should be created manually to avoid storing the token in Git:
+# kubectl exec -n vault vault-0 -- vault kv put secret/cert-manager/cloudflare api-token="YOUR_TOKEN_HERE"
+
 # Output useful information
 output "kv_mount_path" {
   value       = "secret"
