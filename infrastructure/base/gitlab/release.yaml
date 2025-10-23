@@ -107,8 +107,7 @@ spec:
             memory: 512Mi
 
     # Cert-manager disabled (using external)
-    certmanager:
-      install: false
+    # Note: In newer GitLab chart versions, cert-manager is controlled via global.ingress.configureCertmanager
 
     # Nginx ingress disabled (using Traefik)
     nginx-ingress:
