@@ -19,13 +19,20 @@ if ! command -v kubectl &> /dev/null; then
     exit 1
 fi
 
-# Wait for Vault to be ready
-echo -e "${BLUE}Waiting for Vault to be ready...${NC}"
-kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=vault -n vault --timeout=300s || {
-    echo -e "${RED}Vault pod did not become ready${NC}"
-    exit 1
-}
-echo -e "${GREEN}✓${NC} Vault is ready"
+# Wait for Vault pod to be running (not ready, since it's sealed)
+echo -e "${BLUE}Waiting for Vault pod to be running...${NC}"
+for i in {1..60}; do
+    POD_STATUS=$(kubectl get pod -n vault vault-0 -o jsonpath='{.status.phase}' 2>/dev/null || echo "NotFound")
+    if [ "$POD_STATUS" = "Running" ]; then
+        echo -e "${GREEN}✓${NC} Vault pod is running"
+        break
+    fi
+    if [ $i -eq 60 ]; then
+        echo -e "${RED}Vault pod did not start${NC}"
+        exit 1
+    fi
+    sleep 5
+done
 echo ""
 
 # Check if Vault is initialized
@@ -50,15 +57,31 @@ if [ "$INITIALIZED" = "false" ]; then
         echo ""
         echo -e "${BLUE}Unsealing Vault...${NC}"
         UNSEAL_KEYS=$(echo "$INIT_OUTPUT" | jq -r '.unseal_keys_b64[]')
-        COUNT=0
-        while IFS= read -r key; do
-            COUNT=$((COUNT + 1))
-            kubectl exec -n vault vault-0 -- vault operator unseal "$key" > /dev/null
-            echo -e "${GREEN}✓${NC} Unsealed with key $COUNT"
-            if [ $COUNT -eq 3 ]; then
-                break
-            fi
-        done <<< "$UNSEAL_KEYS"
+
+        # Extract the first 3 keys for unsealing
+        UNSEAL_KEY_1=$(echo "$UNSEAL_KEYS" | sed -n '1p')
+        UNSEAL_KEY_2=$(echo "$UNSEAL_KEYS" | sed -n '2p')
+        UNSEAL_KEY_3=$(echo "$UNSEAL_KEYS" | sed -n '3p')
+
+        # Unseal Vault
+        kubectl exec -n vault vault-0 -- vault operator unseal "$UNSEAL_KEY_1" > /dev/null
+        echo -e "${GREEN}✓${NC} Unsealed with key 1"
+        kubectl exec -n vault vault-0 -- vault operator unseal "$UNSEAL_KEY_2" > /dev/null
+        echo -e "${GREEN}✓${NC} Unsealed with key 2"
+        kubectl exec -n vault vault-0 -- vault operator unseal "$UNSEAL_KEY_3" > /dev/null
+        echo -e "${GREEN}✓${NC} Unsealed with key 3"
+
+        echo ""
+        echo -e "${BLUE}Storing unseal keys for auto-unseal...${NC}"
+        # Create secret with unseal keys for auto-unseal
+        kubectl create secret generic vault-unseal-keys \
+            --from-literal=key1="$UNSEAL_KEY_1" \
+            --from-literal=key2="$UNSEAL_KEY_2" \
+            --from-literal=key3="$UNSEAL_KEY_3" \
+            --namespace=vault \
+            --dry-run=client -o yaml | kubectl apply -f -
+        echo -e "${GREEN}✓${NC} Unseal keys stored in vault namespace"
+        echo -e "${YELLOW}⚠${NC}  Note: Keys are stored in Kubernetes secrets (homelab convenience)"
     else
         echo "Please initialize Vault manually and run this script again."
         exit 0
