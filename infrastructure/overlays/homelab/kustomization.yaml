@@ -5,5 +5,5 @@ resources:
   - ../../base/sources
   - ../../base/tf-controller
   - ../../base/vault  # Use base vault (dev mode, no auto-unseal)
-  # - ../../base/external-secrets  # Temporarily disabled to fix Vault first
+  - ../../base/external-secrets  # Re-enabled now that Vault is configured!
 # Add homelab-specific patches and resources here
