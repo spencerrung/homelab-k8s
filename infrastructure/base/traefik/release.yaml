@@ -39,9 +39,9 @@ spec:
       web:
         port: 80
         exposedPort: 80
-        # Redirect HTTP to HTTPS
-        redirectTo:
-          port: websecure
+        # HTTP to HTTPS redirect now handled via middleware
+        middlewares:
+          - default-redirect-https@kubernetescrd
       websecure:
         port: 443
         exposedPort: 443

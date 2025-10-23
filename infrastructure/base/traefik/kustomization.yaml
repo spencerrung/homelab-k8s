@@ -5,3 +5,4 @@ namespace: traefik
 resources:
   - namespace.yaml
   - release.yaml
+  - middleware-redirect-https.yaml
