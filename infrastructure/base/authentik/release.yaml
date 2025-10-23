@@ -1,0 +1,101 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: authentik
+  namespace: authentik
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: authentik
+      version: '>=2024.8.0'
+      sourceRef:
+        kind: HelmRepository
+        name: authentik
+        namespace: flux-system
+      interval: 12h
+  dependsOn:
+    - name: tf-controller
+      namespace: flux-system
+  values:
+    # Global settings
+    global:
+      image:
+        repository: ghcr.io/goauthentik/server
+        tag: 2024.8.3
+        pullPolicy: IfNotPresent
+
+      # Environment URLs - update these for your domain
+      env:
+        - name: AUTHENTIK_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: authentik-secret-key
+              key: secret_key
+        - name: AUTHENTIK_ERROR_REPORTING__ENABLED
+          value: "false"
+        - name: AUTHENTIK_DISABLE_UPDATE_CHECK
+          value: "true"
+        - name: AUTHENTIK_DISABLE_STARTUP_ANALYTICS
+          value: "true"
+        - name: AUTHENTIK_AVATARS
+          value: "gravatar,initials"
+
+    # Use external PostgreSQL
+    postgresql:
+      enabled: false
+
+    # External PostgreSQL configuration
+    authentik:
+      postgresql:
+        host: postgresql.authentik.svc.cluster.local
+        port: 5432
+        name: authentik
+        user: authentik
+        password:
+          valueFrom:
+            secretKeyRef:
+              name: authentik-postgresql
+              key: password
+
+    # Redis configuration (embedded for simplicity)
+    redis:
+      enabled: true
+      master:
+        persistence:
+          enabled: true
+          size: 1Gi
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+
+    # Server configuration
+    server:
+      replicas: 1
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+
+      ingress:
+        enabled: false  # Enable later with Traefik/nginx
+        # Will configure this when setting up ingress controller
+
+    # Worker configuration
+    worker:
+      replicas: 1
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi

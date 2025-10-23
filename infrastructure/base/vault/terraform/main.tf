@@ -88,6 +88,31 @@ resource "vault_kv_secret_v2" "test" {
   })
 }
 
+# Authentik PostgreSQL credentials
+resource "vault_kv_secret_v2" "authentik_postgresql" {
+  mount               = "secret"
+  name                = "authentik/postgresql"
+  cas                 = 1
+  delete_all_versions = true
+
+  data_json = jsonencode({
+    username = "authentik"
+    password = "authentik-secure-password-change-me"  # Change this!
+  })
+}
+
+# Authentik secret key for sessions
+resource "vault_kv_secret_v2" "authentik_secret_key" {
+  mount               = "secret"
+  name                = "authentik/secret-key"
+  cas                 = 1
+  delete_all_versions = true
+
+  data_json = jsonencode({
+    secret_key = "change-me-to-a-random-50-char-string-for-production"
+  })
+}
+
 # Output useful information
 output "kv_mount_path" {
   value       = "secret"
