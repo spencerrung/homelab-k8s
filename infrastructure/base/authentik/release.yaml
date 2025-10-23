@@ -41,6 +41,9 @@ spec:
           value: "true"
         - name: AUTHENTIK_AVATARS
           value: "gravatar,initials"
+        # CSRF trusted origins - required for form submissions
+        - name: CSRF_TRUSTED_ORIGINS
+          value: "https://auth.alucard.dev"
         # PostgreSQL configuration via environment variables
         - name: AUTHENTIK_POSTGRESQL__HOST
           value: "postgresql.authentik.svc.cluster.local"
