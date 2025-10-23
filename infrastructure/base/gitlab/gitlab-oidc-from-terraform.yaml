@@ -1,0 +1,98 @@
+---
+# SecretStore to access Terraform outputs in flux-system namespace
+apiVersion: external-secrets.io/v1
+kind: SecretStore
+metadata:
+  name: terraform-outputs
+  namespace: gitlab
+spec:
+  provider:
+    kubernetes:
+      remoteNamespace: flux-system
+      server:
+        caProvider:
+          type: ConfigMap
+          name: kube-root-ca.crt
+          key: ca.crt
+      auth:
+        serviceAccount:
+          name: gitlab-external-secrets-sa
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gitlab-external-secrets-sa
+  namespace: gitlab
+---
+# ClusterRole to read secrets from flux-system namespace
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: read-terraform-outputs
+  namespace: flux-system
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: ["authentik-terraform-outputs"]
+    verbs: ["get", "list", "watch"]
+---
+# RoleBinding to allow gitlab SA to read terraform outputs
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: gitlab-read-terraform-outputs
+  namespace: flux-system
+subjects:
+  - kind: ServiceAccount
+    name: gitlab-external-secrets-sa
+    namespace: gitlab
+roleRef:
+  kind: Role
+  name: read-terraform-outputs
+  apiGroup: rbac.authorization.k8s.io
+---
+# ExternalSecret to sync GitLab OIDC credentials from Terraform outputs
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: gitlab-oidc-from-terraform
+  namespace: gitlab
+spec:
+  refreshInterval: 5m
+  secretStoreRef:
+    name: terraform-outputs
+    kind: SecretStore
+  target:
+    name: gitlab-oidc
+    creationPolicy: Owner
+    template:
+      data:
+        provider: |
+          name: openid_connect
+          label: Authentik
+          args:
+            name: openid_connect
+            scope:
+              - openid
+              - profile
+              - email
+            response_type: code
+            issuer: https://auth.alucard.dev/application/o/gitlab/
+            discovery: true
+            client_auth_method: query
+            uid_field: preferred_username
+            send_scope_to_token_endpoint: false
+            pkce: true
+            client_options:
+              identifier: {{ .clientId }}
+              secret: {{ .clientSecret }}
+              redirect_uri: https://code.alucard.dev/users/auth/openid_connect/callback
+  data:
+    - secretKey: clientId
+      remoteRef:
+        key: authentik-terraform-outputs
+        property: gitlab_client_id
+    - secretKey: clientSecret
+      remoteRef:
+        key: authentik-terraform-outputs
+        property: gitlab_client_secret

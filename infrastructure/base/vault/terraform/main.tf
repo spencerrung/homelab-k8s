@@ -117,6 +117,10 @@ resource "vault_kv_secret_v2" "authentik_secret_key" {
 # NOTE: This secret should be created manually to avoid storing the token in Git:
 # kubectl exec -n vault vault-0 -- vault kv put secret/cert-manager/cloudflare api-token="YOUR_TOKEN_HERE"
 
+# Authentik API token for Terraform automation
+# NOTE: Create this manually after Authentik is running:
+# kubectl exec -n vault vault-0 -- vault kv put secret/authentik/terraform-token api-token="YOUR_AUTHENTIK_API_TOKEN_HERE"
+
 # Output useful information
 output "kv_mount_path" {
   value       = "secret"

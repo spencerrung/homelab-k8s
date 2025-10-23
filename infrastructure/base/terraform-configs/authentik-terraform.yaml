@@ -1,0 +1,34 @@
+---
+apiVersion: infra.contrib.fluxcd.io/v1alpha2
+kind: Terraform
+metadata:
+  name: authentik-config
+  namespace: flux-system
+spec:
+  interval: 1h
+  path: ./infrastructure/base/terraform-configs/authentik
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  approvePlan: auto
+  destroyResourcesOnDeletion: false
+  writeOutputsToSecret:
+    name: authentik-terraform-outputs
+    outputs:
+      - gitlab_client_id
+      - gitlab_client_secret
+  varsFrom:
+    - kind: Secret
+      name: authentik-terraform-vars
+  runnerPodTemplate:
+    spec:
+      containers:
+        - name: tf-runner
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

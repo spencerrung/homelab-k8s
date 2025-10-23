@@ -4,3 +4,6 @@ kind: Kustomization
 namespace: flux-system
 resources:
   - terraform-vault-config.yaml
+  - vault-store.yaml
+  - authentik-token-secret.yaml
+  - authentik-terraform.yaml
