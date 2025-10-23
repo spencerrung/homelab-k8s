@@ -31,13 +31,9 @@ variable "vault_token" {
   sensitive   = true
 }
 
-# Enable KV v2 secrets engine
-resource "vault_mount" "kv" {
-  path        = "secret"
-  type        = "kv"
-  options     = { version = "2" }
-  description = "KV v2 Secrets Engine for application secrets"
-}
+# KV v2 secrets engine already exists in dev mode at secret/
+# We'll just use the existing mount instead of trying to create it
+# Reference the existing mount path directly in resources below
 
 # Enable Kubernetes auth method
 resource "vault_auth_backend" "kubernetes" {
@@ -81,7 +77,7 @@ resource "vault_kubernetes_auth_backend_role" "external_secrets" {
 
 # Example: Create a test secret
 resource "vault_kv_secret_v2" "test" {
-  mount               = vault_mount.kv.path
+  mount               = "secret"  # Use existing mount path
   name                = "test"
   cas                 = 1
   delete_all_versions = true
@@ -94,7 +90,7 @@ resource "vault_kv_secret_v2" "test" {
 
 # Output useful information
 output "kv_mount_path" {
-  value       = vault_mount.kv.path
+  value       = "secret"
   description = "Path where KV v2 secrets engine is mounted"
 }
 
