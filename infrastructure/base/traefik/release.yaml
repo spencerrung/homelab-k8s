@@ -39,9 +39,7 @@ spec:
       web:
         port: 80
         exposedPort: 80
-        # HTTP to HTTPS redirect now handled via middleware
-        middlewares:
-          - default-redirect-https@kubernetescrd
+        # No global redirect - external Traefik handles TLS termination
       websecure:
         port: 443
         exposedPort: 443
