@@ -45,11 +45,8 @@ resource "authentik_provider_oauth2" "gitlab" {
     data.authentik_property_mapping_provider_scope.profile.id,
   ]
 
-  allowed_redirect_uris = [
-    {
-      matching_mode = "strict"
-      url           = "https://code.alucard.dev/users/auth/openid_connect/callback"
-    }
+  redirect_uris = [
+    "https://code.alucard.dev/users/auth/openid_connect/callback"
   ]
 }
 
