@@ -96,6 +96,17 @@ spec:
         enabled: false  # Enable later with Traefik/nginx
         # Will configure this when setting up ingress controller
 
+      # Mount custom blueprints
+      volumes:
+        - name: gitlab-oidc-blueprint
+          configMap:
+            name: gitlab-oidc-blueprint
+      volumeMounts:
+        - name: gitlab-oidc-blueprint
+          mountPath: /blueprints/custom/gitlab-oidc.yaml
+          subPath: gitlab-oidc.yaml
+          readOnly: true
+
     # Worker configuration
     worker:
       replicas: 1
@@ -106,3 +117,14 @@ spec:
         limits:
           cpu: 2
           memory: 1Gi
+
+      # Mount custom blueprints
+      volumes:
+        - name: gitlab-oidc-blueprint
+          configMap:
+            name: gitlab-oidc-blueprint
+      volumeMounts:
+        - name: gitlab-oidc-blueprint
+          mountPath: /blueprints/custom/gitlab-oidc.yaml
+          subPath: gitlab-oidc.yaml
+          readOnly: true
