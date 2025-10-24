@@ -41,11 +41,9 @@ spec:
           value: "true"
         - name: AUTHENTIK_AVATARS
           value: "gravatar,initials"
-        # CSRF trusted origins - required for form submissions
+        # CSRF trusted origins - required for form submissions (comma-separated list)
         - name: AUTHENTIK_WEB__CSRF_TRUSTED_ORIGINS
-          value: "https://auth.alucard.dev"
-        - name: CSRF_TRUSTED_ORIGINS
-          value: "https://auth.alucard.dev"
+          value: "https://auth.alucard.dev,"
         # PostgreSQL configuration via environment variables
         - name: AUTHENTIK_POSTGRESQL__HOST
           value: "postgresql.authentik.svc.cluster.local"
@@ -80,7 +78,7 @@ spec:
             cpu: 50m
             memory: 64Mi
           limits:
-            cpu: 200m
+            cpu: 512m
             memory: 256Mi
 
     # Server configuration
@@ -91,7 +89,7 @@ spec:
           cpu: 100m
           memory: 256Mi
         limits:
-          cpu: 1
+          cpu: 2
           memory: 1Gi
 
       ingress:
@@ -106,5 +104,5 @@ spec:
           cpu: 100m
           memory: 256Mi
         limits:
-          cpu: 1
+          cpu: 2
           memory: 1Gi
