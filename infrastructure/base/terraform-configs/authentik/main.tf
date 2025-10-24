@@ -39,33 +39,16 @@ resource "authentik_provider_oauth2" "gitlab" {
   authorization_flow = data.authentik_flow.default_authorization_flow.id
   signing_key        = data.authentik_certificate_key_pair.default.id
 
-  property_mappings = [
-    data.authentik_property_mapping_provider_scope.openid.id,
-    data.authentik_property_mapping_provider_scope.email.id,
-    data.authentik_property_mapping_provider_scope.profile.id,
-  ]
-
   redirect_uris = [
     "https://code.alucard.dev/users/auth/openid_connect/callback"
   ]
+
+  # Omit property_mappings to use Authentik defaults (openid, email, profile)
 }
 
 # Get default certificate
 data "authentik_certificate_key_pair" "default" {
   name = "authentik Self-signed Certificate"
-}
-
-# Get scope mappings (using the correct data source name)
-data "authentik_property_mapping_provider_scope" "openid" {
-  name = "scope_openid"
-}
-
-data "authentik_property_mapping_provider_scope" "email" {
-  name = "scope_email"
-}
-
-data "authentik_property_mapping_provider_scope" "profile" {
-  name = "scope_profile"
 }
 
 # Create Application
