@@ -42,7 +42,7 @@ spec:
         - name: AUTHENTIK_AVATARS
           value: "gravatar,initials"
         # CSRF trusted origins - required for form submissions
-        - name: CSRF_TRUSTED_ORIGINS
+        - name: AUTHENTIK_WEB__CSRF_TRUSTED_ORIGINS
           value: "https://auth.alucard.dev"
         # PostgreSQL configuration via environment variables
         - name: AUTHENTIK_POSTGRESQL__HOST
