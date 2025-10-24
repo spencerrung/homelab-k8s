@@ -94,6 +94,10 @@ spec:
         limits:
           cpu: 500m
           memory: 1Gi
+      # Increase max connections to handle multiple sidekiq pods
+      primary:
+        extendedConfiguration: |
+          max_connections = 200
 
     # Redis settings
     redis:
