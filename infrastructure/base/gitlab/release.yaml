@@ -136,7 +136,7 @@ spec:
             memory: 1Gi
           limits:
             cpu: 1000m
-            memory: 2Gi
+            memory: 2.5Gi
 
       # Sidekiq (background jobs)
       sidekiq:
@@ -147,7 +147,7 @@ spec:
             memory: 512Mi
           limits:
             cpu: 1000m
-            memory: 1Gi
+            memory: 2Gi
 
       # Gitaly (Git repository storage)
       gitaly:
