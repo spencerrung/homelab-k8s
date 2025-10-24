@@ -38,17 +38,14 @@ data "authentik_certificate_key_pair" "default" {
 
 # Get default scope mappings
 data "authentik_property_mapping_provider_scope" "scope_openid" {
-  name       = "authentik default OAuth Mapping: OpenID 'openid'"
   managed_list = ["goauthentik.io/providers/oauth2/scope-openid"]
 }
 
 data "authentik_property_mapping_provider_scope" "scope_email" {
-  name       = "authentik default OAuth Mapping: OpenID 'email'"
   managed_list = ["goauthentik.io/providers/oauth2/scope-email"]
 }
 
 data "authentik_property_mapping_provider_scope" "scope_profile" {
-  name       = "authentik default OAuth Mapping: OpenID 'profile'"
   managed_list = ["goauthentik.io/providers/oauth2/scope-profile"]
 }
 
