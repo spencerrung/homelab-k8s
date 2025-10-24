@@ -37,18 +37,20 @@ resource "authentik_provider_oauth2" "gitlab" {
   client_id          = "gitlab"
   client_type        = "confidential"
   authorization_flow = data.authentik_flow.default_authorization_flow.id
-
-  redirect_uris = [
-    "https://code.alucard.dev/users/auth/openid_connect/callback"
-  ]
+  signing_key        = data.authentik_certificate_key_pair.default.id
 
   property_mappings = [
-    data.authentik_scope_mapping.openid.id,
-    data.authentik_scope_mapping.email.id,
-    data.authentik_scope_mapping.profile.id,
+    data.authentik_property_mapping_provider_scope.openid.id,
+    data.authentik_property_mapping_provider_scope.email.id,
+    data.authentik_property_mapping_provider_scope.profile.id,
   ]
 
-  signing_key = data.authentik_certificate_key_pair.default.id
+  allowed_redirect_uris = [
+    {
+      matching_mode = "strict"
+      url           = "https://code.alucard.dev/users/auth/openid_connect/callback"
+    }
+  ]
 }
 
 # Get default certificate
@@ -56,17 +58,17 @@ data "authentik_certificate_key_pair" "default" {
   name = "authentik Self-signed Certificate"
 }
 
-# Get scope mappings
-data "authentik_scope_mapping" "openid" {
-  managed = "goauthentik.io/providers/oauth2/scope-openid"
+# Get scope mappings (using the correct data source name)
+data "authentik_property_mapping_provider_scope" "openid" {
+  name = "scope_openid"
 }
 
-data "authentik_scope_mapping" "email" {
-  managed = "goauthentik.io/providers/oauth2/scope-email"
+data "authentik_property_mapping_provider_scope" "email" {
+  name = "scope_email"
 }
 
-data "authentik_scope_mapping" "profile" {
-  managed = "goauthentik.io/providers/oauth2/scope-profile"
+data "authentik_property_mapping_provider_scope" "profile" {
+  name = "scope_profile"
 }
 
 # Create Application
