@@ -36,19 +36,6 @@ data "authentik_certificate_key_pair" "default" {
   name = "authentik Self-signed Certificate"
 }
 
-# Get default scope mappings
-data "authentik_property_mapping_provider_scope" "scope_openid" {
-  managed_list = ["goauthentik.io/providers/oauth2/scope-openid"]
-}
-
-data "authentik_property_mapping_provider_scope" "scope_email" {
-  managed_list = ["goauthentik.io/providers/oauth2/scope-email"]
-}
-
-data "authentik_property_mapping_provider_scope" "scope_profile" {
-  managed_list = ["goauthentik.io/providers/oauth2/scope-profile"]
-}
-
 # Create OAuth2 Provider for GitLab
 resource "authentik_provider_oauth2" "gitlab" {
   name               = "GitLab"
@@ -61,11 +48,12 @@ resource "authentik_provider_oauth2" "gitlab" {
     "https://code.alucard.dev/users/auth/openid_connect/callback"
   ]
 
-  property_mappings = [
-    data.authentik_property_mapping_provider_scope.scope_openid.id,
-    data.authentik_property_mapping_provider_scope.scope_email.id,
-    data.authentik_property_mapping_provider_scope.scope_profile.id,
-  ]
+  # Note: property_mappings (scope mappings) must be configured manually in Authentik UI
+  # The Terraform provider has issues with data sources for scope mappings
+  # Required scopes: openid, email, profile
+  lifecycle {
+    ignore_changes = [property_mappings]
+  }
 }
 
 # Create Application
