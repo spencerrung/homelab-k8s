@@ -6,6 +6,7 @@ resources:
   - ../../base/tf-controller
   - ../../base/vault  # Use base vault (dev mode, no auto-unseal)
   - ../../base/external-secrets  # Re-enabled now that Vault is configured!
+  - ../../base/terraform-configs  # Terraform configurations (Authentik OIDC, etc.)
   - ../../base/cert-manager  # TLS certificate management
   - ../../base/traefik  # In-cluster ingress controller
   - ../../base/authentik  # OIDC identity provider
