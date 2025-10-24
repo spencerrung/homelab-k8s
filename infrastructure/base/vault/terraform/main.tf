@@ -69,7 +69,7 @@ EOT
 resource "vault_kubernetes_auth_backend_role" "external_secrets" {
   backend                          = vault_auth_backend.kubernetes.path
   role_name                        = "external-secrets"
-  bound_service_account_names      = ["external-secrets-sa"]
+  bound_service_account_names      = ["external-secrets-sa", "terraform-external-secrets-sa"]
   bound_service_account_namespaces = ["*"]
   token_ttl                        = 3600
   token_policies                   = [vault_policy.external_secrets.name]
