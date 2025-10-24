@@ -31,6 +31,27 @@ data "authentik_flow" "default_authorization_flow" {
   slug = "default-provider-authorization-implicit-consent"
 }
 
+# Get default certificate
+data "authentik_certificate_key_pair" "default" {
+  name = "authentik Self-signed Certificate"
+}
+
+# Get default scope mappings
+data "authentik_property_mapping_provider_scope" "scope_openid" {
+  name       = "authentik default OAuth Mapping: OpenID 'openid'"
+  managed_list = ["goauthentik.io/providers/oauth2/scope-openid"]
+}
+
+data "authentik_property_mapping_provider_scope" "scope_email" {
+  name       = "authentik default OAuth Mapping: OpenID 'email'"
+  managed_list = ["goauthentik.io/providers/oauth2/scope-email"]
+}
+
+data "authentik_property_mapping_provider_scope" "scope_profile" {
+  name       = "authentik default OAuth Mapping: OpenID 'profile'"
+  managed_list = ["goauthentik.io/providers/oauth2/scope-profile"]
+}
+
 # Create OAuth2 Provider for GitLab
 resource "authentik_provider_oauth2" "gitlab" {
   name               = "GitLab"
@@ -43,12 +64,11 @@ resource "authentik_provider_oauth2" "gitlab" {
     "https://code.alucard.dev/users/auth/openid_connect/callback"
   ]
 
-  # Omit property_mappings to use Authentik defaults (openid, email, profile)
-}
-
-# Get default certificate
-data "authentik_certificate_key_pair" "default" {
-  name = "authentik Self-signed Certificate"
+  property_mappings = [
+    data.authentik_property_mapping_provider_scope.scope_openid.id,
+    data.authentik_property_mapping_provider_scope.scope_email.id,
+    data.authentik_property_mapping_provider_scope.scope_profile.id,
+  ]
 }
 
 # Create Application
