@@ -1,0 +1,36 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gitlab-oidc-blueprint
+  namespace: authentik
+  labels:
+    blueprints.goauthentik.io/instantiate: "true"
+data:
+  gitlab-oidc.yaml: |
+    version: 1
+    metadata:
+      name: GitLab OIDC Provider
+    entries:
+      - model: authentik_providers_oauth2.oauth2provider
+        identifiers:
+          name: GitLab
+        attrs:
+          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+          client_id: gitlab
+          client_type: confidential
+          redirect_uris: https://code.alucard.dev/users/auth/openid_connect/callback
+          signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
+          property_mappings:
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+
+      - model: authentik_core.application
+        identifiers:
+          slug: gitlab
+        attrs:
+          name: GitLab
+          provider: !Find [authentik_providers_oauth2.oauth2provider, [name, GitLab]]
+          meta_launch_url: https://code.alucard.dev
+          meta_description: GitLab CE - Git repository and CI/CD platform

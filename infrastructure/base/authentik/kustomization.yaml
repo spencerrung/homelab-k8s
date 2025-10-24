@@ -10,3 +10,4 @@ resources:
   - postgresql.yaml
   - release.yaml
   - ingress.yaml
+  - gitlab-oidc-blueprint.yaml

@@ -49,11 +49,8 @@ resource "authentik_provider_oauth2" "gitlab" {
   ]
 
   # Note: property_mappings (scope mappings) must be configured manually in Authentik UI
-  # The Terraform provider has issues with data sources for scope mappings
-  # Required scopes: openid, email, profile
-  lifecycle {
-    ignore_changes = [property_mappings]
-  }
+  # Terraform cannot manage them due to provider limitations with data sources
+  # By omitting this field entirely, Terraform will ignore drift in this attribute
 }
 
 # Create Application
