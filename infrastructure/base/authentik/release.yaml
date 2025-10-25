@@ -98,13 +98,13 @@ spec:
 
       # Mount custom blueprints
       volumes:
-        - name: gitlab-oidc-blueprint
+        - name: gitea-oidc-blueprint
           configMap:
-            name: gitlab-oidc-blueprint
+            name: gitea-oidc-blueprint
       volumeMounts:
-        - name: gitlab-oidc-blueprint
-          mountPath: /blueprints/custom/gitlab-oidc.yaml
-          subPath: gitlab-oidc.yaml
+        - name: gitea-oidc-blueprint
+          mountPath: /blueprints/custom/gitea-oidc.yaml
+          subPath: gitea-oidc.yaml
           readOnly: true
 
     # Worker configuration
@@ -120,11 +120,11 @@ spec:
 
       # Mount custom blueprints
       volumes:
-        - name: gitlab-oidc-blueprint
+        - name: gitea-oidc-blueprint
           configMap:
-            name: gitlab-oidc-blueprint
+            name: gitea-oidc-blueprint
       volumeMounts:
-        - name: gitlab-oidc-blueprint
-          mountPath: /blueprints/custom/gitlab-oidc.yaml
-          subPath: gitlab-oidc.yaml
+        - name: gitea-oidc-blueprint
+          mountPath: /blueprints/custom/gitea-oidc.yaml
+          subPath: gitea-oidc.yaml
           readOnly: true
