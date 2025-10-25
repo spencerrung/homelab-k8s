@@ -37,7 +37,7 @@ spec:
             response_type: code
             issuer: https://auth.alucard.dev/application/o/gitlab/
             discovery: true
-            uid_field: preferred_username
+            uid_field: sub
             send_scope_to_token_endpoint: false
             pkce: true
             client_auth_method: query
