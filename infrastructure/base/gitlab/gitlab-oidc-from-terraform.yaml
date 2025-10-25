@@ -38,6 +38,7 @@ spec:
             issuer: https://auth.alucard.dev/application/o/gitlab/
             discovery: true
             uid_field: preferred_username
+            send_scope_to_token_endpoint: true
             client_options:
               identifier: {{ .client_id }}
               secret: {{ .client_secret }}
