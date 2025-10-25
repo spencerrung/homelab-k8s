@@ -10,4 +10,4 @@ resources:
   - postgresql.yaml
   - release.yaml
   - ingress.yaml
-  - gitlab-oidc-blueprint.yaml
+  # - gitlab-oidc-blueprint.yaml  # Disabled - switching to Gitea
