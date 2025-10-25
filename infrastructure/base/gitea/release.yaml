@@ -1,0 +1,102 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: gitea
+  namespace: gitea
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: gitea
+      version: '>=12.0.0'
+      sourceRef:
+        kind: HelmRepository
+        name: gitea
+        namespace: flux-system
+      interval: 12h
+  values:
+    # Global Gitea configuration
+    gitea:
+      admin:
+        username: "gitea_admin"
+        email: "admin@alucard.dev"
+
+      config:
+        server:
+          DOMAIN: code.alucard.dev
+          ROOT_URL: https://code.alucard.dev
+          PROTOCOL: http
+          HTTP_PORT: 3000
+
+        database:
+          DB_TYPE: sqlite3
+
+        session:
+          PROVIDER: memory
+
+        cache:
+          ADAPTER: memory
+
+        queue:
+          TYPE: level
+
+        service:
+          DISABLE_REGISTRATION: false
+          REQUIRE_SIGNIN_VIEW: false
+          DEFAULT_KEEP_EMAIL_PRIVATE: true
+          DEFAULT_ALLOW_CREATE_ORGANIZATION: true
+          DEFAULT_ENABLE_TIMETRACKING: true
+
+        openid:
+          ENABLE_OPENID_SIGNIN: true
+          ENABLE_OPENID_SIGNUP: true
+
+      # OAuth2 authentication source for Authentik
+      oauth:
+        - name: 'Authentik'
+          provider: 'openidConnect'
+          existingSecret: gitea-oidc
+          key: client-id
+          secret: client-secret
+          autoDiscoverUrl: 'https://auth.alucard.dev/application/o/gitea/.well-known/openid-configuration'
+          iconUrl: 'https://auth.alucard.dev/static/dist/assets/icons/icon.png'
+          scopes: 'openid profile email'
+
+    # Persistence for Git repositories
+    persistence:
+      enabled: true
+      size: 10Gi
+      storageClass: ""  # Use default storage class
+
+    # Service configuration
+    service:
+      http:
+        type: ClusterIP
+        port: 3000
+      ssh:
+        type: LoadBalancer
+        port: 22
+        annotations:
+          metallb.universe.tf/loadBalancerIPs: "192.168.1.240"
+
+    # Ingress disabled (using external Traefik ingress)
+    ingress:
+      enabled: false
+
+    # Resource limits
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+
+    # PostgreSQL disabled (using SQLite for simplicity)
+    postgresql:
+      enabled: false
+
+    # Redis disabled for now
+    redis-cluster:
+      enabled: false
