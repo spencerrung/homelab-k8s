@@ -75,10 +75,8 @@ spec:
         type: ClusterIP
         port: 3000
       ssh:
-        type: LoadBalancer
+        type: ClusterIP
         port: 22
-        annotations:
-          metallb.universe.tf/loadBalancerIPs: "192.168.1.240"
 
     # Ingress disabled (using external Traefik ingress)
     ingress:
