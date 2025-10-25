@@ -29,11 +29,10 @@ spec:
           PROTOCOL: http
           HTTP_PORT: 3000
 
-        database:
-          DB_TYPE: sqlite3
+        # Database configuration auto-configured by postgresql-ha chart
 
         session:
-          PROVIDER: memory
+          PROVIDER: db
 
         cache:
           ADAPTER: memory
@@ -91,10 +90,21 @@ spec:
         cpu: 1000m
         memory: 1Gi
 
-    # PostgreSQL disabled (using SQLite for simplicity)
-    postgresql:
-      enabled: false
+    # PostgreSQL HA enabled (default) for production use
+    postgresql-ha:
+      enabled: true
+      postgresql:
+        replicaCount: 3
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
 
-    # Redis disabled for now
+    # Redis/Valkey cluster for caching
     redis-cluster:
-      enabled: false
+      enabled: true
+      cluster:
+        nodes: 3
