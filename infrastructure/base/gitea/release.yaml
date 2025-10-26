@@ -50,7 +50,7 @@ spec:
         openid:
           ENABLE_OPENID_SIGNIN: true
           ENABLE_OPENID_SIGNUP: true
-          ALLOW_AUTO_REGISTRATION: true
+          ENABLE_AUTO_REGISTRATION: true
 
       # OAuth2 authentication source for Authentik
       oauth:
@@ -60,7 +60,6 @@ spec:
           autoDiscoverUrl: 'https://auth.alucard.dev/application/o/gitea/.well-known/openid-configuration'
           iconUrl: 'https://auth.alucard.dev/static/dist/assets/icons/icon.png'
           scopes: 'openid profile email'
-          autoCreateUser: true
 
     # Persistence for Git repositories
     persistence:
