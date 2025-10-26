@@ -27,30 +27,29 @@ spec:
                   key: authentik_token
             - name: AUTHENTIK_URL
               value: "https://auth.alucard.dev"
+            - name: GITEA_ADMIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: gitea-admin-token
+                  key: token
+            - name: GITEA_URL
+              value: "https://code.alucard.dev"
             command:
             - /bin/sh
             - -c
             - |
               set -e
 
-              echo "Installing kubectl and curl..."
-              apk add --no-cache curl kubectl
-
-              GITEA_POD=$(kubectl get pods -n gitea -l app.kubernetes.io/name=gitea -o jsonpath='{.items[0].metadata.name}')
-
-              if [ -z "$GITEA_POD" ]; then
-                echo "Error: Could not find Gitea pod"
-                exit 1
-              fi
+              echo "Installing curl and jq..."
+              apk add --no-cache curl jq
 
               echo "Syncing Authentik gitea-admins group to Gitea admins"
-              echo "Using Gitea pod: $GITEA_POD"
 
               # Query Authentik API for gitea-admins group members
               echo "Querying Authentik for gitea-admins group members..."
               MEMBERS=$(curl -s -H "Authorization: Bearer $AUTHENTIK_TOKEN" \
                 "$AUTHENTIK_URL/api/v3/core/groups/?name=gitea-admins" | \
-                grep -o '"users":\[[^]]*\]' | grep -o '[0-9]\+' || echo "")
+                jq -r '.results[0].users[]?' || echo "")
 
               if [ -z "$MEMBERS" ]; then
                 echo "No members found in gitea-admins group or group doesn't exist yet"
@@ -59,18 +58,33 @@ spec:
 
               echo "Found user IDs: $MEMBERS"
 
-              # For each user ID, get their username and promote to admin
+              # For each user ID, get their username and promote to admin via Gitea API
               for USER_ID in $MEMBERS; do
                 echo "Processing user ID: $USER_ID"
                 USERNAME=$(curl -s -H "Authorization: Bearer $AUTHENTIK_TOKEN" \
                   "$AUTHENTIK_URL/api/v3/core/users/$USER_ID/" | \
-                  grep -o '"username":"[^"]*"' | cut -d'"' -f4)
+                  jq -r '.username')
 
-                if [ -n "$USERNAME" ]; then
+                if [ -n "$USERNAME" ] && [ "$USERNAME" != "null" ]; then
                   echo "Promoting user $USERNAME to admin in Gitea..."
-                  kubectl exec -n gitea "$GITEA_POD" -c gitea -- \
-                    gitea admin user change-access-mode -u "$USERNAME" --admin 2>/dev/null || \
-                    echo "Warning: Could not promote $USERNAME (user may not exist in Gitea yet)"
+
+                  # Use Gitea API to promote user to admin
+                  RESPONSE=$(curl -s -w "\n%{http_code}" \
+                    -X PATCH \
+                    -H "Authorization: token $GITEA_ADMIN_TOKEN" \
+                    -H "Content-Type: application/json" \
+                    -d '{"admin": true}' \
+                    "$GITEA_URL/api/v1/admin/users/$USERNAME" 2>&1)
+
+                  HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+
+                  if [ "$HTTP_CODE" = "200" ]; then
+                    echo "Successfully promoted $USERNAME to admin"
+                  elif [ "$HTTP_CODE" = "404" ]; then
+                    echo "Warning: User $USERNAME does not exist in Gitea yet"
+                  else
+                    echo "Warning: Failed to promote $USERNAME (HTTP $HTTP_CODE)"
+                  fi
                 fi
               done
 
@@ -80,30 +94,5 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: gitea-group-sync
-  namespace: gitea
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: gitea-group-sync
-rules:
-- apiGroups: [""]
-  resources: ["pods"]
-  verbs: ["get", "list"]
-- apiGroups: [""]
-  resources: ["pods/exec"]
-  verbs: ["create"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: gitea-group-sync
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: gitea-group-sync
-subjects:
-- kind: ServiceAccount
   name: gitea-group-sync
   namespace: gitea
