@@ -47,10 +47,6 @@ spec:
           DEFAULT_ALLOW_CREATE_ORGANIZATION: true
           DEFAULT_ENABLE_TIMETRACKING: true
 
-        openid:
-          ENABLE_OPENID_SIGNIN: true
-          ENABLE_OPENID_SIGNUP: true
-
         oauth2_client:
           ENABLE_AUTO_REGISTRATION: true
           ACCOUNT_LINKING: login
