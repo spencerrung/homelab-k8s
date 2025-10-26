@@ -17,7 +17,7 @@ spec:
           serviceAccountName: gitea-group-sync
           containers:
           - name: sync
-            image: curlimages/curl:latest
+            image: alpine:latest
             imagePullPolicy: IfNotPresent
             env:
             - name: AUTHENTIK_TOKEN
@@ -33,11 +33,10 @@ spec:
             - |
               set -e
 
-              echo "Installing kubectl..."
-              wget -q https://dl.k8s.io/release/v1.28.0/bin/linux/amd64/kubectl -O /tmp/kubectl
-              chmod +x /tmp/kubectl
+              echo "Installing kubectl and curl..."
+              apk add --no-cache curl kubectl
 
-              GITEA_POD=$(/tmp/kubectl get pods -n gitea -l app.kubernetes.io/name=gitea -o jsonpath='{.items[0].metadata.name}')
+              GITEA_POD=$(kubectl get pods -n gitea -l app.kubernetes.io/name=gitea -o jsonpath='{.items[0].metadata.name}')
 
               if [ -z "$GITEA_POD" ]; then
                 echo "Error: Could not find Gitea pod"
@@ -69,7 +68,7 @@ spec:
 
                 if [ -n "$USERNAME" ]; then
                   echo "Promoting user $USERNAME to admin in Gitea..."
-                  /tmp/kubectl exec -n gitea "$GITEA_POD" -c gitea -- \
+                  kubectl exec -n gitea "$GITEA_POD" -c gitea -- \
                     gitea admin user change-access-mode -u "$USERNAME" --admin 2>/dev/null || \
                     echo "Warning: Could not promote $USERNAME (user may not exist in Gitea yet)"
                 fi
