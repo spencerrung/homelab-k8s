@@ -101,10 +101,17 @@ spec:
         - name: gitea-oidc-blueprint
           configMap:
             name: gitea-oidc-blueprint
+        - name: users-groups-blueprint
+          configMap:
+            name: users-groups-blueprint
       volumeMounts:
         - name: gitea-oidc-blueprint
           mountPath: /blueprints/custom/gitea-oidc.yaml
           subPath: gitea-oidc.yaml
+          readOnly: true
+        - name: users-groups-blueprint
+          mountPath: /blueprints/custom/users-groups.yaml
+          subPath: users-groups.yaml
           readOnly: true
 
     # Worker configuration
@@ -123,8 +130,15 @@ spec:
         - name: gitea-oidc-blueprint
           configMap:
             name: gitea-oidc-blueprint
+        - name: users-groups-blueprint
+          configMap:
+            name: users-groups-blueprint
       volumeMounts:
         - name: gitea-oidc-blueprint
           mountPath: /blueprints/custom/gitea-oidc.yaml
           subPath: gitea-oidc.yaml
+          readOnly: true
+        - name: users-groups-blueprint
+          mountPath: /blueprints/custom/users-groups.yaml
+          subPath: users-groups.yaml
           readOnly: true

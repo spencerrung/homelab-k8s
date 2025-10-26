@@ -11,6 +11,5 @@ resources:
   - release.yaml
   - ingress.yaml
   - users-groups-blueprint.yaml
-  - oidc-scope-mappings-blueprint.yaml
   - gitea-oidc-blueprint.yaml
   # - gitlab-oidc-blueprint.yaml  # Disabled - switching to Gitea
