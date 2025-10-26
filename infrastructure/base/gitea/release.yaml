@@ -50,7 +50,15 @@ spec:
         openid:
           ENABLE_OPENID_SIGNIN: true
           ENABLE_OPENID_SIGNUP: true
+
+        oauth2_client:
           ENABLE_AUTO_REGISTRATION: true
+          ACCOUNT_LINKING: login
+          USERNAME: userid
+          OPENID_CONNECT_SCOPES:
+            - openid
+            - email
+            - profile
 
       # OAuth2 authentication source for Authentik
       oauth:
