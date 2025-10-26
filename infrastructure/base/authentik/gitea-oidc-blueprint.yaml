@@ -32,7 +32,7 @@ data:
             - !Find [authentik_providers_oauth2.scopemapping, [managed, "goauthentik.io/providers/oauth2/scope-email"]]
             - !Find [authentik_providers_oauth2.scopemapping, [managed, "goauthentik.io/providers/oauth2/scope-profile"]]
             - !Find [authentik_providers_oauth2.scopemapping, [managed, "goauthentik.io/providers/oauth2/scope-groups"]]
-            - !Find [authentik_providers_oauth2.scopemapping, [name, "preferred_username"]]
+            - !Find [authentik_providers_oauth2.scopepropertymapping, [name, "username-property-mapping"]]
           access_code_validity: minutes=1
           access_token_validity: minutes=10
           refresh_token_validity: days=30

@@ -10,15 +10,15 @@ data:
   username-scope-mapping.yaml: |
     version: 1
     metadata:
-      name: Username Scope Mapping
+      name: Username Property Mapping
     entries:
-      # Custom scope mapping to add preferred_username to OIDC claims
-      - model: authentik_providers_oauth2.scopemapping
+      # Custom property mapping to add preferred_username to OIDC tokens
+      - model: authentik_providers_oauth2.scopepropertymapping
         identifiers:
-          name: preferred_username
-          scope_name: profile
+          name: username-property-mapping
         attrs:
-          description: "Add preferred_username to profile scope"
+          scope_name: profile
+          description: "Add preferred_username and nickname claims"
           expression: |
             return {
               "preferred_username": user.username,
