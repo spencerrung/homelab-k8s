@@ -104,6 +104,9 @@ spec:
         - name: users-groups-blueprint
           configMap:
             name: users-groups-blueprint
+        - name: username-scope-mapping-blueprint
+          configMap:
+            name: username-scope-mapping-blueprint
       volumeMounts:
         - name: gitea-oidc-blueprint
           mountPath: /blueprints/custom/gitea-oidc.yaml
@@ -112,6 +115,10 @@ spec:
         - name: users-groups-blueprint
           mountPath: /blueprints/custom/users-groups.yaml
           subPath: users-groups.yaml
+          readOnly: true
+        - name: username-scope-mapping-blueprint
+          mountPath: /blueprints/custom/username-scope-mapping.yaml
+          subPath: username-scope-mapping.yaml
           readOnly: true
 
     # Worker configuration
@@ -133,6 +140,9 @@ spec:
         - name: users-groups-blueprint
           configMap:
             name: users-groups-blueprint
+        - name: username-scope-mapping-blueprint
+          configMap:
+            name: username-scope-mapping-blueprint
       volumeMounts:
         - name: gitea-oidc-blueprint
           mountPath: /blueprints/custom/gitea-oidc.yaml
@@ -141,4 +151,8 @@ spec:
         - name: users-groups-blueprint
           mountPath: /blueprints/custom/users-groups.yaml
           subPath: users-groups.yaml
+          readOnly: true
+        - name: username-scope-mapping-blueprint
+          mountPath: /blueprints/custom/username-scope-mapping.yaml
+          subPath: username-scope-mapping.yaml
           readOnly: true

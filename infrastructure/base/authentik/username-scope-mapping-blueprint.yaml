@@ -1,0 +1,26 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: username-scope-mapping-blueprint
+  namespace: authentik
+  labels:
+    blueprints.goauthentik.io/instantiate: "true"
+data:
+  username-scope-mapping.yaml: |
+    version: 1
+    metadata:
+      name: Username Scope Mapping
+    entries:
+      # Custom scope mapping to add preferred_username to OIDC claims
+      - model: authentik_providers_oauth2.scopemapping
+        identifiers:
+          name: preferred_username
+          scope_name: profile
+        attrs:
+          description: "Add preferred_username to profile scope"
+          expression: |
+            return {
+              "preferred_username": user.username,
+              "nickname": user.username,
+            }
