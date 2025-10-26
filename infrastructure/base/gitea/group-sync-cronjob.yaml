@@ -23,7 +23,7 @@ spec:
             - name: AUTHENTIK_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: authentik-terraform-vars
+                  name: authentik-api-token
                   key: authentik_token
             - name: AUTHENTIK_URL
               value: "https://auth.alucard.dev"
@@ -95,31 +95,6 @@ rules:
 - apiGroups: [""]
   resources: ["pods/exec"]
   verbs: ["create"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: gitea-group-sync-secrets
-  namespace: flux-system
-rules:
-- apiGroups: [""]
-  resources: ["secrets"]
-  resourceNames: ["authentik-terraform-vars"]
-  verbs: ["get"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: gitea-group-sync-secrets
-  namespace: flux-system
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: gitea-group-sync-secrets
-subjects:
-- kind: ServiceAccount
-  name: gitea-group-sync
-  namespace: gitea
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
