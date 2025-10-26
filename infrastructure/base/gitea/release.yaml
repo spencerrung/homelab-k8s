@@ -50,7 +50,7 @@ spec:
         oauth2_client:
           ENABLE_AUTO_REGISTRATION: true
           ACCOUNT_LINKING: login
-          USERNAME: userid
+          USERNAME: preferred_username
           OPENID_CONNECT_SCOPES:
             - openid
             - email
