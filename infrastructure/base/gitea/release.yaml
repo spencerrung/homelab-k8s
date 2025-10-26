@@ -55,9 +55,7 @@ spec:
       oauth:
         - name: 'Authentik'
           provider: 'openidConnect'
-          key: 'gitea'
           existingSecret: gitea-oidc
-          existingSecretKey: secret
           autoDiscoverUrl: 'https://auth.alucard.dev/application/o/gitea/.well-known/openid-configuration'
           iconUrl: 'https://auth.alucard.dev/static/dist/assets/icons/icon.png'
           scopes: 'openid profile email'
