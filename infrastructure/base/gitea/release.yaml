@@ -41,7 +41,7 @@ spec:
           TYPE: level
 
         service:
-          DISABLE_REGISTRATION: false
+          DISABLE_REGISTRATION: true
           REQUIRE_SIGNIN_VIEW: false
           DEFAULT_KEEP_EMAIL_PRIVATE: true
           DEFAULT_ALLOW_CREATE_ORGANIZATION: true
@@ -50,6 +50,7 @@ spec:
         openid:
           ENABLE_OPENID_SIGNIN: true
           ENABLE_OPENID_SIGNUP: true
+          ALLOW_AUTO_REGISTRATION: true
 
       # OAuth2 authentication source for Authentik
       oauth:
@@ -59,6 +60,7 @@ spec:
           autoDiscoverUrl: 'https://auth.alucard.dev/application/o/gitea/.well-known/openid-configuration'
           iconUrl: 'https://auth.alucard.dev/static/dist/assets/icons/icon.png'
           scopes: 'openid profile email'
+          autoCreateUser: true
 
     # Persistence for Git repositories
     persistence:
