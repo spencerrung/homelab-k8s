@@ -1,0 +1,26 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oidc-scope-mappings-blueprint
+  namespace: authentik
+  labels:
+    blueprints.goauthentik.io/instantiate: "true"
+data:
+  oidc-scope-mappings.yaml: |
+    version: 1
+    metadata:
+      name: OIDC Scope Mappings
+    entries:
+      # Custom scope mapping for groups claim
+      - model: authentik_providers_oauth2.scopemapping
+        identifiers:
+          name: goauthentik.io/providers/oauth2/scope-groups
+          managed: goauthentik.io/providers/oauth2/scope-groups
+        attrs:
+          name: Groups
+          description: "Return user's groups"
+          scope_name: groups
+          expression: |
+            # Return list of group names that the user is a member of
+            return list(user.groups.all().values_list("name", flat=True))

@@ -1,0 +1,37 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: users-groups-blueprint
+  namespace: authentik
+  labels:
+    blueprints.goauthentik.io/instantiate: "true"
+data:
+  users-groups.yaml: |
+    version: 1
+    metadata:
+      name: Users and Groups
+    entries:
+      # Create personal user: spencerrung
+      - model: authentik_core.user
+        identifiers:
+          username: spencerrung
+        attrs:
+          name: Spencer
+          email: spencerrung@alucard.dev
+          is_staff: true
+          is_active: true
+
+      # Create group for Gitea administrators
+      - model: authentik_core.group
+        identifiers:
+          name: gitea-admins
+        attrs:
+          is_superuser: false
+
+      # Add spencerrung to gitea-admins group
+      - model: authentik_core.groupmembership
+        identifiers:
+          user: !Find [authentik_core.user, [username, spencerrung]]
+          group: !Find [authentik_core.group, [name, gitea-admins]]
+        attrs: {}

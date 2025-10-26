@@ -9,3 +9,4 @@ resources:
   - externalsecrets.yaml
   - release.yaml
   - ingress.yaml
+  - group-sync-cronjob.yaml

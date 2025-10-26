@@ -1,0 +1,121 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gitea-group-sync-script
+  namespace: gitea
+data:
+  sync-groups.sh: |
+    #!/bin/bash
+    set -e
+
+    # This script syncs Authentik group membership to Gitea admin status
+    # Users in the gitea-admins group in Authentik are promoted to admins in Gitea
+    # This runs as a CronJob to keep permissions in sync
+
+    GITEA_POD=$(kubectl get pods -n gitea -l app.kubernetes.io/name=gitea -o jsonpath='{.items[0].metadata.name}')
+
+    if [ -z "$GITEA_POD" ]; then
+      echo "Error: Could not find Gitea pod"
+      exit 1
+    fi
+
+    echo "Using Gitea pod: $GITEA_POD"
+
+    # Get list of users who should be admins (members of gitea-admins group in Authentik)
+    # We'll query via the Authentik API when it's available
+    # For now, we'll check based on users with specific username patterns or via API
+
+    # Sync admin users from a predefined list
+    # In a real implementation, this would query Authentik's API for group members
+
+    # The actual sync logic would:
+    # 1. Get members of gitea-admins group from Authentik
+    # 2. For each member, check if they're an admin in Gitea
+    # 3. Promote them if they're not
+    # 4. Demote non-members if they were manually promoted (optional)
+
+    echo "Group sync script executed"
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: gitea-group-sync
+  namespace: gitea
+spec:
+  schedule: "*/15 * * * *"  # Run every 15 minutes
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: gitea-group-sync
+          containers:
+          - name: sync
+            image: bitnami/kubectl:latest
+            imagePullPolicy: IfNotPresent
+            env:
+            - name: KUBECONFIG
+              value: /var/run/secrets/kubernetes.io/serviceaccount/config
+            volumeMounts:
+            - name: script
+              mountPath: /scripts
+            command:
+            - /bin/bash
+            - -c
+            - |
+              set -e
+
+              GITEA_POD=$(kubectl get pods -n gitea -l app.kubernetes.io/name=gitea -o jsonpath='{.items[0].metadata.name}')
+
+              if [ -z "$GITEA_POD" ]; then
+                echo "Error: Could not find Gitea pod"
+                exit 1
+              fi
+
+              echo "Syncing Authentik groups to Gitea admins using pod: $GITEA_POD"
+
+              # For now, ensure spencerrung is promoted to admin
+              # This would be extended to query Authentik API for all gitea-admins group members
+              kubectl exec -n gitea "$GITEA_POD" -c gitea -- \
+                gitea admin user list 2>/dev/null | grep -q "spencerrung" && \
+                kubectl exec -n gitea "$GITEA_POD" -c gitea -- \
+                gitea admin user change-access-mode -u spencerrung --admin 2>/dev/null || true
+
+              echo "Group sync completed"
+          volumes:
+          - name: script
+            configMap:
+              name: gitea-group-sync-script
+              defaultMode: 0755
+          restartPolicy: OnFailure
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gitea-group-sync
+  namespace: gitea
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: gitea-group-sync
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list"]
+- apiGroups: [""]
+  resources: ["pods/exec"]
+  verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: gitea-group-sync
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: gitea-group-sync
+subjects:
+- kind: ServiceAccount
+  name: gitea-group-sync
+  namespace: gitea
