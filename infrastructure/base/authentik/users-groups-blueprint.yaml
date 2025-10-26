@@ -28,10 +28,5 @@ data:
           name: gitea-admins
         attrs:
           is_superuser: false
-
-      # Add spencerrung to gitea-admins group
-      - model: authentik_core.groupmembership
-        identifiers:
-          user: !Find [authentik_core.user, [username, spencerrung]]
-          group: !Find [authentik_core.group, [name, gitea-admins]]
-        attrs: {}
+          users:
+            - !Find [authentik_core.user, [username, spencerrung]]
