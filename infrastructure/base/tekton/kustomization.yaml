@@ -1,13 +1,11 @@
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: tekton-pipelines
 resources:
-  - namespace.yaml
-  - https://storage.googleapis.com/tekton-releases/pipeline/previous/v1.5.0/release.yaml
-  - https://storage.googleapis.com/tekton-releases/triggers/previous/v0.33.0/release.yaml
-  - https://storage.googleapis.com/tekton-releases/triggers/previous/v0.33.0/interceptors.yaml
-  - https://storage.googleapis.com/tekton-releases/dashboard/previous/v0.62.0/release.yaml
+  - release-pipelines.yaml
+  - release-triggers.yaml
+  - release-interceptors.yaml
+  - release-dashboard.yaml
   - ingress.yaml
 patches:
   # Reduce resource requests for homelab environment
