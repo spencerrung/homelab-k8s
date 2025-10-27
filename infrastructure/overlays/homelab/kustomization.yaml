@@ -11,6 +11,7 @@ resources:
   - ../../base/traefik  # In-cluster ingress controller
   - ../../base/authentik  # OIDC identity provider
   - ../../base/gitea  # Lightweight Git hosting with a cup of tea
+  - ../../base/tekton  # Cloud-native CI/CD pipelines
   # - ../../base/gitlab  # Git repository and CI/CD platform (disabled - switching to Gitea)
 # Add homelab-specific patches and resources here
 # Note: cert-manager-issuers is deployed via separate Flux Kustomization in clusters/homelab/cert-manager-issuers.yaml

@@ -1,0 +1,55 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: tekton-pipelines
+resources:
+  - namespace.yaml
+  - https://storage.googleapis.com/tekton-releases/pipeline/previous/v1.5.0/release.yaml
+  - https://storage.googleapis.com/tekton-releases/triggers/previous/v0.33.0/release.yaml
+  - https://storage.googleapis.com/tekton-releases/triggers/previous/v0.33.0/interceptors.yaml
+  - https://storage.googleapis.com/tekton-releases/dashboard/previous/v0.62.0/release.yaml
+  - ingress.yaml
+patches:
+  # Reduce resource requests for homelab environment
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: tekton-pipelines-controller
+        namespace: tekton-pipelines
+      spec:
+        template:
+          spec:
+            containers:
+            - name: tekton-pipelines-controller
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                limits:
+                  cpu: 1000m
+                  memory: 1Gi
+    target:
+      kind: Deployment
+      name: tekton-pipelines-controller
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: tekton-dashboard
+        namespace: tekton-pipelines
+      spec:
+        template:
+          spec:
+            containers:
+            - name: tekton-dashboard
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+    target:
+      kind: Deployment
+      name: tekton-dashboard
