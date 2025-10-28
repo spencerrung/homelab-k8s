@@ -18,6 +18,9 @@ spec:
     - name: image-reference
       type: string
       description: The image reference to build and push (e.g., code.alucard.dev/user/repo:tag)
+    - name: image-base
+      type: string
+      description: The base image reference without tag (e.g., code.alucard.dev/user/repo)
     - name: dockerfile
       type: string
       description: Path to the Dockerfile
@@ -47,7 +50,7 @@ spec:
     - name: build-push
       runAfter: ["fetch-source"]
       taskRef:
-        name: buildah
+        name: kaniko
       workspaces:
         - name: source
           workspace: shared-data
@@ -56,6 +59,8 @@ spec:
       params:
         - name: IMAGE
           value: $(params.image-reference)
+        - name: IMAGE_BASE
+          value: $(params.image-base)
         - name: DOCKERFILE
           value: $(params.dockerfile)
         - name: CONTEXT

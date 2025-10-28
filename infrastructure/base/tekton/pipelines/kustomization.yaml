@@ -5,6 +5,6 @@ resources:
   - secretstore.yaml
   - gitea-docker-credentials.yaml
   - task-git-clone.yaml
-  - task-buildah.yaml
+  - task-kaniko.yaml
   - pipeline-build-push.yaml
   - triggers.yaml
