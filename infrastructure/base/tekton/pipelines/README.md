@@ -32,16 +32,16 @@ vault kv put gitea/webhook-secret \
 ### 2. Configure Gitea Webhook (Internal Service)
 
 In your Gitea repository:
-1. Go to **Settings → Webhooks → Add Webhook → Gitea**
+1. Go to **Settings → Webhooks → Add Webhook → Gogs** (Gogs format is GitHub-compatible)
 2. Configure:
-   - **Target URL**: `http://el-gitea-listener.tekton-pipelines.svc.cluster.local:8080`
-   - **HTTP Method**: POST
-   - **POST Content Type**: application/json
+   - **Payload URL**: `http://el-gitea-listener.tekton-pipelines.svc.cluster.local:8080`
+   - **Content Type**: application/json
    - **Secret**: Get from Vault: `vault kv get -field=secret gitea/webhook-secret`
-   - **Trigger On**: Push events
-   - **Branch filter**: `main` (or leave empty for all)
+   - **Trigger Events**: Select "Push events" (you can also select "Just the push event")
    - **Active**: ✓ checked
 3. Click **Add Webhook**
+
+**Important**: Use "Gogs" webhook type, not "Gitea". Tekton uses the GitHub interceptor which is compatible with Gogs/GitHub webhook format.
 
 ### 3. Test the Webhook
 

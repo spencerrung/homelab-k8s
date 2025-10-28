@@ -75,7 +75,7 @@ spec:
     - name: gitea-push-trigger
       interceptors:
         - ref:
-            name: "gitea"
+            name: "github"
           params:
             - name: "eventTypes"
               value: ["push"]
