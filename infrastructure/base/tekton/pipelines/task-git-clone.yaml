@@ -26,7 +26,7 @@ spec:
       description: The git repo will be cloned onto this workspace
   steps:
     - name: clone
-      image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:latest
+      image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.56.0
       script: |
         #!/bin/sh
         set -eu
