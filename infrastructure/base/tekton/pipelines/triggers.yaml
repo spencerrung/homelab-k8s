@@ -73,16 +73,6 @@ spec:
   serviceAccountName: tekton-build-sa
   triggers:
     - name: gitea-push-trigger
-      interceptors:
-        - ref:
-            name: "github"
-          params:
-            - name: "eventTypes"
-              value: ["push"]
-            - name: "secretRef"
-              value:
-                secretName: gitea-webhook-secret
-                secretKey: secret
       bindings:
         - ref: gitea-push-binding
       template:
