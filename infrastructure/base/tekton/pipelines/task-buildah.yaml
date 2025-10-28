@@ -38,7 +38,7 @@ spec:
         - name: DOCKER_CONFIG
           value: $(workspaces.dockerconfig.path)
       script: |
-        #!/busybox/sh
+        #!/bin/sh
         set -e
 
         # Extract the registry and image name from the full image reference
