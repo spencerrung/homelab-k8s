@@ -2,7 +2,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - namespace.yaml
   - release-pipelines.yaml
   - release-triggers.yaml
   - release-interceptors.yaml
@@ -10,6 +9,19 @@ resources:
   - ingress.yaml
   - pipelines/
 patches:
+  # Set PodSecurity to baseline (not restricted) for Tekton workloads
+  - patch: |-
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: tekton-pipelines
+        labels:
+          pod-security.kubernetes.io/enforce: baseline
+          pod-security.kubernetes.io/audit: baseline
+          pod-security.kubernetes.io/warn: baseline
+    target:
+      kind: Namespace
+      name: tekton-pipelines
   # Reduce resource requests for homelab environment
   - patch: |-
       apiVersion: apps/v1
