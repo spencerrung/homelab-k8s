@@ -26,21 +26,27 @@ spec:
       description: The git repo will be cloned onto this workspace
   steps:
     - name: clone
-      image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.56.0
+      image: alpine/git:latest
+      workingDir: $(workspaces.output.path)
       script: |
         #!/bin/sh
         set -eu
 
         CHECKOUT_DIR="$(workspaces.output.path)/$(params.subdirectory)"
 
-        /ko-app/git-init \
-          -url="$(params.url)" \
-          -revision="$(params.revision)" \
-          -path="${CHECKOUT_DIR}"
-
+        # Clone the repository
+        git clone "$(params.url)" "${CHECKOUT_DIR}"
         cd "${CHECKOUT_DIR}"
+
+        # Checkout the specific revision
+        git checkout "$(params.revision)"
+
+        # Get the actual commit SHA
         RESULT_SHA="$(git rev-parse HEAD)"
         echo -n "${RESULT_SHA}" > $(results.commit.path)
+
+        echo "Successfully cloned $(params.url) at revision $(params.revision)"
+        echo "Commit SHA: ${RESULT_SHA}"
   results:
     - name: commit
       description: The commit SHA that was fetched
