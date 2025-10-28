@@ -51,6 +51,10 @@ spec:
           ENABLED: true
           CHUNKED_UPLOAD_PATH: /data/gitea/tmp/package-upload
 
+        webhook:
+          ALLOWED_HOST_LIST: "*.svc.cluster.local"
+          SKIP_TLS_VERIFY: true
+
         oauth2_client:
           ENABLE_AUTO_REGISTRATION: true
           ACCOUNT_LINKING: login
