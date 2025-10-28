@@ -47,6 +47,10 @@ spec:
           DEFAULT_ALLOW_CREATE_ORGANIZATION: true
           DEFAULT_ENABLE_TIMETRACKING: true
 
+        packages:
+          ENABLED: true
+          CHUNKED_UPLOAD_PATH: /data/gitea/tmp/package-upload
+
         oauth2_client:
           ENABLE_AUTO_REGISTRATION: true
           ACCOUNT_LINKING: login

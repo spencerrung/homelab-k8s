@@ -1,0 +1,65 @@
+---
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: buildah
+  namespace: tekton-pipelines
+  labels:
+    app.kubernetes.io/version: "0.7"
+spec:
+  description: >-
+    Build and push container images using Buildah
+  params:
+    - name: IMAGE
+      description: Reference of the image buildah will produce
+    - name: DOCKERFILE
+      description: Path to the Dockerfile to build
+      default: ./Dockerfile
+    - name: CONTEXT
+      description: Path to the directory to use as context
+      default: .
+    - name: FORMAT
+      description: The format of the built container (oci or docker)
+      default: "oci"
+    - name: TLSVERIFY
+      description: Verify the TLS on the registry endpoint
+      type: string
+      default: "true"
+  workspaces:
+    - name: source
+    - name: dockerconfig
+      description: Docker config for authentication
+      optional: true
+  steps:
+    - name: build-and-push
+      image: quay.io/buildah/stable:latest
+      workingDir: $(workspaces.source.path)
+      script: |
+        #!/usr/bin/env bash
+        set -e
+
+        # If dockerconfig workspace is provided, use it
+        if [ -d "$(workspaces.dockerconfig.path)" ]; then
+          export REGISTRY_AUTH_FILE="$(workspaces.dockerconfig.path)/config.json"
+        fi
+
+        buildah --storage-driver=vfs bud \
+          --format=$(params.FORMAT) \
+          --tls-verify=$(params.TLSVERIFY) \
+          --no-cache \
+          -f $(params.DOCKERFILE) \
+          -t $(params.IMAGE) \
+          $(params.CONTEXT)
+
+        buildah --storage-driver=vfs push \
+          --tls-verify=$(params.TLSVERIFY) \
+          $(params.IMAGE) \
+          docker://$(params.IMAGE)
+      securityContext:
+        privileged: true
+      volumeMounts:
+        - name: varlibcontainers
+          mountPath: /var/lib/containers
+  volumes:
+    - name: varlibcontainers
+      emptyDir: {}

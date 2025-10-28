@@ -1,0 +1,140 @@
+---
+# TriggerBinding extracts data from Gitea webhook payload
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: gitea-push-binding
+  namespace: tekton-pipelines
+spec:
+  params:
+    - name: git-repo-url
+      value: $(body.repository.clone_url)
+    - name: git-revision
+      value: $(body.after)
+    - name: git-repo-name
+      value: $(body.repository.name)
+    - name: git-repo-owner
+      value: $(body.repository.owner.login)
+---
+# TriggerTemplate creates PipelineRun when triggered
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: gitea-build-template
+  namespace: tekton-pipelines
+spec:
+  params:
+    - name: git-repo-url
+      description: The git repository URL
+    - name: git-revision
+      description: The git revision (commit SHA)
+      default: main
+    - name: git-repo-name
+      description: The name of the repository
+    - name: git-repo-owner
+      description: The owner of the repository
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1
+      kind: PipelineRun
+      metadata:
+        generateName: build-push-$(tt.params.git-repo-name)-
+        namespace: tekton-pipelines
+      spec:
+        serviceAccountName: tekton-build-sa
+        pipelineRef:
+          name: build-and-push
+        params:
+          - name: repo-url
+            value: $(tt.params.git-repo-url)
+          - name: revision
+            value: $(tt.params.git-revision)
+          - name: image-reference
+            value: code.alucard.dev/$(tt.params.git-repo-owner)/$(tt.params.git-repo-name):$(tt.params.git-revision)
+        workspaces:
+          - name: shared-data
+            volumeClaimTemplate:
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: 1Gi
+          - name: docker-credentials
+            secret:
+              secretName: gitea-docker-credentials
+---
+# EventListener receives webhooks from Gitea
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: gitea-listener
+  namespace: tekton-pipelines
+spec:
+  serviceAccountName: tekton-build-sa
+  triggers:
+    - name: gitea-push-trigger
+      interceptors:
+        - ref:
+            name: "gitea"
+          params:
+            - name: "eventTypes"
+              value: ["push"]
+            - name: "secretRef"
+              value:
+                secretName: gitea-webhook-secret
+                secretKey: secret
+      bindings:
+        - ref: gitea-push-binding
+      template:
+        ref: gitea-build-template
+---
+# Webhook secret for validating Gitea webhooks
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: gitea-webhook-secret
+  namespace: tekton-pipelines
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: vault-backend
+    kind: SecretStore
+  target:
+    name: gitea-webhook-secret
+    creationPolicy: Owner
+  data:
+    - secretKey: secret
+      remoteRef:
+        key: gitea/webhook-secret
+        property: secret
+---
+# RBAC for EventListener
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: tekton-triggers-eventlistener
+  namespace: tekton-pipelines
+rules:
+  - apiGroups: ["triggers.tekton.dev"]
+    resources: ["eventlisteners", "triggerbindings", "triggertemplates", "triggers"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["configmaps", "secrets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["tekton.dev"]
+    resources: ["pipelineruns", "pipelineresources", "taskruns"]
+    verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: tekton-triggers-eventlistener-binding
+  namespace: tekton-pipelines
+subjects:
+  - kind: ServiceAccount
+    name: tekton-build-sa
+    namespace: tekton-pipelines
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: tekton-triggers-eventlistener

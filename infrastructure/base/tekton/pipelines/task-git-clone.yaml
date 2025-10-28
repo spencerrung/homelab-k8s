@@ -1,0 +1,46 @@
+---
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: git-clone
+  namespace: tekton-pipelines
+  labels:
+    app.kubernetes.io/version: "0.9"
+spec:
+  description: >-
+    Clone a git repository from Gitea
+  params:
+    - name: url
+      description: Repository URL to clone from
+      type: string
+    - name: revision
+      description: Revision to checkout (branch, tag, sha, ref)
+      type: string
+      default: "main"
+    - name: subdirectory
+      description: Subdirectory inside the workspace to clone the repo
+      type: string
+      default: ""
+  workspaces:
+    - name: output
+      description: The git repo will be cloned onto this workspace
+  steps:
+    - name: clone
+      image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:latest
+      script: |
+        #!/bin/sh
+        set -eu
+
+        CHECKOUT_DIR="$(workspaces.output.path)/$(params.subdirectory)"
+
+        /ko-app/git-init \
+          -url="$(params.url)" \
+          -revision="$(params.revision)" \
+          -path="${CHECKOUT_DIR}"
+
+        cd "${CHECKOUT_DIR}"
+        RESULT_SHA="$(git rev-parse HEAD)"
+        echo -n "${RESULT_SHA}" > $(results.commit.path)
+  results:
+    - name: commit
+      description: The commit SHA that was fetched

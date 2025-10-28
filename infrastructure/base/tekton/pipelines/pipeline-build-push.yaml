@@ -1,0 +1,64 @@
+---
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: build-and-push
+  namespace: tekton-pipelines
+spec:
+  description: >-
+    Clone a repository, build a container image, and push to Gitea registry
+  params:
+    - name: repo-url
+      type: string
+      description: The git repository URL to clone from
+    - name: revision
+      type: string
+      description: The git revision to check out
+      default: "main"
+    - name: image-reference
+      type: string
+      description: The image reference to build and push (e.g., code.alucard.dev/user/repo:tag)
+    - name: dockerfile
+      type: string
+      description: Path to the Dockerfile
+      default: "./Dockerfile"
+    - name: context
+      type: string
+      description: Build context directory
+      default: "."
+  workspaces:
+    - name: shared-data
+      description: Workspace for sharing data between tasks
+    - name: docker-credentials
+      description: Docker credentials for pushing to registry
+  tasks:
+    - name: fetch-source
+      taskRef:
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: shared-data
+      params:
+        - name: url
+          value: $(params.repo-url)
+        - name: revision
+          value: $(params.revision)
+
+    - name: build-push
+      runAfter: ["fetch-source"]
+      taskRef:
+        name: buildah
+      workspaces:
+        - name: source
+          workspace: shared-data
+        - name: dockerconfig
+          workspace: docker-credentials
+      params:
+        - name: IMAGE
+          value: $(params.image-reference)
+        - name: DOCKERFILE
+          value: $(params.dockerfile)
+        - name: CONTEXT
+          value: $(params.context)
+        - name: TLSVERIFY
+          value: "false"  # Set to true in production with proper certs
