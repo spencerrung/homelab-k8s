@@ -5,9 +5,12 @@ metadata:
   name: alucard-web
   namespace: alucard-web
   annotations:
+    # Use Traefik ingress class
+    kubernetes.io/ingress.class: traefik
+    # Use cert-manager to provision certificate
     cert-manager.io/cluster-issuer: letsencrypt-prod
+    # Allow both HTTP and HTTPS entrypoints (external Traefik handles TLS)
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-    traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
   tls:
     - hosts:
@@ -23,4 +26,4 @@ spec:
               service:
                 name: alucard-web
                 port:
-                  name: http
+                  number: 80
