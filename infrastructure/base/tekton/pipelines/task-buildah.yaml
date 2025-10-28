@@ -37,10 +37,23 @@ spec:
       env:
         - name: DOCKER_CONFIG
           value: $(workspaces.dockerconfig.path)
-      args:
-        - --dockerfile=$(params.DOCKERFILE)
-        - --context=$(workspaces.source.path)/$(params.CONTEXT)
-        - --destination=$(params.IMAGE)
-        - --insecure
-        - --insecure-pull
-        - --cache=false
+      script: |
+        #!/busybox/sh
+        set -e
+
+        # Extract the registry and image name from the full image reference
+        IMAGE_BASE=$(echo "$(params.IMAGE)" | cut -d':' -f1)
+
+        # Build and push with both commit SHA and latest tags
+        /kaniko/executor \
+          --dockerfile=$(params.DOCKERFILE) \
+          --context=$(workspaces.source.path)/$(params.CONTEXT) \
+          --destination=$(params.IMAGE) \
+          --destination=${IMAGE_BASE}:latest \
+          --insecure \
+          --insecure-pull \
+          --cache=false
+
+        echo "Pushed image with tags:"
+        echo "  - $(params.IMAGE)"
+        echo "  - ${IMAGE_BASE}:latest"
