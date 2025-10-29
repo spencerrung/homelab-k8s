@@ -78,7 +78,7 @@ spec:
             cpu: 50m
             memory: 64Mi
           limits:
-            cpu: 512m
+            cpu: 1
             memory: 256Mi
 
     # Server configuration
@@ -86,11 +86,11 @@ spec:
       replicas: 1
       resources:
         requests:
-          cpu: 100m
-          memory: 256Mi
+          cpu: 250m
+          memory: 512Mi
         limits:
           cpu: 2
-          memory: 1Gi
+          memory: 1.5Gi
 
       ingress:
         enabled: false  # Enable later with Traefik/nginx
@@ -126,11 +126,11 @@ spec:
       replicas: 1
       resources:
         requests:
-          cpu: 100m
-          memory: 256Mi
+          cpu: 250m
+          memory: 512Mi
         limits:
           cpu: 2
-          memory: 1Gi
+          memory: 1.5Gi
 
       # Mount custom blueprints
       volumes:
