@@ -123,13 +123,13 @@ spec:
 
     # Worker configuration
     worker:
-      replicas: 1
+      replicas: 3
       resources:
         requests:
-          cpu: 250m
+          cpu: 100m
           memory: 512Mi
         limits:
-          cpu: 2
+          cpu: 1
           memory: 1.5Gi
 
       # Mount custom blueprints
