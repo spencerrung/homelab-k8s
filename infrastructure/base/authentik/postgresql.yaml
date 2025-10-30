@@ -58,8 +58,8 @@ spec:
               memory: 256Mi
               cpu: 100m
             limits:
-              memory: 512Mi
-              cpu: 1
+              memory: 800Mi
+              cpu: 2
   volumeClaimTemplates:
     - metadata:
         name: data
