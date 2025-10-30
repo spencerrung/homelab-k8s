@@ -122,23 +122,6 @@ spec:
           cpu: 1
           memory: 1.5Gi
 
-      # Increase health check timeouts for Raspberry Pi nodes
-      livenessProbe:
-        initialDelaySeconds: 30
-        periodSeconds: 10
-        timeoutSeconds: 10
-        failureThreshold: 5
-      readinessProbe:
-        initialDelaySeconds: 30
-        periodSeconds: 10
-        timeoutSeconds: 10
-        failureThreshold: 5
-      startupProbe:
-        initialDelaySeconds: 30
-        periodSeconds: 10
-        timeoutSeconds: 10
-        failureThreshold: 60
-
       # Mount custom blueprints
       volumes:
         - name: gitea-oidc-blueprint
