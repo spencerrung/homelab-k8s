@@ -84,13 +84,13 @@ spec:
     # Server configuration
     server:
       replicas: 2
-      # resources:
-      #   requests:
-      #     cpu: 100m
-      #     memory: 512Mi
-      #   limits:
-      #     cpu: 1
-      #     memory: 1.5Gi
+      resources:
+        requests:
+          cpu: 100m
+          memory: 512Mi
+        limits:
+          cpu: 1
+          memory: 1.5Gi
 
       ingress:
         enabled: false  # Enable later with Traefik/nginx
@@ -124,13 +124,13 @@ spec:
     # Worker configuration
     worker:
       replicas: 3
-      # resources:
-      #   requests:
-      #     cpu: 100m
-      #     memory: 512Mi
-      #   limits:
-      #     cpu: 1
-      #     memory: 1.5Gi
+      resources:
+        requests:
+          cpu: 100m
+          memory: 512Mi
+        limits:
+          cpu: 1
+          memory: 1.5Gi
 
       # Mount custom blueprints
       volumes:
