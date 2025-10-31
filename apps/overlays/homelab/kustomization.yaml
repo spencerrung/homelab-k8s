@@ -4,4 +4,5 @@ kind: Kustomization
 resources:
   - ../../base
   - ../../alucard-web  # Alucard.dev static website
+  - ../../simple-cookbook  # Simple-Cookbook.com static website
 # Add homelab-specific patches and resources here
