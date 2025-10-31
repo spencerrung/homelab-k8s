@@ -1,0 +1,29 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: simple-cookbook
+  namespace: simple-cookbook
+  annotations:
+    # Use Traefik ingress class
+    kubernetes.io/ingress.class: traefik
+    # Use cert-manager to provision certificate
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    # Allow both HTTP and HTTPS entrypoints (external Traefik handles TLS)
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+spec:
+  tls:
+    - hosts:
+        - simple-cookbook.com
+      secretName: simple-cookbook-tls
+  rules:
+    - host: simple-cookbook.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: simple-cookbook
+                port:
+                  number: 80

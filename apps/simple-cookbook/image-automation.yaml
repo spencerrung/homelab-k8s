@@ -1,0 +1,52 @@
+---
+# ImageRepository watches the Gitea container registry for new images
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: simple-cookbook
+  namespace: flux-system
+spec:
+  image: code.alucard.dev/spencerrung/simple-cookbook
+  interval: 5m
+  secretRef:
+    name: gitea-registry-credentials
+---
+# ImagePolicy defines which image tags to use (latest semver or by timestamp)
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: simple-cookbook
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: simple-cookbook
+  policy:
+    alphabetical:
+      order: asc
+---
+# ImageUpdateAutomation updates the deployment manifest when new images are available
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageUpdateAutomation
+metadata:
+  name: simple-cookbook
+  namespace: flux-system
+spec:
+  interval: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  git:
+    checkout:
+      ref:
+        branch: main
+    commit:
+      author:
+        email: fluxcdbot@users.noreply.github.com
+        name: fluxcdbot
+      messageTemplate: |
+        Update simple-cookbook image to {{range .Updated.Images}}{{println .}}{{end}}
+    push:
+      branch: main
+  update:
+    path: ./apps/simple-cookbook
+    strategy: Setters
