@@ -122,31 +122,13 @@ spec:
           cpu: 1
           memory: 1.5Gi
 
-      # Disable HTTP-based health checks for workers
-      # Workers run background tasks and don't expose HTTP endpoints
-      # Use process-based liveness check instead
-      livenessProbe:
-        exec:
-          command:
-            - sh
-            - -c
-            - "ps aux | grep -v grep | grep -q dramatiq"
-        initialDelaySeconds: 30
-        periodSeconds: 30
-        timeoutSeconds: 5
-        failureThreshold: 5
-      # No readiness probe needed - workers don't serve traffic
+      # Disable health checks for workers entirely
+      # Workers run background tasks, don't expose HTTP endpoints
+      # Standard utilities (ps, pgrep) aren't available in minimal container
+      # Container will be restarted by Kubernetes if it crashes
+      livenessProbe: null
       readinessProbe: null
-      startupProbe:
-        exec:
-          command:
-            - sh
-            - -c
-            - "ps aux | grep -v grep | grep -q dramatiq"
-        initialDelaySeconds: 30
-        periodSeconds: 10
-        timeoutSeconds: 5
-        failureThreshold: 30
+      startupProbe: null
 
       # Mount custom blueprints
       volumes:
