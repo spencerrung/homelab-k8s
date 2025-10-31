@@ -122,6 +122,36 @@ spec:
           cpu: 1
           memory: 1.5Gi
 
+      # Increase health check timeouts for workers
+      # Workers don't run HTTP servers, so health checks can take longer
+      livenessProbe:
+        exec:
+          command:
+            - ak
+            - healthcheck
+        initialDelaySeconds: 30
+        periodSeconds: 30
+        timeoutSeconds: 10
+        failureThreshold: 5
+      readinessProbe:
+        exec:
+          command:
+            - ak
+            - healthcheck
+        initialDelaySeconds: 30
+        periodSeconds: 30
+        timeoutSeconds: 10
+        failureThreshold: 5
+      startupProbe:
+        exec:
+          command:
+            - ak
+            - healthcheck
+        initialDelaySeconds: 30
+        periodSeconds: 30
+        timeoutSeconds: 10
+        failureThreshold: 10
+
       # Mount custom blueprints
       volumes:
         - name: gitea-oidc-blueprint
