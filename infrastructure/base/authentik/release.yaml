@@ -122,35 +122,31 @@ spec:
           cpu: 1
           memory: 1.5Gi
 
-      # Increase health check timeouts for workers
-      # Workers don't run HTTP servers, so health checks can take longer
+      # Disable HTTP-based health checks for workers
+      # Workers run background tasks and don't expose HTTP endpoints
+      # Use process-based liveness check instead
       livenessProbe:
         exec:
           command:
-            - ak
-            - healthcheck
+            - pgrep
+            - -f
+            - dramatiq
         initialDelaySeconds: 30
         periodSeconds: 30
-        timeoutSeconds: 10
+        timeoutSeconds: 5
         failureThreshold: 5
-      readinessProbe:
-        exec:
-          command:
-            - ak
-            - healthcheck
-        initialDelaySeconds: 30
-        periodSeconds: 30
-        timeoutSeconds: 10
-        failureThreshold: 5
+      # No readiness probe needed - workers don't serve traffic
+      readinessProbe: null
       startupProbe:
         exec:
           command:
-            - ak
-            - healthcheck
+            - pgrep
+            - -f
+            - dramatiq
         initialDelaySeconds: 30
-        periodSeconds: 30
-        timeoutSeconds: 10
-        failureThreshold: 10
+        periodSeconds: 10
+        timeoutSeconds: 5
+        failureThreshold: 30
 
       # Mount custom blueprints
       volumes:
