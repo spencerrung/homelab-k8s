@@ -113,7 +113,7 @@ spec:
 
     # Worker configuration
     worker:
-      replicas: 3
+      replicas: 2
       resources:
         requests:
           cpu: 100m
