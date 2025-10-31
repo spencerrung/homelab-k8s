@@ -128,9 +128,9 @@ spec:
       livenessProbe:
         exec:
           command:
-            - pgrep
-            - -f
-            - dramatiq
+            - sh
+            - -c
+            - "ps aux | grep -v grep | grep -q dramatiq"
         initialDelaySeconds: 30
         periodSeconds: 30
         timeoutSeconds: 5
@@ -140,9 +140,9 @@ spec:
       startupProbe:
         exec:
           command:
-            - pgrep
-            - -f
-            - dramatiq
+            - sh
+            - -c
+            - "ps aux | grep -v grep | grep -q dramatiq"
         initialDelaySeconds: 30
         periodSeconds: 10
         timeoutSeconds: 5
