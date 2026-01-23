@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: code.alucard.dev/spencerrung/alucard-web:latest # {"$imagepolicy": "flux-system:alucard-web"}
+          image: docker.io/spencerrung/alucard-web:latest # {"$imagepolicy": "flux-system:alucard-web"}
           ports:
             - containerPort: 80
               name: http
