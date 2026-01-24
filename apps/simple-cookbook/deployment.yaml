@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: code.alucard.dev/spencerrung/simple-cookbook:latest # {"$imagepolicy": "flux-system:simple-cookbook"}
+          image: docker.io/spencerrung/simple-cookbook:latest # {"$imagepolicy": "flux-system:simple-cookbook"}
           ports:
             - containerPort: 80
               name: http
