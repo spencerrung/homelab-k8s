@@ -19,16 +19,12 @@ spec:
     - name: cert-manager
       namespace: cert-manager
   values:
-    # Global arguments
-    globalArguments:
-      - "--global.checknewversion=false"
-      - "--global.sendanonymoususage=false"
-
     # ARM64 compatible image for Raspberry Pi (Traefik v3)
+    # Must be >= v3.6.0 for chart 41.x; matches chart 41.0.1 appVersion.
     image:
       registry: docker.io
       repository: traefik
-      tag: "v3.3"
+      tag: "v3.7.5"
 
     # Deployment configuration
     deployment:
@@ -45,9 +41,11 @@ spec:
         exposedPort: 443
         http3:
           enabled: false
-        tls:
-          enabled: true
-          # cert-manager will provide certificates
+        # TLS config moved under `http` in traefik chart v41+
+        http:
+          tls:
+            enabled: true
+            # cert-manager will provide certificates
       metrics:
         port: 9100
         exposedPort: 9100
@@ -74,12 +72,9 @@ spec:
         cpu: 500m
         memory: 256Mi
 
-    # Logs
-    logs:
-      general:
-        level: DEBUG
-      access:
-        enabled: true  # Enabled for debugging
+    # Logs (top-level `logs` was renamed to `log` in traefik chart v41+)
+    log:
+      level: INFO
 
     # Enable Prometheus metrics (optional)
     metrics:
@@ -88,6 +83,9 @@ spec:
 
     # Additional arguments
     additionalArguments:
+      # Global flags (previously the top-level `globalArguments`, removed in v41+)
+      - "--global.checknewversion=false"
+      - "--global.sendanonymoususage=false"
       # Enable Kubernetes Ingress provider
       - "--providers.kubernetesingress=true"
       - "--providers.kubernetesingress.ingressclass=traefik"

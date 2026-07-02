@@ -1,0 +1,99 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: synapse
+  namespace: matrix
+spec:
+  replicas: 1
+  # RWO PVC — never run two pods at once.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: synapse
+  template:
+    metadata:
+      labels:
+        app: synapse
+    spec:
+      securityContext:
+        runAsUser: 991
+        runAsGroup: 991
+        fsGroup: 991
+      initContainers:
+        # Generate the signing key into /data on first boot (no-op if it exists).
+        - name: generate-keys
+          image: matrixdotorg/synapse:v1.146.0
+          command:
+            - python
+            - -m
+            - synapse.app.homeserver
+            - -c
+            - /config/homeserver.yaml
+            - -c
+            - /secrets/secrets.yaml
+            - --generate-keys
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+            - name: secrets
+              mountPath: /secrets
+              readOnly: true
+            - name: data
+              mountPath: /data
+      containers:
+        - name: synapse
+          image: matrixdotorg/synapse:v1.146.0
+          command:
+            - python
+            - -m
+            - synapse.app.homeserver
+            - -c
+            - /config/homeserver.yaml
+            - -c
+            - /secrets/secrets.yaml
+          ports:
+            - containerPort: 8008
+              name: http
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+            - name: secrets
+              mountPath: /secrets
+              readOnly: true
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 1
+              memory: 1536Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+      volumes:
+        - name: config
+          configMap:
+            name: synapse-config
+        - name: secrets
+          secret:
+            secretName: synapse-secrets
+        - name: data
+          persistentVolumeClaim:
+            claimName: synapse-data

@@ -1,0 +1,31 @@
+---
+# Delegation: route alucard.dev/.well-known/matrix/* to Synapse so the short
+# server_name (alucard.dev) resolves to the homeserver at matrix.alucard.dev.
+# The /.well-known/matrix/ prefix is more specific than the `/` rule in
+# apps/alucard-web/ingress.yaml, so Traefik prefers this route for those paths
+# while the static site keeps serving everything else on alucard.dev.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: matrix-wellknown
+  namespace: matrix
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+spec:
+  tls:
+    - hosts:
+        - alucard.dev
+      secretName: matrix-wellknown-tls
+  rules:
+    - host: alucard.dev
+      http:
+        paths:
+          - path: /.well-known/matrix/
+            pathType: Prefix
+            backend:
+              service:
+                name: synapse
+                port:
+                  number: 8008
