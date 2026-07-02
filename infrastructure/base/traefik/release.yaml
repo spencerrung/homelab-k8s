@@ -53,8 +53,12 @@ spec:
     # Service configuration
     service:
       enabled: true
-      type: NodePort  # Use NodePort so external Traefik can route to it
       spec:
+        # Use NodePort so external Traefik can route to it. In chart v41+ the
+        # service type lives under `service.spec.type` (a bare `service.type`
+        # is ignored and the chart defaults to LoadBalancer, which never gets
+        # an IP on this bare-metal cluster and hangs the Helm upgrade wait).
+        type: NodePort
         # Allow access from any node (not just where pod is running)
         externalTrafficPolicy: Cluster
 
