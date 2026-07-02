@@ -1,0 +1,12 @@
+---
+# Persistent /data for Synapse: signing key, media store, logs.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: synapse-data
+  namespace: matrix
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 10Gi

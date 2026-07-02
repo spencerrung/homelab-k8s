@@ -1,0 +1,67 @@
+---
+# Non-secret Synapse configuration. Secret values (database password,
+# registration_shared_secret, macaroon_secret_key, form_secret) live in the
+# ESO-managed `synapse-secrets` Secret and are merged at runtime via a second
+# `-c /secrets/secrets.yaml` config file.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: synapse-config
+  namespace: matrix
+data:
+  homeserver.yaml: |
+    # Server identity. server_name is permanent and forms every user ID
+    # (@user:alucard.dev). Synapse is reached at matrix.alucard.dev via
+    # .well-known delegation served off alucard.dev.
+    server_name: "alucard.dev"
+    public_baseurl: "https://matrix.alucard.dev/"
+    pid_file: /data/homeserver.pid
+
+    # Serve /.well-known/matrix/server so other homeservers know to reach us at
+    # matrix.alucard.dev:443. The client well-known is derived from public_baseurl.
+    serve_server_wellknown: true
+
+    # Single HTTP listener; TLS is terminated by Traefik, which forwards here.
+    listeners:
+      - port: 8008
+        tls: false
+        type: http
+        x_forwarded: true
+        bind_addresses: ['0.0.0.0']
+        resources:
+          - names: [client, federation]
+            compress: false
+
+    # Closed registration; accounts are created with register_new_matrix_user.
+    enable_registration: false
+    enable_registration_without_verification: false
+
+    # Persistent storage on the /data PVC.
+    media_store_path: /data/media_store
+    signing_key_path: /data/alucard.dev.signing.key
+    max_upload_size: 50M
+
+    # Federation key lookups.
+    trusted_key_servers:
+      - server_name: "matrix.org"
+    suppress_key_server_warning: true
+
+    report_stats: false
+
+    log_config: "/config/log.config"
+  log.config: |
+    version: 1
+    formatters:
+      precise:
+        format: '%(asctime)s - %(name)s - %(lineno)d - %(levelname)s - %(request)s - %(message)s'
+    handlers:
+      console:
+        class: logging.StreamHandler
+        formatter: precise
+    loggers:
+      synapse.storage.SQL:
+        level: INFO
+    root:
+      level: INFO
+      handlers: [console]
+    disable_existing_loggers: false

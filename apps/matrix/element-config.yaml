@@ -1,0 +1,23 @@
+---
+# Element web configuration. Points the client at the homeserver and pins the
+# server_name so logins are @user:alucard.dev.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: element-config
+  namespace: matrix
+data:
+  config.json: |
+    {
+      "default_server_config": {
+        "m.homeserver": {
+          "base_url": "https://matrix.alucard.dev",
+          "server_name": "alucard.dev"
+        }
+      },
+      "brand": "alucard.dev",
+      "disable_custom_urls": false,
+      "disable_guests": true,
+      "default_country_code": "US",
+      "show_labs_settings": false
+    }
