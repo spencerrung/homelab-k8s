@@ -1,0 +1,92 @@
+---
+# Static .well-known responder for Matrix delegation. Synapse's
+# serve_server_wellknown only echoes server_name (alucard.dev:443), which points
+# federation at the apex (the static website) instead of the homeserver. This
+# nginx returns the correct delegation target (matrix.alucard.dev:443) and a
+# clean client base_url (no trailing slash).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: matrix-wellknown
+  namespace: matrix
+data:
+  default.conf: |
+    server {
+      listen 8080;
+      server_name _;
+
+      location = /.well-known/matrix/server {
+        default_type application/json;
+        add_header Access-Control-Allow-Origin *;
+        return 200 '{"m.server": "matrix.alucard.dev:443"}';
+      }
+
+      location = /.well-known/matrix/client {
+        default_type application/json;
+        add_header Access-Control-Allow-Origin *;
+        return 200 '{"m.homeserver": {"base_url": "https://matrix.alucard.dev"}}';
+      }
+
+      location / {
+        return 404;
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: matrix-wellknown
+  namespace: matrix
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: matrix-wellknown
+  template:
+    metadata:
+      labels:
+        app: matrix-wellknown
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 8080
+              name: http
+          volumeMounts:
+            - name: config
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+              readOnly: true
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+          readinessProbe:
+            httpGet:
+              path: /.well-known/matrix/server
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 10
+      volumes:
+        - name: config
+          configMap:
+            name: matrix-wellknown
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: matrix-wellknown
+  namespace: matrix
+spec:
+  type: ClusterIP
+  selector:
+    app: matrix-wellknown
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP

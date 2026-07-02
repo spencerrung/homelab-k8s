@@ -15,6 +15,7 @@ resources:
   - synapse-deployment.yaml
   - synapse-service.yaml
   - synapse-ingress.yaml
+  - wellknown-server.yaml
   - wellknown-ingress.yaml
   # Element web client
   - element-config.yaml

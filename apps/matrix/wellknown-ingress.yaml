@@ -26,6 +26,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: synapse
+                name: matrix-wellknown
                 port:
-                  number: 8008
+                  number: 80
