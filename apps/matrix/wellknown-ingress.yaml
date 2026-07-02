@@ -1,9 +1,12 @@
 ---
-# Delegation: route alucard.dev/.well-known/matrix/* to Synapse so the short
-# server_name (alucard.dev) resolves to the homeserver at matrix.alucard.dev.
-# The /.well-known/matrix/ prefix is more specific than the `/` rule in
-# apps/alucard-web/ingress.yaml, so Traefik prefers this route for those paths
-# while the static site keeps serving everything else on alucard.dev.
+# Delegation + apex federation on alucard.dev:
+#  - /.well-known/matrix/* -> static responder (points delegation at matrix.alucard.dev)
+#  - /_matrix/*            -> Synapse directly, so remote servers that cached the
+#                            OLD delegation (alucard.dev:443) can still fetch our
+#                            signing key and federate instead of hitting the
+#                            static website. Both prefixes are more specific than
+#                            the `/` rule in apps/alucard-web/ingress.yaml, so the
+#                            static site keeps serving everything else.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -29,3 +32,10 @@ spec:
                 name: matrix-wellknown
                 port:
                   number: 80
+          - path: /_matrix/
+            pathType: Prefix
+            backend:
+              service:
+                name: synapse
+                port:
+                  number: 8008

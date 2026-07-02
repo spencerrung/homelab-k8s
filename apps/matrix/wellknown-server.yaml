@@ -18,12 +18,14 @@ data:
       location = /.well-known/matrix/server {
         default_type application/json;
         add_header Access-Control-Allow-Origin *;
+        add_header Cache-Control "public, max-age=3600";
         return 200 '{"m.server": "matrix.alucard.dev:443"}';
       }
 
       location = /.well-known/matrix/client {
         default_type application/json;
         add_header Access-Control-Allow-Origin *;
+        add_header Cache-Control "public, max-age=3600";
         return 200 '{"m.homeserver": {"base_url": "https://matrix.alucard.dev"}}';
       }
 
