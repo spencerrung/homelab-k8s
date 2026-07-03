@@ -1,0 +1,20 @@
+---
+# Cinny web client configuration. homeserverList uses the server_name
+# (alucard.dev); Cinny resolves the base URL via our .well-known delegation to
+# matrix.alucard.dev. Logins are @user:alucard.dev.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cinny-config
+  namespace: matrix
+data:
+  config.json: |
+    {
+      "defaultHomeserver": 0,
+      "homeserverList": ["alucard.dev"],
+      "allowCustomHomeservers": true,
+      "hashRouter": {
+        "enabled": false,
+        "basename": "/"
+      }
+    }

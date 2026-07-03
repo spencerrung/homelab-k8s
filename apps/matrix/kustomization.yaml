@@ -22,3 +22,8 @@ resources:
   - element-deployment.yaml
   - element-service.yaml
   - element-ingress.yaml
+  # Cinny web client
+  - cinny-config.yaml
+  - cinny-deployment.yaml
+  - cinny-service.yaml
+  - cinny-ingress.yaml
