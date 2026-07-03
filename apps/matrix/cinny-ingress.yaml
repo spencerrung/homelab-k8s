@@ -1,4 +1,10 @@
 ---
+# No cert-manager origin cert: cinny.alucard.dev is Cloudflare-proxied, and CF
+# won't serve the _acme-challenge TXT under a proxied name, so DNS-01 can't
+# validate. Browsers use Cloudflare's edge cert; Traefik serves its default cert
+# on the origin leg (CF is Full, not strict). The tls block below just keeps the
+# websecure router TLS-enabled; the referenced secret intentionally doesn't exist
+# so Traefik falls back to its default certificate.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -6,7 +12,6 @@ metadata:
   namespace: matrix
   annotations:
     kubernetes.io/ingress.class: traefik
-    cert-manager.io/cluster-issuer: letsencrypt-prod
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
 spec:
   tls:
