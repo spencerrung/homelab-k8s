@@ -6,4 +6,5 @@ resources:
   - ../../alucard-web  # Alucard.dev static website
   - ../../simple-cookbook  # Simple-Cookbook.com static website
   - ../../matrix  # Matrix (Synapse) homeserver + Element web
+  - ../../atproto-pds  # AT Protocol / Bluesky PDS (bluesky-social/pds)
 # Add homelab-specific patches and resources here

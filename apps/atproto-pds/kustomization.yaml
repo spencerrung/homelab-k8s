@@ -1,0 +1,14 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  # Namespace + secret plumbing
+  - namespace.yaml
+  - service-account.yaml
+  - vault-store.yaml
+  - externalsecrets.yaml
+  # Bluesky PDS
+  - pvc.yaml
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml

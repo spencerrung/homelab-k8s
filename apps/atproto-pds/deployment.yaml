@@ -1,0 +1,87 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pds
+  namespace: atproto
+spec:
+  replicas: 1
+  # RWO PVC — never run two pods at once.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: pds
+  template:
+    metadata:
+      labels:
+        app: pds
+    spec:
+      containers:
+        - name: pds
+          image: ghcr.io/bluesky-social/pds:0.4
+          ports:
+            - containerPort: 3000
+              name: http
+          env:
+            - name: PDS_HOSTNAME
+              value: pds.alucard.dev
+            - name: PDS_PORT
+              value: "3000"
+            - name: PDS_DATA_DIRECTORY
+              value: /pds
+            - name: PDS_BLOBSTORE_DISK_LOCATION
+              value: /pds/blocks
+            - name: PDS_BLOB_UPLOAD_LIMIT
+              value: "52428800"
+            - name: PDS_DID_PLC_URL
+              value: https://plc.directory
+            - name: PDS_BSKY_APP_VIEW_URL
+              value: https://api.bsky.app
+            - name: PDS_BSKY_APP_VIEW_DID
+              value: did:web:api.bsky.app
+            - name: PDS_REPORT_SERVICE_URL
+              value: https://mod.bsky.app
+            - name: PDS_REPORT_SERVICE_DID
+              value: did:plc:ar7c4by46qjdydhdevvrndac
+            - name: PDS_CRAWLERS
+              value: https://bsky.network
+            - name: LOG_ENABLED
+              value: "true"
+          # PDS_JWT_SECRET, PDS_ADMIN_PASSWORD,
+          # PDS_PLC_ROTATION_KEY_K256_PRIVATE_KEY_HEX from Vault via ESO.
+          envFrom:
+            - secretRef:
+                name: pds-secrets
+          volumeMounts:
+            - name: data
+              mountPath: /pds
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 2
+              memory: 1Gi
+          startupProbe:
+            httpGet:
+              path: /xrpc/_health
+              port: http
+            periodSeconds: 10
+            failureThreshold: 30
+          livenessProbe:
+            httpGet:
+              path: /xrpc/_health
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /xrpc/_health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: pds-data

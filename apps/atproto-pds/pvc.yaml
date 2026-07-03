@@ -1,0 +1,12 @@
+---
+# Persistent storage for the PDS: SQLite databases + blob store (/pds).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pds-data
+  namespace: atproto
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 20Gi
