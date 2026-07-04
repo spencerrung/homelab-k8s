@@ -9,4 +9,5 @@ resources:
   - ../../atproto-pds  # AT Protocol / Bluesky PDS (bluesky-social/pds)
   - ../../nova  # WebAssembly showcase (nova.alucard.dev)
   - ../../finale  # WebAssembly fireworks show (250.alucard.dev)
+  - ../../breathe  # Paced-breathing guide (breathe.alucard.dev)
 # Add homelab-specific patches and resources here

@@ -1,0 +1,41 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: breathe
+  namespace: breathe
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: breathe
+  template:
+    metadata:
+      labels:
+        app: breathe
+    spec:
+      containers:
+        - name: web
+          image: docker.io/spencerrung/breathe:latest # {"$imagepolicy": "flux-system:breathe"}
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
