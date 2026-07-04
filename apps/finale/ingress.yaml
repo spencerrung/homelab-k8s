@@ -1,0 +1,29 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: finale
+  namespace: finale
+  annotations:
+    # Use Traefik ingress class
+    kubernetes.io/ingress.class: traefik
+    # Use cert-manager to provision certificate
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    # Allow both HTTP and HTTPS entrypoints (external Traefik handles TLS)
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+spec:
+  tls:
+    - hosts:
+        - 250.alucard.dev
+      secretName: finale-tls
+  rules:
+    - host: 250.alucard.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: finale
+                port:
+                  number: 80

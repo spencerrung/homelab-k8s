@@ -8,4 +8,5 @@ resources:
   - ../../matrix  # Matrix (Synapse) homeserver + Element web
   - ../../atproto-pds  # AT Protocol / Bluesky PDS (bluesky-social/pds)
   - ../../nova  # WebAssembly showcase (nova.alucard.dev)
+  - ../../finale  # WebAssembly fireworks show (250.alucard.dev)
 # Add homelab-specific patches and resources here

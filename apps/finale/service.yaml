@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: finale
+  namespace: finale
+spec:
+  type: ClusterIP
+  selector:
+    app: finale
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
