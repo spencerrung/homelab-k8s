@@ -86,11 +86,14 @@ spec:
                 - sh
                 - -ec
                 - |
+                  # --s3-no-check-bucket: bucket-scoped B2 keys cannot list
+                  # buckets, so rclone would otherwise try CreateBucket (403)
                   rclone copyto /snap/vault.snap \
                     ":s3:${BUCKET}/vault-$(date -u +%Y%m%d-%H%M%S).snap" \
                     --s3-provider Other \
                     --s3-endpoint "https://${ENDPOINT}" \
-                    --s3-env-auth
+                    --s3-env-auth \
+                    --s3-no-check-bucket
                   echo "uploaded; recent snapshots:"
                   rclone lsl ":s3:${BUCKET}" --s3-provider Other \
                     --s3-endpoint "https://${ENDPOINT}" --s3-env-auth | tail -5
