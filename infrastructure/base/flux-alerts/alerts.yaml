@@ -1,0 +1,46 @@
+---
+# Reconciliation failures for everything Flux manages. name: '*' wildcards
+# only work within a namespace, so HelmReleases are listed per namespace -
+# add an entry when a new namespace gains a HelmRelease.
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+  name: flux-errors
+  namespace: flux-system
+spec:
+  providerRef:
+    name: matrix
+  eventSeverity: error
+  eventSources:
+    - kind: GitRepository
+      name: '*'
+    - kind: HelmRepository
+      name: '*'
+    - kind: Kustomization
+      name: '*'
+    - kind: HelmRelease
+      name: '*'
+    - kind: HelmRelease
+      name: '*'
+      namespace: vault
+    - kind: HelmRelease
+      name: '*'
+      namespace: cert-manager
+    - kind: HelmRelease
+      name: '*'
+      namespace: traefik
+    - kind: HelmRelease
+      name: '*'
+      namespace: external-secrets
+    - kind: HelmRelease
+      name: '*'
+      namespace: authentik
+    - kind: HelmRelease
+      name: '*'
+      namespace: gitea
+    - kind: HelmRelease
+      name: '*'
+      namespace: velero
+    - kind: HelmRelease
+      name: '*'
+      namespace: monitoring
