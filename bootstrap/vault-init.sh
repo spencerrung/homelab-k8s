@@ -44,8 +44,8 @@ INITIALIZED=$(get_status | grep -o '"initialized": *[a-z]*' | grep -o '[a-z]*$')
 if [ "$INITIALIZED" != "true" ]; then
   echo "==> initializing (1 share / threshold 1)"
   INIT_OUT=$(kubectl exec -n "$NS" "$POD" -- vault operator init -key-shares=1 -key-threshold=1 -format=json)
-  VAULT_UNSEAL_KEY=$(echo "$INIT_OUT" | grep -o '"unseal_keys_b64": *\[ *"[^"]*"' | grep -o '[^"]*"$' | tr -d '"')
-  VAULT_ROOT_TOKEN=$(echo "$INIT_OUT" | grep -o '"root_token": *"[^"]*"' | cut -d'"' -f4)
+  VAULT_UNSEAL_KEY=$(echo "$INIT_OUT" | python3 -c 'import json,sys; print(json.load(sys.stdin)["unseal_keys_b64"][0])')
+  VAULT_ROOT_TOKEN=$(echo "$INIT_OUT" | python3 -c 'import json,sys; print(json.load(sys.stdin)["root_token"])')
   echo
   echo "############################################################"
   echo "  STORE THESE IN YOUR PASSWORD MANAGER NOW - shown once."
