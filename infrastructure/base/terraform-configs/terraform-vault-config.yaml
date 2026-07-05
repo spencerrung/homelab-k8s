@@ -7,6 +7,9 @@ metadata:
   name: vault-config
   namespace: flux-system
 spec:
+  # Suspended ahead of tf-controller removal
+  suspend: true
+
   # How often to check for drift and reconcile
   interval: 10m
 

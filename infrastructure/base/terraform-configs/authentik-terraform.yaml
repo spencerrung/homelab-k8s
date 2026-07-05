@@ -5,6 +5,8 @@ metadata:
   name: authentik-config
   namespace: flux-system
 spec:
+  # Suspended ahead of tf-controller removal
+  suspend: true
   interval: 1h
   path: ./infrastructure/base/terraform-configs/authentik
   sourceRef:
