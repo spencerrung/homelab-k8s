@@ -27,16 +27,19 @@ vexec() {
   kubectl exec -n "$NS" "$POD" -- env VAULT_TOKEN="${VAULT_ROOT_TOKEN:-}" vault "$@"
 }
 
+# vault status exits 2 while sealed/uninitialized, so exit codes can't
+# distinguish "sealed" from "not responding" - go by the JSON output instead
+get_status() {
+  kubectl exec -n "$NS" "$POD" -- vault status -format=json 2>/dev/null || true
+}
+
 echo "==> waiting for $POD"
 kubectl wait -n "$NS" pod/"$POD" --for=condition=PodScheduled --timeout=300s >/dev/null
-until kubectl exec -n "$NS" "$POD" -- vault status -format=json >/dev/null 2>&1; do
-  # vault status exits non-zero while sealed/uninitialized but still answers;
-  # only retry if the container itself isn't responding yet
-  kubectl exec -n "$NS" "$POD" -- vault status >/dev/null 2>&1 && break
+until get_status | grep -q '"initialized"'; do
   sleep 3
 done
 
-INITIALIZED=$(kubectl exec -n "$NS" "$POD" -- vault status -format=json 2>/dev/null | grep -o '"initialized": *[a-z]*' | grep -o '[a-z]*$' || echo false)
+INITIALIZED=$(get_status | grep -o '"initialized": *[a-z]*' | grep -o '[a-z]*$')
 
 if [ "$INITIALIZED" != "true" ]; then
   echo "==> initializing (1 share / threshold 1)"
@@ -52,7 +55,7 @@ if [ "$INITIALIZED" != "true" ]; then
   echo
 fi
 
-SEALED=$(kubectl exec -n "$NS" "$POD" -- vault status -format=json 2>/dev/null | grep -o '"sealed": *[a-z]*' | grep -o '[a-z]*$' || echo true)
+SEALED=$(get_status | grep -o '"sealed": *[a-z]*' | grep -o '[a-z]*$')
 if [ "$SEALED" = "true" ]; then
   [ -n "${VAULT_UNSEAL_KEY:-}" ] || { echo "ERROR: sealed and no VAULT_UNSEAL_KEY set"; exit 1; }
   echo "==> unsealing"
