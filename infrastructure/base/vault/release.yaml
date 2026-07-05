@@ -19,13 +19,40 @@ spec:
     server:
       image:
         repository: hashicorp/vault
-        tag: "1.15.6"
+        tag: "2.0.3"
 
-      # Simple dev mode - auto-init, auto-unseal
       dev:
-        enabled: true
-        devRootToken: "root"
+        enabled: false
 
-      # Disable injector to keep it simple
+      standalone:
+        enabled: false
+
+      # Production mode: single-node raft on a PVC. Raft (vs file storage)
+      # gives us `vault operator raft snapshot` for backups. Manual unseal
+      # after any pod restart:
+      #   VAULT_UNSEAL_KEY=... bootstrap/vault-init.sh
+      ha:
+        enabled: true
+        replicas: 1
+        raft:
+          enabled: true
+          setNodeId: true
+
+      # local-path storage is node-local, so the pod must always land on
+      # the node that holds the PVC data
+      nodeSelector:
+        kubernetes.io/hostname: pi-03
+
+      dataStorage:
+        enabled: true
+        size: 5Gi
+
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          memory: 512Mi
+
     injector:
       enabled: false
