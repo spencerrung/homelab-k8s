@@ -1,0 +1,43 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    'config:recommended',
+  ],
+  // Batch PRs into a weekly window instead of trickling all week
+  schedule: ['before 6am on saturday'],
+  // Flux manager: HelmRelease chart versions + HelmRepository sources
+  flux: {
+    managerFilePatterns: ['/(^|/)(clusters|infrastructure|apps)/.+\\.ya?ml$/'],
+  },
+  // Kubernetes manager: container image tags in raw manifests
+  kubernetes: {
+    managerFilePatterns: ['/(^|/)(infrastructure|apps)/.+\\.ya?ml$/'],
+  },
+  packageRules: [
+    {
+      // First-party images are managed by Flux image automation, not Renovate
+      matchPackageNames: [
+        'docker.io/spencerrung/**',
+        'spencerrung/**',
+      ],
+      enabled: false,
+    },
+    {
+      // Low-risk updates land as one weekly PR
+      matchUpdateTypes: ['patch'],
+      groupName: 'patch updates',
+    },
+    {
+      matchUpdateTypes: ['major'],
+      labels: ['major'],
+      // Majors on the core platform deserve a deliberate upgrade, not a merge button
+      dependencyDashboardApproval: true,
+    },
+    {
+      // Postgres majors require a data migration; never auto-propose
+      matchPackageNames: ['postgres', 'docker.io/library/postgres'],
+      matchUpdateTypes: ['major'],
+      enabled: false,
+    },
+  ],
+}
