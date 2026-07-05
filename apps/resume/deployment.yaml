@@ -1,4 +1,3 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,7 +15,7 @@ spec:
     spec:
       containers:
         - name: resume
-          image: docker.io/spencerrung/resume:latest # {"$imagepolicy": "flux-system:resume"}
+          image: docker.io/spencerrung/resume:20260705233847-682951d # {"$imagepolicy": "flux-system:resume"}
           ports:
             - containerPort: 80
               name: http
