@@ -11,22 +11,7 @@ spec:
   imageRepositoryRef:
     name: alucard-web
   filterTags:
-    pattern: '^(?P<ts>\d{14})-[a-f0-9]{7}$'
-    extract: '$ts'
-  policy:
-    numerical:
-      order: asc
----
-apiVersion: image.toolkit.fluxcd.io/v1beta2
-kind: ImagePolicy
-metadata:
-  name: simple-cookbook
-  namespace: flux-system
-spec:
-  imageRepositoryRef:
-    name: simple-cookbook
-  filterTags:
-    pattern: '^(?P<ts>\d{14})-[a-f0-9]{7}$'
+    pattern: '^(?P<ts>\d{14})-[a-f0-9]+$'
     extract: '$ts'
   policy:
     numerical:
@@ -41,7 +26,7 @@ spec:
   imageRepositoryRef:
     name: nova
   filterTags:
-    pattern: '^(?P<ts>\d{14})-[a-f0-9]{7}$'
+    pattern: '^(?P<ts>\d{14})-[a-f0-9]+$'
     extract: '$ts'
   policy:
     numerical:
@@ -56,7 +41,7 @@ spec:
   imageRepositoryRef:
     name: finale
   filterTags:
-    pattern: '^(?P<ts>\d{14})-[a-f0-9]{7}$'
+    pattern: '^(?P<ts>\d{14})-[a-f0-9]+$'
     extract: '$ts'
   policy:
     numerical:
@@ -71,7 +56,22 @@ spec:
   imageRepositoryRef:
     name: breathe
   filterTags:
-    pattern: '^(?P<ts>\d{14})-[a-f0-9]{7}$'
+    pattern: '^(?P<ts>\d{14})-[a-f0-9]+$'
+    extract: '$ts'
+  policy:
+    numerical:
+      order: asc
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: resume
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: resume
+  filterTags:
+    pattern: '^(?P<ts>\d{14})-[a-f0-9]+$'
     extract: '$ts'
   policy:
     numerical:

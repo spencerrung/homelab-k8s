@@ -11,15 +11,6 @@ spec:
 apiVersion: image.toolkit.fluxcd.io/v1beta2
 kind: ImageRepository
 metadata:
-  name: simple-cookbook
-  namespace: flux-system
-spec:
-  image: docker.io/spencerrung/simple-cookbook
-  interval: 15m
----
-apiVersion: image.toolkit.fluxcd.io/v1beta2
-kind: ImageRepository
-metadata:
   name: nova
   namespace: flux-system
 spec:
@@ -42,4 +33,13 @@ metadata:
   namespace: flux-system
 spec:
   image: docker.io/spencerrung/breathe
+  interval: 15m
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: resume
+  namespace: flux-system
+spec:
+  image: docker.io/spencerrung/resume
   interval: 15m
