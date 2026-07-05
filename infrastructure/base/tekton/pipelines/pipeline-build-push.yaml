@@ -6,7 +6,8 @@ metadata:
   namespace: tekton-pipelines
 spec:
   description: >-
-    Clone a repository, build a container image, and push to Gitea registry
+    Clone a repository, build a container image, and push to Docker Hub
+    with a sortable tag for Flux image automation
   params:
     - name: repo-url
       type: string
@@ -15,12 +16,9 @@ spec:
       type: string
       description: The git revision to check out
       default: "main"
-    - name: image-reference
-      type: string
-      description: The image reference to build and push (e.g., code.alucard.dev/user/repo:tag)
     - name: image-base
       type: string
-      description: The base image reference without tag (e.g., code.alucard.dev/user/repo)
+      description: The base image reference without tag (e.g., docker.io/user/repo)
     - name: dockerfile
       type: string
       description: Path to the Dockerfile
@@ -47,8 +45,16 @@ spec:
         - name: revision
           value: $(params.revision)
 
-    - name: build-push
+    - name: generate-tag
       runAfter: ["fetch-source"]
+      taskRef:
+        name: generate-tag
+      params:
+        - name: REVISION
+          value: $(params.revision)
+
+    - name: build-push
+      runAfter: ["generate-tag"]
       taskRef:
         name: kaniko
       workspaces:
@@ -58,12 +64,10 @@ spec:
           workspace: docker-credentials
       params:
         - name: IMAGE
-          value: $(params.image-reference)
+          value: $(params.image-base):$(tasks.generate-tag.results.tag)
         - name: IMAGE_BASE
           value: $(params.image-base)
         - name: DOCKERFILE
           value: $(params.dockerfile)
         - name: CONTEXT
           value: $(params.context)
-        - name: TLSVERIFY
-          value: "false"  # Set to true in production with proper certs

@@ -6,3 +6,4 @@ resources:
   - ../../base/cert-manager-issuers
   - ../../base/flux-alerts
   - ../../base/kyverno-policies
+  - ../../base/image-automation

@@ -43,7 +43,6 @@ spec:
         - --dockerfile=$(params.DOCKERFILE)
         - --context=$(workspaces.source.path)/$(params.CONTEXT)
         - --destination=$(params.IMAGE)
+        # human-friendly alias; Flux image automation ignores it
         - --destination=$(params.IMAGE_BASE):latest
-        - --insecure
-        - --insecure-pull
         - --cache=false

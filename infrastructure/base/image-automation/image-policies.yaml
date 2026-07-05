@@ -1,0 +1,78 @@
+---
+# Policy names must match the {"$imagepolicy": "flux-system:<name>"}
+# markers in the app deployments. Tags are <UTC ts>-<short sha> from the
+# Tekton generate-tag task; newest timestamp wins.
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: alucard-web
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: alucard-web
+  filterTags:
+    pattern: '^(?P<ts>\d{14})-[a-f0-9]{7}$'
+    extract: '$ts'
+  policy:
+    numerical:
+      order: asc
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: simple-cookbook
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: simple-cookbook
+  filterTags:
+    pattern: '^(?P<ts>\d{14})-[a-f0-9]{7}$'
+    extract: '$ts'
+  policy:
+    numerical:
+      order: asc
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: nova
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: nova
+  filterTags:
+    pattern: '^(?P<ts>\d{14})-[a-f0-9]{7}$'
+    extract: '$ts'
+  policy:
+    numerical:
+      order: asc
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: finale
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: finale
+  filterTags:
+    pattern: '^(?P<ts>\d{14})-[a-f0-9]{7}$'
+    extract: '$ts'
+  policy:
+    numerical:
+      order: asc
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: breathe
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: breathe
+  filterTags:
+    pattern: '^(?P<ts>\d{14})-[a-f0-9]{7}$'
+    extract: '$ts'
+  policy:
+    numerical:
+      order: asc

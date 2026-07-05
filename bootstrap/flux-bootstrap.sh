@@ -70,12 +70,14 @@ fi
 echo ""
 echo -e "${GREEN}Bootstrapping Flux...${NC}"
 
+# --read-write-key: image automation pushes tag-bump commits to main
 flux bootstrap github \
   --owner="$GITHUB_USER" \
   --repository="$GITHUB_REPO" \
   --branch="$BRANCH" \
   --path="clusters/$CLUSTER_NAME" \
   --personal \
+  --read-write-key \
   --components-extra=image-reflector-controller,image-automation-controller
 
 echo ""
@@ -92,5 +94,4 @@ echo "  1. Watch Flux reconciliation: flux get kustomizations --watch"
 echo "  2. Check deployed resources: kubectl get kustomizations -A"
 echo "  3. View logs: flux logs --follow --all-namespaces"
 echo ""
-echo "The example podinfo app should be deployed shortly."
-echo "Check status with: kubectl get hr -n podinfo"
+echo "See docs/runbooks/bootstrap.md for the rest of the bring-up."

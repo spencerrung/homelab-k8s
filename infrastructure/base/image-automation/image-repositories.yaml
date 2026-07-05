@@ -1,0 +1,45 @@
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: alucard-web
+  namespace: flux-system
+spec:
+  image: docker.io/spencerrung/alucard-web
+  interval: 15m
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: simple-cookbook
+  namespace: flux-system
+spec:
+  image: docker.io/spencerrung/simple-cookbook
+  interval: 15m
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: nova
+  namespace: flux-system
+spec:
+  image: docker.io/spencerrung/nova
+  interval: 15m
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: finale
+  namespace: flux-system
+spec:
+  image: docker.io/spencerrung/finale
+  interval: 15m
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: breathe
+  namespace: flux-system
+spec:
+  image: docker.io/spencerrung/breathe
+  interval: 15m

@@ -1,0 +1,28 @@
+---
+# Produces a sortable image tag <UTC timestamp>-<short sha> so Flux image
+# automation can order releases numerically (git SHAs don't sort).
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: generate-tag
+  namespace: tekton-pipelines
+spec:
+  params:
+    - name: REVISION
+      description: Git revision (commit SHA) being built
+  results:
+    - name: tag
+      description: Sortable image tag
+  steps:
+    - name: generate
+      image: docker.io/library/busybox:1.36
+      script: |
+        #!/bin/sh
+        printf '%s-%s' "$(date -u +%Y%m%d%H%M%S)" "$(printf '%s' "$(params.REVISION)" | cut -c1-7)" \
+          | tee $(results.tag.path)
+      computeResources:
+        requests:
+          cpu: 10m
+          memory: 16Mi
+        limits:
+          memory: 32Mi

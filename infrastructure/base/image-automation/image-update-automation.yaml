@@ -1,0 +1,29 @@
+---
+# Commits tag bumps straight to main (homelab - no PR ceremony).
+# Requires the Flux deploy key to be read-write:
+#   flux bootstrap ... --read-write-key   (see bootstrap/flux-bootstrap.sh)
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageUpdateAutomation
+metadata:
+  name: apps
+  namespace: flux-system
+spec:
+  interval: 10m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  git:
+    checkout:
+      ref:
+        branch: main
+    commit:
+      author:
+        name: fluxcdbot
+        email: fluxcdbot@users.noreply.github.com
+      messageTemplate: |
+        chore(images): {{ range .Changed.Changes }}{{ .OldValue }} -> {{ .NewValue }} {{ end }}
+    push:
+      branch: main
+  update:
+    path: ./apps
+    strategy: Setters
