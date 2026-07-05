@@ -1,4 +1,34 @@
 ---
+# Bridges Alertmanager webhooks into the Homelab Alerts Matrix room.
+# Alertmanager posts to /alerts/homelab; room-mapping resolves the room ID.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: matrix-alertmanager-receiver-config
+  namespace: monitoring
+data:
+  config.yaml: |
+    http:
+      address: 0.0.0.0
+      port: 8080
+    matrix:
+      homeserver-url: http://synapse.matrix.svc.cluster.local:8008
+      user-id: ${MATRIX_USER_ID}
+      access-token: ${MATRIX_ACCESS_TOKEN}
+      room-mapping:
+        homelab: ${MATRIX_ROOM_ID}
+    templating:
+      firing-template: >-
+        <p>🔥 <strong>{{ .Alert.Status | ToUpper }}</strong>
+        {{ index .Alert.Labels "alertname" }}
+        {{- with index .Alert.Labels "namespace" }} ({{ . }}){{ end }}<br>
+        {{ with index .Alert.Annotations "summary" }}{{ . }}{{ end }}
+        {{ with index .Alert.Annotations "description" }}{{ . }}{{ end }}</p>
+      resolved-template: >-
+        <p>✅ <strong>RESOLVED</strong>
+        {{ index .Alert.Labels "alertname" }}
+        {{- with index .Alert.Labels "namespace" }} ({{ . }}){{ end }}</p>
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -19,6 +49,9 @@ spec:
           image: docker.io/metio/matrix-alertmanager-receiver:2026.6.24
           args:
             - --config-path=/config/config.yaml
+          envFrom:
+            - secretRef:
+                name: matrix-alertmanager-receiver-secrets
           ports:
             - containerPort: 8080
               name: http
@@ -34,8 +67,8 @@ spec:
               readOnly: true
       volumes:
         - name: config
-          secret:
-            secretName: matrix-alertmanager-receiver-config
+          configMap:
+            name: matrix-alertmanager-receiver-config
 ---
 apiVersion: v1
 kind: Service
