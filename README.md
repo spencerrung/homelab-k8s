@@ -1,147 +1,47 @@
 # Homelab K8s GitOps
 
-GitOps repository for managing Kubernetes applications on the homelab k3s cluster using Flux.
+Flux GitOps repo for a 9-node Raspberry Pi 4B k3s cluster (`alucard.dev`).
+A separate ansible repo installs the OS and k3s; everything after that is
+declared here and reconciled by Flux.
 
-## Overview
-
-This repository uses [Flux](https://fluxcd.io/) to manage application deployments on a Raspberry Pi k3s cluster. All cluster state is defined declaratively in Git, and Flux automatically reconciles the cluster to match.
-
-**Key Components:**
-- **Flux**: GitOps continuous delivery
-- **Terraform Controller**: GitOps for Terraform (infrastructure as code)
-- **Vault**: Secret management
-- **External Secrets Operator**: Syncs secrets from Vault to Kubernetes
-
-## Repository Structure
+## Layout
 
 ```
-.
-├── clusters/
-│   └── homelab/              # Main k3s cluster configuration
-│       └── flux-system/      # Flux system components (auto-generated)
-├── infrastructure/           # Core infrastructure components
-│   ├── base/                 # Base infrastructure manifests
-│   └── overlays/
-│       └── homelab/          # Homelab-specific infrastructure config
-├── apps/                     # Application deployments
-│   ├── base/                 # Base application manifests
-│   └── overlays/
-│       └── homelab/          # Homelab-specific app config
-└── bootstrap/                # Bootstrap scripts and helpers
+clusters/homelab/     Flux Kustomizations (the dependency tiers)
+infrastructure/
+  base/<component>/   one directory per component (HelmRelease or manifests)
+  controllers/        tier: cert-manager, traefik, ESO, vault, velero
+  configs/            tier: cluster issuers, flux-alerts
+  platform/           tier: authentik, gitea, tekton
+apps/
+  <name>/             one directory per app (raw manifests)
+  web/ stateful/      tier membership lists
+bootstrap/            flux bootstrap + vault init scripts
+docs/                 architecture, runbooks, decisions
 ```
 
-## Prerequisites
+## Docs
 
-- Running k3s cluster (bootstrapped via ansible)
-- `flux` CLI installed: `curl -s https://fluxcd.io/install.sh | sudo bash`
-- `kubectl` configured to access your cluster
-- GitHub personal access token with repo permissions
+- [Architecture](docs/architecture.md) — diagrams: traffic, Flux tier
+  graph, secrets flow
+- Runbooks: [bootstrap](docs/runbooks/bootstrap.md) ·
+  [disaster recovery](docs/runbooks/disaster-recovery.md) ·
+  [add an app](docs/runbooks/add-an-app.md) ·
+  [monitoring](docs/runbooks/monitoring.md)
+- [Decision records](docs/decisions/)
+- [ARM64 notes](docs/arm64-notes.md)
 
-## Initial Setup
-
-1. **Bootstrap Flux on your cluster:**
-
-   ```bash
-   ./bootstrap/flux-bootstrap.sh
-   ```
-
-2. **Initialize Vault and Terraform:**
-
-   ```bash
-   ./bootstrap/init-vault-terraform.sh
-   ```
-
-   This will initialize Vault and set up Terraform to automatically configure it.
-
-3. **Verify everything is running:**
-
-   ```bash
-   flux check
-   flux get kustomizations --watch
-   kubectl get terraform -n flux-system
-   ```
-
-## Adding Infrastructure Components
-
-Infrastructure components (ingress controllers, cert-manager, storage, etc.) go in the `infrastructure/` directory:
-
-1. Add base manifests or Helm releases to `infrastructure/base/`
-2. Add environment-specific overlays to `infrastructure/overlays/homelab/`
-3. Reference in `clusters/homelab/infrastructure.yaml`
-4. Commit and push - Flux will automatically deploy
-
-## Adding Applications
-
-Applications go in the `apps/` directory:
-
-1. Add base manifests or Helm releases to `apps/base/`
-2. Add environment-specific overlays to `apps/overlays/homelab/`
-3. Reference in `clusters/homelab/apps.yaml`
-4. Commit and push - Flux will automatically deploy
-
-## Common Commands
+## Day-to-day
 
 ```bash
-# Check Flux status
-flux check
-
-# View all Flux resources
-flux get all
-
-# View Kustomizations
-flux get kustomizations
-
-# View Helm releases
-flux get helmreleases
-
-# Suspend reconciliation (for maintenance)
-flux suspend kustomization apps
-
-# Resume reconciliation
-flux resume kustomization apps
-
-# Force immediate reconciliation
-flux reconcile kustomization apps --with-source
-
-# View logs
+flux get kustomizations              # tier status
+flux reconcile kustomization <tier> --with-source
 flux logs --follow --all-namespaces
+kubectl get externalsecrets -A      # secret sync status
 ```
 
-## Troubleshooting
+Reconciliation failures and Prometheus alerts land in the Matrix
+**Homelab Alerts** room. Grafana: `grafana.alucard.dev`.
 
-- **Check Flux reconciliation status:** `flux get kustomizations`
-- **View events:** `kubectl get events -n flux-system --sort-by='.lastTimestamp'`
-- **Check specific resource:** `flux get helmrelease <name> -n <namespace>`
-- **View logs:** `flux logs --kind=HelmRelease --name=<name> -n <namespace>`
-
-## Directory Conventions
-
-- **base/**: Shared base configurations using Kustomize or raw manifests
-- **overlays/**: Environment-specific customizations
-- **Namespaces**: Each app/component creates its own namespace
-- **Helm**: Use `HelmRepository` and `HelmRelease` CRDs for Helm charts
-
-## Infrastructure Components
-
-### Terraform Controller
-Manages infrastructure as code using Terraform, running in-cluster via Flux. See [infrastructure/base/tf-controller/README.md](infrastructure/base/tf-controller/README.md)
-
-### Vault
-HashiCorp Vault for centralized secret management. Configured automatically via Terraform. See [infrastructure/base/vault/README.md](infrastructure/base/vault/README.md)
-
-### External Secrets Operator
-Syncs secrets from Vault into Kubernetes Secrets. See [infrastructure/base/external-secrets/README.md](infrastructure/base/external-secrets/README.md)
-
-## Security Notes
-
-- Secrets managed via Vault and External Secrets Operator
-- Vault tokens stored as Kubernetes secrets (gitignored)
-- Never commit plain-text credentials
-- Terraform automatically configures Vault security policies
-- Use read-only deploy keys where possible
-
-## Links
-
-- [Flux Documentation](https://fluxcd.io/docs/)
-- [Flux GitHub](https://github.com/fluxcd/flux2)
-- [Awesome Flux](https://github.com/fluxcd/awesome-flux)
+**If the vault pod restarted**, Vault is sealed (ESO alerts will fire):
+`VAULT_UNSEAL_KEY=... ./bootstrap/vault-init.sh`
