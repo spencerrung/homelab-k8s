@@ -13,4 +13,3 @@ resources:
   - users-groups-blueprint.yaml
   - username-scope-mapping-blueprint.yaml
   - gitea-oidc-blueprint.yaml
-  # - gitlab-oidc-blueprint.yaml  # Disabled - switching to Gitea

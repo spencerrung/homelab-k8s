@@ -9,4 +9,3 @@ resources:
   - jetstack.yaml
   - traefik.yaml
   - gitea.yaml
-  # - gitlab.yaml  # Disabled - switching to Gitea

@@ -1,50 +1,74 @@
 ---
-apiVersion: v1
-kind: ConfigMap
+# Gitea OIDC provider blueprint, rendered from Vault so the client_secret
+# stays out of git. Authentik discovers blueprints from Secrets carrying the
+# instantiate label the same way it does ConfigMaps. Gitea reads the same
+# Vault key (gitea-oidc) for its side of the OIDC config, so rotating the
+# secret in Vault updates both ends.
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
 metadata:
   name: gitea-oidc-blueprint
   namespace: authentik
-  labels:
-    blueprints.goauthentik.io/instantiate: "true"
-data:
-  gitea-oidc.yaml: |
-    version: 1
-    metadata:
-      name: Gitea OIDC Provider
-    entries:
-      # Create OAuth2 Provider for Gitea
-      - model: authentik_providers_oauth2.oauth2provider
-        identifiers:
-          name: Gitea
-        attrs:
-          name: Gitea
-          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
-          client_type: confidential
-          client_id: gitea
-          client_secret: xo7wP8vqQyrERhCV33pIURhNoqCPSpHL6568j3oHqOc=
-          sub_mode: hashed_user_id
-          issuer_mode: per_provider
-          redirect_uris: |
-            https://code.alucard.dev/user/oauth2/Authentik/callback
-          signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
-          property_mappings:
-            - !Find [authentik_providers_oauth2.scopemapping, [managed, "goauthentik.io/providers/oauth2/scope-openid"]]
-            - !Find [authentik_providers_oauth2.scopemapping, [managed, "goauthentik.io/providers/oauth2/scope-email"]]
-            - !Find [authentik_providers_oauth2.scopemapping, [managed, "goauthentik.io/providers/oauth2/scope-profile"]]
-            - !Find [authentik_providers_oauth2.scopemapping, [managed, "goauthentik.io/providers/oauth2/scope-groups"]]
-            - !Find [authentik_providers_oauth2.scopepropertymapping, [name, "username-property-mapping"]]
-          access_code_validity: minutes=1
-          access_token_validity: minutes=10
-          refresh_token_validity: days=30
-          include_claims_in_id_token: true
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: vault-backend
+    kind: SecretStore
+  target:
+    name: gitea-oidc-blueprint
+    creationPolicy: Owner
+    template:
+      metadata:
+        labels:
+          blueprints.goauthentik.io/instantiate: "true"
+      data:
+        gitea-oidc.yaml: |
+          version: 1
+          metadata:
+            name: Gitea OIDC Provider
+          entries:
+            # Create OAuth2 Provider for Gitea
+            - model: authentik_providers_oauth2.oauth2provider
+              identifiers:
+                name: Gitea
+              attrs:
+                name: Gitea
+                authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+                client_type: confidential
+                client_id: {{ .client_id }}
+                client_secret: {{ .client_secret }}
+                sub_mode: hashed_user_id
+                issuer_mode: per_provider
+                redirect_uris: |
+                  https://code.alucard.dev/user/oauth2/Authentik/callback
+                signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
+                property_mappings:
+                  - !Find [authentik_providers_oauth2.scopemapping, [managed, "goauthentik.io/providers/oauth2/scope-openid"]]
+                  - !Find [authentik_providers_oauth2.scopemapping, [managed, "goauthentik.io/providers/oauth2/scope-email"]]
+                  - !Find [authentik_providers_oauth2.scopemapping, [managed, "goauthentik.io/providers/oauth2/scope-profile"]]
+                  - !Find [authentik_providers_oauth2.scopemapping, [managed, "goauthentik.io/providers/oauth2/scope-groups"]]
+                  - !Find [authentik_providers_oauth2.scopepropertymapping, [name, "username-property-mapping"]]
+                access_code_validity: minutes=1
+                access_token_validity: minutes=10
+                refresh_token_validity: days=30
+                include_claims_in_id_token: true
 
-      # Create Application for Gitea
-      - model: authentik_core.application
-        identifiers:
-          slug: gitea
-        attrs:
-          name: Gitea
-          provider: !Find [authentik_providers_oauth2.oauth2provider, [name, Gitea]]
-          meta_launch_url: https://code.alucard.dev
-          meta_description: Gitea - Lightweight Git hosting with a cup of tea
-          open_in_new_tab: true
+            # Create Application for Gitea
+            - model: authentik_core.application
+              identifiers:
+                slug: gitea
+              attrs:
+                name: Gitea
+                provider: !Find [authentik_providers_oauth2.oauth2provider, [name, Gitea]]
+                meta_launch_url: https://code.alucard.dev
+                meta_description: Gitea - Lightweight Git hosting with a cup of tea
+                open_in_new_tab: true
+  data:
+    - secretKey: client_id
+      remoteRef:
+        key: gitea-oidc
+        property: client-id
+    - secretKey: client_secret
+      remoteRef:
+        key: gitea-oidc
+        property: client-secret
