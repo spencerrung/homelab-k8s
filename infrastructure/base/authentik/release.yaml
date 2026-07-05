@@ -89,8 +89,8 @@ spec:
       # Mount custom blueprints
       volumes:
         - name: gitea-oidc-blueprint
-          configMap:
-            name: gitea-oidc-blueprint
+          secret:
+            secretName: gitea-oidc-blueprint
         - name: users-groups-blueprint
           configMap:
             name: users-groups-blueprint
@@ -133,8 +133,8 @@ spec:
       # Mount custom blueprints
       volumes:
         - name: gitea-oidc-blueprint
-          configMap:
-            name: gitea-oidc-blueprint
+          secret:
+            secretName: gitea-oidc-blueprint
         - name: users-groups-blueprint
           configMap:
             name: users-groups-blueprint
