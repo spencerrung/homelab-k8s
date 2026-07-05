@@ -1,0 +1,50 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: matrix-alertmanager-receiver
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: matrix-alertmanager-receiver
+  template:
+    metadata:
+      labels:
+        app: matrix-alertmanager-receiver
+    spec:
+      containers:
+        - name: receiver
+          image: docker.io/metio/matrix-alertmanager-receiver:2026.6.24
+          args:
+            - --config-path=/config/config.yaml
+          ports:
+            - containerPort: 8080
+              name: http
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 48Mi
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+      volumes:
+        - name: config
+          secret:
+            secretName: matrix-alertmanager-receiver-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: matrix-alertmanager-receiver
+  namespace: monitoring
+spec:
+  selector:
+    app: matrix-alertmanager-receiver
+  ports:
+    - port: 8080
+      targetPort: http

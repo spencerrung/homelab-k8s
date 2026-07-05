@@ -9,3 +9,6 @@ resources:
   - traefik.yaml
   - gitea.yaml
   - vmware-tanzu.yaml
+  - prometheus-community.yaml
+  - grafana-community.yaml
+  - grafana.yaml

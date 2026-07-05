@@ -1,0 +1,140 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kube-prometheus-stack
+  namespace: monitoring
+spec:
+  interval: 30m
+  timeout: 15m
+  chart:
+    spec:
+      chart: kube-prometheus-stack
+      version: '87.10.1'
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community
+        namespace: flux-system
+      interval: 12h
+  values:
+    # k3s runs the whole control plane in one process: the separate
+    # scheduler/controller-manager/kube-proxy metric ports don't exist as
+    # scrapable endpoints (their metrics are folded into the apiserver's),
+    # and single-server k3s uses sqlite, not etcd. Leaving these enabled
+    # means permanently-red targets and alerts.
+    kubeScheduler:
+      enabled: false
+    kubeControllerManager:
+      enabled: false
+    kubeProxy:
+      enabled: false
+    kubeEtcd:
+      enabled: false
+    defaultRules:
+      rules:
+        etcd: false
+        kubeScheduler: false
+        kubeControllerManager: false
+        kubeProxy: false
+
+    prometheus:
+      prometheusSpec:
+        retention: 7d
+        retentionSize: 8GB
+        # Without these the operator only picks up monitors deployed by
+        # this chart itself - flux/traefik/cert-manager monitors would be
+        # silently ignored
+        serviceMonitorSelectorNilUsesHelmValues: false
+        podMonitorSelectorNilUsesHelmValues: false
+        ruleSelectorNilUsesHelmValues: false
+        probeSelectorNilUsesHelmValues: false
+        # local-path PVC is node-local; pin so pod and data stay together
+        nodeSelector:
+          kubernetes.io/hostname: pi-05
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 15Gi
+        resources:
+          requests:
+            cpu: 200m
+            memory: 768Mi
+          limits:
+            memory: 1536Mi
+
+    alertmanager:
+      alertmanagerSpec:
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+          limits:
+            memory: 96Mi
+      config:
+        route:
+          receiver: matrix
+          group_by:
+            - alertname
+            - namespace
+          group_wait: 30s
+          group_interval: 5m
+          repeat_interval: 4h
+          routes:
+            - receiver: 'null'
+              matchers:
+                - alertname = "Watchdog"
+        receivers:
+          - name: 'null'
+          - name: matrix
+            webhook_configs:
+              - url: http://matrix-alertmanager-receiver.monitoring.svc:8080/alerts/homelab
+                send_resolved: true
+
+    grafana:
+      admin:
+        existingSecret: grafana-admin
+        userKey: admin-user
+        passwordKey: admin-password
+      sidecar:
+        dashboards:
+          enabled: true
+          searchNamespace: ALL
+      additionalDataSources:
+        - name: Loki
+          type: loki
+          url: http://loki.monitoring.svc.cluster.local:3100
+          access: proxy
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          memory: 256Mi
+
+    prometheusOperator:
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          memory: 128Mi
+
+    kube-state-metrics:
+      resources:
+        requests:
+          cpu: 20m
+          memory: 64Mi
+        limits:
+          memory: 128Mi
+
+    prometheus-node-exporter:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 16Mi
+        limits:
+          memory: 48Mi
