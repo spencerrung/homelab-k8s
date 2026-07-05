@@ -13,10 +13,12 @@ data:
       port: 8080
     matrix:
       homeserver-url: http://synapse.matrix.svc.cluster.local:8008
-      user-id: ${MATRIX_USER_ID}
-      access-token: ${MATRIX_ACCESS_TOKEN}
+      # quoted because env expansion happens before YAML parsing and the
+      # expanded values start with @ / ! which are YAML-illegal unquoted
+      user-id: "${MATRIX_USER_ID}"
+      access-token: "${MATRIX_ACCESS_TOKEN}"
       room-mapping:
-        homelab: ${MATRIX_ROOM_ID}
+        homelab: "${MATRIX_ROOM_ID}"
     templating:
       firing-template: >-
         <p>🔥 <strong>{{ .Alert.Status | ToUpper }}</strong>
