@@ -1,0 +1,94 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: velero
+  namespace: velero
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: velero
+      version: '12.1.0'
+      sourceRef:
+        kind: HelmRepository
+        name: vmware-tanzu
+        namespace: flux-system
+      interval: 12h
+  values:
+    initContainers:
+      - name: velero-plugin-for-aws
+        image: velero/velero-plugin-for-aws:v1.13.1
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+          - mountPath: /target
+            name: plugins
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        memory: 512Mi
+
+    credentials:
+      useSecret: true
+      existingSecret: velero-b2-credentials
+
+    configuration:
+      backupStorageLocation:
+        - name: default
+          provider: aws
+          bucket: alucard-velero
+          config:
+            region: us-west-004
+            s3ForcePathStyle: "true"
+            s3Url: https://s3.us-west-004.backblazeb2.com
+            # B2 rejects the AWS SDK's newer checksum headers; must be empty
+            checksumAlgorithm: ""
+      # No CSI snapshots on local-path; everything goes through the
+      # node-agent (kopia) filesystem backup
+      volumeSnapshotLocation: []
+      defaultVolumesToFsBackup: true
+      features: ""
+
+    snapshotsEnabled: false
+
+    # kopia node-agent DaemonSet - keep requests low for the 2GB nodes;
+    # the big PVCs live on 8GB nodes where the pods run
+    deployNodeAgent: true
+    nodeAgent:
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          memory: 512Mi
+
+    metrics:
+      enabled: false
+
+    schedules:
+      # Everything stateful, nightly at 02:00 (after the 01:30 vault
+      # snapshot), kept 14 days
+      nightly-stateful:
+        disabled: false
+        schedule: "0 2 * * *"
+        template:
+          ttl: 336h
+          includedNamespaces:
+            - matrix
+            - atproto
+            - gitea
+            - authentik
+      # Whole cluster weekly (manifests are in git; belt and braces),
+      # kept 60 days
+      weekly-full:
+        disabled: false
+        schedule: "0 3 * * 0"
+        template:
+          ttl: 1440h
+          excludedNamespaces:
+            - kube-system
+            - flux-system
+            - velero

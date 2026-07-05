@@ -30,6 +30,11 @@ spec:
     metadata:
       labels:
         app: postgresql
+      annotations:
+        # Consistent dump inside the volume before the kopia file copy;
+        # restore prefers this over the raw datadir
+        pre.hook.backup.velero.io/command: '["sh", "-c", "pg_dumpall -U $POSTGRES_USER > /var/lib/postgresql/data/velero-dump.sql"]'
+        pre.hook.backup.velero.io/timeout: 5m
     spec:
       containers:
         - name: postgresql

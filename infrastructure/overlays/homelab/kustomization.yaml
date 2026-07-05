@@ -5,6 +5,7 @@ resources:
   - ../../base/sources
   - ../../base/vault  # Use base vault (dev mode, no auto-unseal)
   - ../../base/external-secrets  # Re-enabled now that Vault is configured!
+  - ../../base/velero  # Backups to Backblaze B2
   - ../../base/cert-manager  # TLS certificate management
   - ../../base/traefik  # In-cluster ingress controller
   - ../../base/authentik  # OIDC identity provider

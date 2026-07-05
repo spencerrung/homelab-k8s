@@ -8,3 +8,4 @@ resources:
   - jetstack.yaml
   - traefik.yaml
   - gitea.yaml
+  - vmware-tanzu.yaml
