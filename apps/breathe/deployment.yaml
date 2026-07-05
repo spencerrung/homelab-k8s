@@ -1,4 +1,3 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,7 +15,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: docker.io/spencerrung/breathe:latest # {"$imagepolicy": "flux-system:breathe"}
+          image: docker.io/spencerrung/breathe:20260705233856-158b2ae # {"$imagepolicy": "flux-system:breathe"}
           ports:
             - containerPort: 80
               name: http
