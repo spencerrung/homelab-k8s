@@ -8,3 +8,4 @@ resources:
   - ../../base/external-secrets
   - ../../base/vault
   - ../../base/velero
+  - ../../base/kyverno

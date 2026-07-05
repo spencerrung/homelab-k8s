@@ -12,3 +12,4 @@ resources:
   - prometheus-community.yaml
   - grafana-community.yaml
   - grafana.yaml
+  - kyverno.yaml

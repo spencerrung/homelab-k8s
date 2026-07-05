@@ -6,6 +6,7 @@ resources:
   - namespace.yaml
   - externalsecrets.yaml
   - postgresql.yaml
+  - networkpolicy.yaml
   - release.yaml
   - ingress.yaml
   - users-groups-blueprint.yaml

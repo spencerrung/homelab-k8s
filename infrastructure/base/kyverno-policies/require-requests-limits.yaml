@@ -1,0 +1,34 @@
+---
+# Audit for now; flip validationFailureAction to Enforce once the report
+# is clean for a couple of weeks.
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-requests-limits
+spec:
+  validationFailureAction: Audit
+  background: false
+  rules:
+    - name: requests-and-memory-limits
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - tekton-pipelines
+      validate:
+        message: "CPU/memory requests and a memory limit are required."
+        pattern:
+          spec:
+            containers:
+              - resources:
+                  requests:
+                    memory: "?*"
+                    cpu: "?*"
+                  limits:
+                    memory: "?*"

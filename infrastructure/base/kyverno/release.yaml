@@ -1,0 +1,48 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kyverno
+  namespace: kyverno
+spec:
+  interval: 30m
+  timeout: 10m
+  chart:
+    spec:
+      chart: kyverno
+      version: '3.8.1'
+      sourceRef:
+        kind: HelmRepository
+        name: kyverno
+        namespace: flux-system
+      interval: 12h
+  values:
+    # Admission-only footprint for the Pi fleet: policies run in Audit
+    # mode, results come from admission events. The background, cleanup
+    # and reports controllers can be enabled later if report tooling is
+    # wanted - they roughly triple the pod count.
+    admissionController:
+      replicas: 1
+      nodeSelector:
+        kubernetes.io/hostname: pi-02
+      container:
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            memory: 384Mi
+    backgroundController:
+      enabled: false
+    cleanupController:
+      enabled: false
+    reportsController:
+      enabled: false
+    # Never block kube-system or flux itself even if a policy misbehaves
+    config:
+      resourceFilters:
+        - '[Event,*,*]'
+        - '[*/*,kube-system,*]'
+        - '[*/*,kube-public,*]'
+        - '[*/*,kube-node-lease,*]'
+        - '[*/*,flux-system,*]'

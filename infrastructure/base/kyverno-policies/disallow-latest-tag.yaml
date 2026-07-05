@@ -1,0 +1,48 @@
+---
+# Escape hatch: label a namespace policy.alucard.dev/allow-latest: "true".
+# The five Tekton-built static sites currently trip this - expected until
+# Flux image automation (Phase 5) moves them to sortable tags.
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disallow-latest-tag
+spec:
+  validationFailureAction: Audit
+  background: false
+  rules:
+    - name: require-image-tag
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      exclude:
+        any:
+          - resources:
+              namespaceSelector:
+                matchLabels:
+                  policy.alucard.dev/allow-latest: "true"
+      validate:
+        message: "Images must carry an explicit tag."
+        pattern:
+          spec:
+            containers:
+              - image: "*:*"
+    - name: disallow-latest
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      exclude:
+        any:
+          - resources:
+              namespaceSelector:
+                matchLabels:
+                  policy.alucard.dev/allow-latest: "true"
+      validate:
+        message: "Pin an explicit tag; :latest is not reproducible."
+        pattern:
+          spec:
+            containers:
+              - image: "!*:latest"

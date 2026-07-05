@@ -1,0 +1,9 @@
+---
+# ClusterPolicy instances - a tier below the kyverno HelmRelease that
+# installs their CRDs.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - require-requests-limits.yaml
+  - require-probes.yaml
+  - disallow-latest-tag.yaml

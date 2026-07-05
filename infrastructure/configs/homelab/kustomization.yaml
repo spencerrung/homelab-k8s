@@ -5,3 +5,4 @@ kind: Kustomization
 resources:
   - ../../base/cert-manager-issuers
   - ../../base/flux-alerts
+  - ../../base/kyverno-policies
