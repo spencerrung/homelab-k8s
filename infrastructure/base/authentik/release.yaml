@@ -15,9 +15,6 @@ spec:
         name: authentik
         namespace: flux-system
       interval: 12h
-  dependsOn:
-    - name: tf-controller
-      namespace: flux-system
   values:
     # Global settings
     global:
