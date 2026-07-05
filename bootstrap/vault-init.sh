@@ -19,9 +19,8 @@ POD=vault-0
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 POLICY_DIR="$REPO_ROOT/infrastructure/base/vault/policies"
 
-# Namespaces whose external-secrets-sa may authenticate (tighten to
-# 'external-secrets' once the ClusterSecretStore migration lands).
-ESO_NAMESPACES="external-secrets,atproto,matrix,authentik,gitea,cert-manager,tekton-pipelines"
+# Only the ClusterSecretStore's ServiceAccount may authenticate.
+ESO_NAMESPACES="external-secrets"
 
 vexec() {
   kubectl exec -n "$NS" "$POD" -- env VAULT_TOKEN="${VAULT_ROOT_TOKEN:-}" vault "$@"

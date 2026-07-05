@@ -4,8 +4,6 @@ kind: Kustomization
 resources:
   # Namespace + secret plumbing
   - namespace.yaml
-  - service-account.yaml
-  - vault-store.yaml
   - externalsecrets.yaml
   # Database
   - postgresql.yaml

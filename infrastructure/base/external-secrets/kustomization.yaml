@@ -5,3 +5,4 @@ namespace: external-secrets
 resources:
   - namespace.yaml
   - release.yaml
+  - cluster-secret-store.yaml
