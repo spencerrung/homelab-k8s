@@ -4,7 +4,6 @@ kind: Kustomization
 resources:
   - hashicorp.yaml
   - external-secrets.yaml
-  - tofu-controller.yaml
   - authentik.yaml
   - jetstack.yaml
   - traefik.yaml
