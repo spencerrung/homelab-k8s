@@ -1,0 +1,8 @@
+---
+# Platform tier: identity, git hosting, CI.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base/authentik
+  - ../../base/gitea
+  - ../../base/tekton

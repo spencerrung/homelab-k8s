@@ -5,6 +5,9 @@ metadata:
   name: infrastructure
   namespace: flux-system
 spec:
+  # Suspended: superseded by sources/infra-controllers/infra-configs/
+  # platform-apps, which have adopted its resources. Deleted next commit.
+  suspend: true
   interval: 10m0s
   sourceRef:
     kind: GitRepository

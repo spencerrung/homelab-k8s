@@ -5,6 +5,8 @@ metadata:
   name: cert-manager-issuers
   namespace: flux-system
 spec:
+  # Suspended: superseded by infra-configs. Deleted next commit.
+  suspend: true
   interval: 10m
   retryInterval: 1m
   timeout: 5m

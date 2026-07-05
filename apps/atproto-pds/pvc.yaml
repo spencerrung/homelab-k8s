@@ -5,6 +5,9 @@ kind: PersistentVolumeClaim
 metadata:
   name: pds-data
   namespace: atproto
+  annotations:
+    # Never allow Flux to prune this PVC - data is irreplaceable
+    kustomize.toolkit.fluxcd.io/prune: disabled
 spec:
   accessModes: ["ReadWriteOnce"]
   resources:

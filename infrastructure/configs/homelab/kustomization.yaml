@@ -1,0 +1,7 @@
+---
+# Cluster configuration that needs the controllers tier (CRDs, webhooks).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base/cert-manager-issuers
+  - ../../base/flux-alerts

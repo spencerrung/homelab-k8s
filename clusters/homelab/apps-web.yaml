@@ -2,18 +2,17 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: monitoring
+  name: apps-web
   namespace: flux-system
 spec:
   interval: 10m0s
   retryInterval: 2m0s
   dependsOn:
-    - name: infra-controllers
+    - name: infra-configs
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./infrastructure/base/monitoring
+  path: ./apps/web/homelab
   prune: true
   wait: true
-  # first install pulls a lot of arm64 images
-  timeout: 15m0s
+  timeout: 5m0s

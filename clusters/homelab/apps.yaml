@@ -5,6 +5,8 @@ metadata:
   name: apps
   namespace: flux-system
 spec:
+  # Suspended: superseded by apps-web/apps-stateful. Deleted next commit.
+  suspend: true
   interval: 10m0s
   dependsOn:
     - name: infrastructure
