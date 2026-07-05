@@ -1,0 +1,10 @@
+---
+# Resources that need the prometheus-operator CRDs (installed by the
+# kube-prometheus-stack HelmRelease in ../monitoring). Flux dry-runs every
+# resource in a Kustomization before applying, so CRD instances cannot live
+# in the same Kustomization as the chart that installs their CRDs.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: monitoring
+resources:
+  - flux-podmonitor.yaml

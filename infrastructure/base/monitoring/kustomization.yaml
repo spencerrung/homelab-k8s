@@ -9,5 +9,4 @@ resources:
   - grafana-ingress.yaml
   - loki.yaml
   - alloy.yaml
-  - flux-podmonitor.yaml
   - matrix-alertmanager-receiver.yaml
