@@ -46,6 +46,8 @@ spec:
           cpu: 100m
           memory: 128Mi
 
-    # Enable prometheus metrics (optional)
+    # Prometheus metrics, scraped via ServiceMonitor (Phase 3 monitoring)
     prometheus:
-      enabled: false
+      enabled: true
+      servicemonitor:
+        enabled: true

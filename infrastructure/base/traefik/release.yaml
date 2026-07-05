@@ -80,10 +80,12 @@ spec:
     log:
       level: INFO
 
-    # Enable Prometheus metrics (optional)
+    # Prometheus metrics, scraped via ServiceMonitor (Phase 3 monitoring)
     metrics:
       prometheus:
-        enabled: false
+        enabled: true
+        serviceMonitor:
+          enabled: true
 
     # Additional arguments
     additionalArguments:
