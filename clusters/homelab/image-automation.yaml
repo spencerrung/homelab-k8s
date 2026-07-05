@@ -1,0 +1,21 @@
+---
+# wait: false on purpose - ImagePolicies stay unresolved until the first
+# sortable tag exists on Docker Hub, and that must never block the config
+# tier. The flux-errors Alert covers failures here.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: image-automation
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  retryInterval: 2m0s
+  dependsOn:
+    - name: infra-controllers
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./infrastructure/base/image-automation
+  prune: true
+  wait: false
+  timeout: 3m0s
