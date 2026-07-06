@@ -33,10 +33,12 @@ spec:
         - name: prowlarr
           image: lscr.io/linuxserver/prowlarr:2.4.0
           env:
+            # match the UNAS NFS anon-squash identity so client-side
+            # permission checks pass on /data
             - name: PUID
-              value: "1000"
+              value: "977"
             - name: PGID
-              value: "1000"
+              value: "988"
             - name: TZ
               value: Etc/UTC
             - name: PROWLARR__AUTH__APIKEY
