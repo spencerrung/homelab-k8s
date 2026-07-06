@@ -43,6 +43,13 @@ spec:
           env:
             - name: VPN_SERVICE_PROVIDER
               value: private internet access
+            # Pi 4 (Cortex-A72) has no AES hardware; the default "strong"
+            # preset was CPU-bound at ~280KiB/s. normal = AES-128, and the
+            # MSS clamp avoids fragmentation collapse over the tunnel.
+            - name: PRIVATE_INTERNET_ACCESS_OPENVPN_ENCRYPTION_PRESET
+              value: normal
+            - name: OPENVPN_FLAGS
+              value: --mssfix 1350
             - name: OPENVPN_USER
               valueFrom:
                 secretKeyRef:
