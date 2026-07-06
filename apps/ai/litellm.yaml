@@ -68,9 +68,10 @@ spec:
           resources:
             requests:
               cpu: 100m
-              memory: 256Mi
+              memory: 512Mi
+            # boot (prisma client generation) spikes well past steady-state
             limits:
-              memory: 768Mi
+              memory: 2Gi
           # first boot runs prisma client generation - >5min on a Pi 4
           startupProbe:
             httpGet:
