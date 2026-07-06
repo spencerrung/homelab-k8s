@@ -53,8 +53,11 @@ spec:
                 secretKeyRef:
                   name: media-vpn
                   key: password
+            # PIA offers port forwarding only outside the US; Toronto is
+            # the nearest PF-capable region. To prefer US egress instead,
+            # set a US region and VPN_PORT_FORWARDING=off.
             - name: SERVER_REGIONS
-              value: US Denver
+              value: CA Toronto
             - name: FIREWALL_OUTBOUND_SUBNETS
               value: 10.42.0.0/16,10.43.0.0/16
             - name: FIREWALL_INPUT_PORTS
