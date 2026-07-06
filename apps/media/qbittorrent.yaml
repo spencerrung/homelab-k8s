@@ -48,8 +48,11 @@ spec:
             # MSS clamp avoids fragmentation collapse over the tunnel.
             - name: PRIVATE_INTERNET_ACCESS_OPENVPN_ENCRYPTION_PRESET
               value: normal
+            # CRITICAL: flannel VXLAN pod interfaces are MTU 1450; OpenVPN's
+            # default tun-mtu 1500 fragments every packet (~250KiB/s). 1380
+            # fits inside the overlay and was worth a 6x speedup.
             - name: OPENVPN_FLAGS
-              value: --mssfix 1350
+              value: --tun-mtu 1380 --mssfix 1300
             - name: OPENVPN_USER
               valueFrom:
                 secretKeyRef:
