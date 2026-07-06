@@ -117,6 +117,15 @@ kubectl exec -n media deploy/sonarr -- sh -c \
 Same inode number on both = hardlink, zero copy. Different = check the
 paths all live under the single `/data` mount.
 
+## FlareSolverr (Cloudflare-protected indexers)
+
+Deployed cluster-internal at `http://flaresolverr:8191`. One-time wiring:
+Prowlarr → Settings → Indexers → Add Indexer Proxy → FlareSolverr, host
+`http://flaresolverr:8191`, tag `flaresolverr`. Then add that tag to
+exactly the indexers that need challenge-solving — tagged searches take
+a few extra seconds each (headless Chromium on a Pi), so don't tag
+indexers that work without it.
+
 ## Going further (optional, not yet installed)
 
 - **Recyclarr**: declarative TRaSH-guide quality profiles for
