@@ -1,0 +1,72 @@
+---
+# Cloudflare-challenge solver proxy for Prowlarr indexers. Cluster-internal
+# only - Prowlarr calls it at http://flaresolverr:8191; it needs no
+# ingress, storage, or secrets. Runs headless Chromium, hence the memory.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flaresolverr
+  namespace: media
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flaresolverr
+  template:
+    metadata:
+      labels:
+        app: flaresolverr
+    spec:
+      containers:
+        - name: flaresolverr
+          image: docker.io/flaresolverr/flaresolverr:v3.5.0
+          env:
+            - name: LOG_LEVEL
+              value: info
+            - name: TZ
+              value: Etc/UTC
+          ports:
+            - containerPort: 8191
+              name: http
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 8
+            failureThreshold: 30
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 8
+            failureThreshold: 4
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 8
+      volumes: []
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flaresolverr
+  namespace: media
+spec:
+  selector:
+    app: flaresolverr
+  ports:
+    - port: 8191
+      targetPort: http
+      name: http
