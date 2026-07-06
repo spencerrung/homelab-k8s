@@ -122,9 +122,12 @@ spec:
           resources:
             requests:
               cpu: 100m
-              memory: 256Mi
-            limits:
               memory: 512Mi
+            # qbt 5.x / libtorrent 2 uses mmap I/O; mapped pages count
+            # against the cgroup, so heavy downloads OOM small limits.
+            # Pairs with the in-app "memory_working_set_limit" preference.
+            limits:
+              memory: 2Gi
           startupProbe:
             httpGet:
               path: /
