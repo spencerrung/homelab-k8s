@@ -17,10 +17,10 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   csi:
     driver: nfs.csi.k8s.io
-    volumeHandle: 10.10.10.62/var/nfs/shared/homeassistant
+    volumeHandle: 10.10.10.62/volume/cb9d8e3a-aadf-446d-b16c-b701b8199c8c/.srv/.unifi-drive/homeassistant/.data
     volumeAttributes:
       server: 10.10.10.62
-      share: /var/nfs/shared/homeassistant
+      share: /volume/cb9d8e3a-aadf-446d-b16c-b701b8199c8c/.srv/.unifi-drive/homeassistant/.data
   mountOptions:
     - nfsvers=4.1
     - noatime

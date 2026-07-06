@@ -22,7 +22,8 @@ spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       nodeSelector:
-        kubernetes.io/hostname: raspberrypi-d868c445
+        # must be a node on the UNAS export allow-list
+        kubernetes.io/hostname: pi-04
       initContainers:
         # Seed a minimal configuration.yaml on first boot; never touches an
         # existing one. trusted_proxies is required or every request
