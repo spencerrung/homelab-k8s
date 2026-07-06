@@ -43,7 +43,7 @@ spec:
               cpu: 100m
               memory: 192Mi
             limits:
-              memory: 384Mi
+              memory: 512Mi
           livenessProbe:
             httpGet:
               path: /api/v1/status
