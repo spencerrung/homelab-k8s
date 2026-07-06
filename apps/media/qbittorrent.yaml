@@ -12,8 +12,6 @@ spec:
     requests:
       storage: 1Gi
 ---
-# Single-container pod by design: a gluetun VPN sidecar can be added as a
-# second container later without restructuring.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -32,6 +30,60 @@ spec:
         app: qbittorrent
     spec:
       containers:
+        # VPN sidecar: shares the pod's network namespace, so ALL of
+        # qBittorrent's traffic rides the PIA tunnel. The firewall
+        # (killswitch) drops non-tunnel egress except the cluster subnets
+        # and admits inbound only on the WebUI port - if the tunnel drops,
+        # torrent traffic stops rather than leaking to the ISP.
+        - name: gluetun
+          image: docker.io/qmcgaw/gluetun:v3.41.1
+          securityContext:
+            capabilities:
+              add: ["NET_ADMIN"]
+          env:
+            - name: VPN_SERVICE_PROVIDER
+              value: private internet access
+            - name: OPENVPN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: media-vpn
+                  key: username
+            - name: OPENVPN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: media-vpn
+                  key: password
+            - name: SERVER_REGIONS
+              value: US Denver
+            - name: FIREWALL_OUTBOUND_SUBNETS
+              value: 10.42.0.0/16,10.43.0.0/16
+            - name: FIREWALL_INPUT_PORTS
+              value: "8080"
+            - name: VPN_PORT_FORWARDING
+              value: "on"
+            - name: VPN_PORT_FORWARDING_UP_COMMAND
+              value: /bin/sh -c 'wget -q -O- --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8080/api/v2/app/setPreferences'
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 256Mi
+          startupProbe:
+            exec:
+              command: ["/gluetun-entrypoint", "healthcheck"]
+            periodSeconds: 10
+            timeoutSeconds: 8
+            failureThreshold: 30
+          livenessProbe:
+            exec:
+              command: ["/gluetun-entrypoint", "healthcheck"]
+            periodSeconds: 60
+            timeoutSeconds: 10
+            failureThreshold: 3
+          volumeMounts:
+            - name: dev-net-tun
+              mountPath: /dev/net/tun
         - name: qbittorrent
           image: lscr.io/linuxserver/qbittorrent:5.2.2
           env:
@@ -94,6 +146,10 @@ spec:
         - name: media
           persistentVolumeClaim:
             claimName: media
+        - name: dev-net-tun
+          hostPath:
+            path: /dev/net/tun
+            type: CharDevice
 ---
 apiVersion: v1
 kind: Service
