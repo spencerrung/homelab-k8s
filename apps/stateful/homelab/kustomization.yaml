@@ -5,3 +5,5 @@ kind: Kustomization
 resources:
   - ../../matrix
   - ../../atproto-pds
+  - ../../media
+  - ../../home-assistant

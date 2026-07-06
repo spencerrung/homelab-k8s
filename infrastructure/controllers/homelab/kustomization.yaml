@@ -9,3 +9,4 @@ resources:
   - ../../base/vault
   - ../../base/velero
   - ../../base/kyverno
+  - ../../base/csi-driver-nfs

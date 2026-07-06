@@ -1,0 +1,42 @@
+---
+# HA /config on the UNAS NFS export. Note: the recorder SQLite DB lives
+# here too - commit_interval is raised in the seeded configuration.yaml to
+# soften NFS locking; if the recorder misbehaves, options are a local-path
+# volume for /config or moving the recorder to postgres.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: home-assistant-config
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  csi:
+    driver: nfs.csi.k8s.io
+    volumeHandle: 10.10.10.62/var/nfs/shared/homeassistant
+    volumeAttributes:
+      server: 10.10.10.62
+      share: /var/nfs/shared/homeassistant
+  mountOptions:
+    - nfsvers=4.1
+    - noatime
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: config
+  namespace: home-assistant
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""
+  volumeName: home-assistant-config
+  resources:
+    requests:
+      storage: 10Gi

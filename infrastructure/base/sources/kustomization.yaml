@@ -13,3 +13,4 @@ resources:
   - grafana-community.yaml
   - grafana.yaml
   - kyverno.yaml
+  - csi-driver-nfs.yaml

@@ -1,0 +1,41 @@
+---
+# Static RWX PV for the shared media tree on the UNAS. Every consumer
+# mounts it at /data (same path everywhere = hardlink imports instead of
+# copies): /data/downloads, /data/tv, /data/movies.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: media-arr
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  capacity:
+    storage: 1Ti
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  csi:
+    driver: nfs.csi.k8s.io
+    volumeHandle: 10.10.10.62/var/nfs/shared/arr
+    volumeAttributes:
+      server: 10.10.10.62
+      share: /var/nfs/shared/arr
+  mountOptions:
+    - nfsvers=4.1
+    - noatime
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: media
+  namespace: media
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""
+  volumeName: media-arr
+  resources:
+    requests:
+      storage: 1Ti

@@ -81,6 +81,7 @@ spec:
             - atproto
             - gitea
             - authentik
+            - home-assistant
       # Whole cluster weekly (manifests are in git; belt and braces),
       # kept 60 days
       weekly-full:
@@ -92,3 +93,5 @@ spec:
             - kube-system
             - flux-system
             - velero
+            # media library is huge and re-downloadable; never kopia it to B2
+            - media
