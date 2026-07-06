@@ -21,7 +21,10 @@ spec:
       server: 10.10.10.62
       share: /volume/cb9d8e3a-aadf-446d-b16c-b701b8199c8c/.srv/.unifi-drive/arr/.data
   mountOptions:
-    - nfsvers=4.1
+    # UNAS serves NFSv3 only (no v4 pseudo-root); nolock keeps locks local
+    # to the single client per volume, which is consistent for our use
+    - nfsvers=3
+    - nolock
     - noatime
 ---
 apiVersion: v1
