@@ -36,12 +36,19 @@ spec:
       labels:
         app: searxng
     spec:
+      # the Service named 'searxng' would inject SEARXNG_PORT=tcp://... via
+      # legacy service links, which searxng misreads as its port config
+      enableServiceLinks: false
       containers:
         - name: searxng
           image: docker.io/searxng/searxng:2026.7.6-556d08c39
           env:
             - name: SEARXNG_BASE_URL
               value: http://searxng.ai.svc.cluster.local:8080/
+            - name: SEARXNG_PORT
+              value: "8080"
+            - name: SEARXNG_BIND_ADDRESS
+              value: 0.0.0.0
           envFrom:
             - secretRef:
                 name: searxng-secrets
