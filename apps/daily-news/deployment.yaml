@@ -1,0 +1,47 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: daily-news
+  namespace: daily-news
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: daily-news
+  template:
+    metadata:
+      labels:
+        app: daily-news
+    spec:
+      containers:
+        - name: daily-news
+          image: docker.io/spencerrung/daily-news:latest # {"$imagepolicy": "flux-system:daily-news"}
+          ports:
+            - containerPort: 3000
+              name: http
+          env:
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: daily-news-secrets
+                  key: ANTHROPIC_API_KEY
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10

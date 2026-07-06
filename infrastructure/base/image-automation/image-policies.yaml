@@ -76,3 +76,18 @@ spec:
   policy:
     numerical:
       order: asc
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: daily-news
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: daily-news
+  filterTags:
+    pattern: '^(?P<ts>\d{14})-[a-f0-9]+$'
+    extract: '$ts'
+  policy:
+    numerical:
+      order: asc

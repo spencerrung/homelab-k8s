@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: daily-news
+  namespace: daily-news
+spec:
+  selector:
+    app: daily-news
+  ports:
+    - port: 3000
+      targetPort: http
+      name: http
