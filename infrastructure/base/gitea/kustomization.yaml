@@ -9,4 +9,3 @@ resources:
   - networkpolicy.yaml
   - release.yaml
   - ingress.yaml
-  - group-sync-cronjob.yaml
