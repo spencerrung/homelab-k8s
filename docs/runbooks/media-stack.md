@@ -47,6 +47,18 @@ Create the directories once (any pod):
 
 ## Setup order
 
+### 0. VPN (already wired)
+
+qBittorrent runs behind a gluetun sidecar: all its traffic exits via PIA
+(CA Toronto - PIA only offers port forwarding outside the US) with a
+killswitch; the ISP sees one encrypted tunnel. Creds: Vault
+`secret/media/vpn`. Verify anytime:
+`kubectl exec -n media deploy/qbittorrent -c qbittorrent -- wget -qO- https://ipinfo.io/json`
+should show a PIA IP, not the home IP. In qbt WebUI settings enable
+"Bypass authentication for clients on localhost" so gluetun can push
+forwarded-port renewals into qbt. Prowlarr/FlareSolverr/arrs are NOT
+tunneled (indexer browsing is ordinary HTTPS; peers never see them).
+
 ### 1. qBittorrent — `qbt.alucard.dev`
 
 1. Get the temporary admin password from the logs:
