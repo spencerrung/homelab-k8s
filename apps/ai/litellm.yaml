@@ -53,7 +53,10 @@ spec:
           envFrom:
             - secretRef:
                 name: litellm-secrets
+          # surface boot progress; buffered output vanishes on SIGKILL
           env:
+            - name: PYTHONUNBUFFERED
+              value: "1"
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
@@ -68,14 +71,15 @@ spec:
               memory: 256Mi
             limits:
               memory: 768Mi
+          # first boot runs prisma client generation - >5min on a Pi 4
           startupProbe:
             httpGet:
               path: /health/liveliness
               port: http
-            initialDelaySeconds: 15
-            periodSeconds: 10
+            initialDelaySeconds: 30
+            periodSeconds: 12
             timeoutSeconds: 8
-            failureThreshold: 30
+            failureThreshold: 60
           livenessProbe:
             httpGet:
               path: /health/liveliness
