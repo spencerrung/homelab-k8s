@@ -53,13 +53,21 @@ spec:
               memory: 128Mi
             limits:
               memory: 512Mi
+          startupProbe:
+            httpGet:
+              path: /ping
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 8
+            failureThreshold: 30
           livenessProbe:
             httpGet:
               path: /ping
               port: http
-            initialDelaySeconds: 30
             periodSeconds: 30
-            timeoutSeconds: 5
+            timeoutSeconds: 8
+            failureThreshold: 4
           readinessProbe:
             httpGet:
               path: /ping
