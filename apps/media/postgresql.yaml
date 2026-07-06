@@ -1,0 +1,123 @@
+---
+# PostgreSQL backend for sonarr/radarr - their SQLite databases corrupt
+# with "database is locked" on the NFS-rooted local-path storage. The
+# arrs create their own schema; the databases are created by initdb on
+# first start.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgresql-initdb
+  namespace: media
+data:
+  create-databases.sh: |
+    #!/bin/sh
+    set -e
+    for db in sonarr_main sonarr_log radarr_main radarr_log; do
+      psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d postgres \
+        -c "CREATE DATABASE $db OWNER \"$POSTGRES_USER\";"
+    done
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresql
+  namespace: media
+spec:
+  selector:
+    app: postgresql
+  ports:
+    - port: 5432
+      name: postgres
+  clusterIP: None
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgresql
+  namespace: media
+spec:
+  serviceName: postgresql
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgresql
+  template:
+    metadata:
+      labels:
+        app: postgresql
+    spec:
+      containers:
+        - name: postgresql
+          image: postgres:16-alpine
+          ports:
+            - containerPort: 5432
+              name: postgres
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: media-postgresql
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: media-postgresql
+                  key: password
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", "pg_isready -U $POSTGRES_USER"]
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            exec:
+              command: ["sh", "-c", "pg_isready -U $POSTGRES_USER"]
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 8
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: initdb
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: initdb
+          configMap:
+            name: postgresql-initdb
+            defaultMode: 0555
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        annotations:
+          kustomize.toolkit.fluxcd.io/prune: disabled
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 5Gi
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgresql-ingress
+  namespace: media
+spec:
+  podSelector:
+    matchLabels:
+      app: postgresql
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector: {}
+      ports:
+        - port: 5432
+          protocol: TCP

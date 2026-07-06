@@ -41,6 +41,24 @@ spec:
               value: "988"
             - name: TZ
               value: Etc/UTC
+            - name: RADARR__POSTGRES__HOST
+              value: postgresql
+            - name: RADARR__POSTGRES__PORT
+              value: "5432"
+            - name: RADARR__POSTGRES__MAINDB
+              value: radarr_main
+            - name: RADARR__POSTGRES__LOGDB
+              value: radarr_log
+            - name: RADARR__POSTGRES__USER
+              valueFrom:
+                secretKeyRef:
+                  name: media-postgresql
+                  key: username
+            - name: RADARR__POSTGRES__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: media-postgresql
+                  key: password
             - name: RADARR__AUTH__APIKEY
               valueFrom:
                 secretKeyRef:

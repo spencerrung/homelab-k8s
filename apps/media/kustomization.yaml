@@ -5,6 +5,7 @@ resources:
   - namespace.yaml
   - externalsecrets.yaml
   - media-pv.yaml
+  - postgresql.yaml
   - prowlarr.yaml
   - sonarr.yaml
   - radarr.yaml

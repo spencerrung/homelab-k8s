@@ -41,6 +41,24 @@ spec:
               value: "988"
             - name: TZ
               value: Etc/UTC
+            - name: SONARR__POSTGRES__HOST
+              value: postgresql
+            - name: SONARR__POSTGRES__PORT
+              value: "5432"
+            - name: SONARR__POSTGRES__MAINDB
+              value: sonarr_main
+            - name: SONARR__POSTGRES__LOGDB
+              value: sonarr_log
+            - name: SONARR__POSTGRES__USER
+              valueFrom:
+                secretKeyRef:
+                  name: media-postgresql
+                  key: username
+            - name: SONARR__POSTGRES__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: media-postgresql
+                  key: password
             - name: SONARR__AUTH__APIKEY
               valueFrom:
                 secretKeyRef:
