@@ -1,0 +1,98 @@
+---
+# Private metasearch for agents and Open WebUI. Cluster-internal only -
+# no ingress on purpose (unauthenticated JSON API).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: searxng-config
+  namespace: ai
+data:
+  settings.yml: |
+    use_default_settings: true
+    server:
+      # secret comes from the SEARXNG_SECRET env var
+      limiter: false
+      image_proxy: true
+    search:
+      formats:
+        - html
+        - json
+  limiter.toml: |
+    [botdetection.ip_limit]
+    link_token = false
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: searxng
+  namespace: ai
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: searxng
+  template:
+    metadata:
+      labels:
+        app: searxng
+    spec:
+      containers:
+        - name: searxng
+          image: docker.io/searxng/searxng:2026.7.6-556d08c39
+          env:
+            - name: SEARXNG_BASE_URL
+              value: http://searxng.ai.svc.cluster.local:8080/
+          envFrom:
+            - secretRef:
+                name: searxng-secrets
+          ports:
+            - containerPort: 8080
+              name: http
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 512Mi
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 8
+            failureThreshold: 30
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 8
+            failureThreshold: 4
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 8
+          volumeMounts:
+            - name: config
+              mountPath: /etc/searxng
+      volumes:
+        - name: config
+          configMap:
+            name: searxng-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: searxng
+  namespace: ai
+spec:
+  selector:
+    app: searxng
+  ports:
+    - port: 8080
+      targetPort: http
+      name: http

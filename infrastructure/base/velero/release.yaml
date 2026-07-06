@@ -82,6 +82,7 @@ spec:
             - gitea
             - authentik
             - home-assistant
+            - ai
       # Whole cluster weekly (manifests are in git; belt and braces),
       # kept 60 days
       weekly-full:

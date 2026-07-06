@@ -7,3 +7,4 @@ resources:
   - ../../atproto-pds
   - ../../media
   - ../../home-assistant
+  - ../../ai
