@@ -10,8 +10,10 @@ metadata:
   namespace: media
 data:
   recyclarr.yml: |
+    # NOTE: instance names (tv/movies) must be unique across services —
+    # recyclarr silently syncs nothing if two instances share a name.
     sonarr:
-      main:
+      tv:
         base_url: http://sonarr:8989
         api_key: !env_var SONARR_API_KEY
         delete_old_custom_formats: true
@@ -70,7 +72,7 @@ data:
               - name: HD - 720p/1080p Anime
     # Same language policy as sonarr; note radarr trash_ids differ.
     radarr:
-      main:
+      movies:
         base_url: http://radarr:7878
         api_key: !env_var RADARR_API_KEY
         delete_old_custom_formats: true
