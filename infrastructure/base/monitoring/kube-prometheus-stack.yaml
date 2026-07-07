@@ -36,6 +36,19 @@ spec:
         kubeScheduler: false
         kubeControllerManager: false
         kubeProxy: false
+        # consumers of the apiserver histogram buckets dropped below
+        kubeApiserverSlos: false
+        kubeApiserverBurnrate: false
+        kubeApiserverHistogram: false
+
+    # ~110k of 245k series were apiserver/etcd latency histogram buckets
+    # feeding SLO dashboards nobody reads on a homelab - drop at scrape
+    kubeApiServer:
+      serviceMonitor:
+        metricRelabelings:
+          - action: drop
+            sourceLabels: [__name__]
+            regex: (apiserver_request_duration_seconds_bucket|apiserver_request_sli_duration_seconds_bucket|apiserver_request_body_size_bytes_bucket|apiserver_response_sizes_bucket|apiserver_watch_events_sizes_bucket|etcd_request_duration_seconds_bucket)
 
     prometheus:
       prometheusSpec:
@@ -172,9 +185,9 @@ spec:
       resources:
         requests:
           cpu: 50m
-          memory: 128Mi
+          memory: 192Mi
         limits:
-          memory: 256Mi
+          memory: 384Mi
 
     prometheusOperator:
       resources:
