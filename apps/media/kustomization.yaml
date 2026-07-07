@@ -12,3 +12,4 @@ resources:
   - qbittorrent.yaml
   - jellyseerr.yaml
   - flaresolverr.yaml
+  - recyclarr.yaml
