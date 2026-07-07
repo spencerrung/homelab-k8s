@@ -50,6 +50,15 @@ spec:
             sourceLabels: [__name__]
             regex: (apiserver_request_duration_seconds_bucket|apiserver_request_sli_duration_seconds_bucket|apiserver_request_body_size_bytes_bucket|apiserver_response_sizes_bucket|apiserver_watch_events_sizes_bucket|etcd_request_duration_seconds_bucket)
 
+    # k3s twist: the single-binary kubelet endpoint serves the apiserver
+    # metric surface too, so the same drop must guard this door
+    kubelet:
+      serviceMonitor:
+        metricRelabelings:
+          - action: drop
+            sourceLabels: [__name__]
+            regex: (apiserver_request_duration_seconds_bucket|apiserver_request_sli_duration_seconds_bucket|apiserver_request_body_size_bytes_bucket|apiserver_response_sizes_bucket|apiserver_watch_events_sizes_bucket|etcd_request_duration_seconds_bucket)
+
     prometheus:
       prometheusSpec:
         retention: 7d
