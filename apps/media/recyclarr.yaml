@@ -22,6 +22,29 @@ data:
               until_quality: HDTV-720p
               until_score: 100
             min_format_score: 0
+          # Anime profile: sonarr falls back to the series' original
+          # language (Japanese) for untagged anime releases, so a
+          # "Not English" block would reject everything incl. dual
+          # audio. Prefer dual audio by title tag; accept the rest.
+          - name: HD - 720p/1080p Anime
+            upgrade:
+              allowed: true
+              until_quality: HDTV-720p
+              until_score: 100
+            min_format_score: 0
+            qualities:
+              - name: Bluray-1080p
+              - name: WEB 1080p
+                qualities:
+                  - WEBDL-1080p
+                  - WEBRip-1080p
+              - name: Bluray-720p
+              - name: WEB 720p
+                qualities:
+                  - WEBDL-720p
+                  - WEBRip-720p
+              - name: HDTV-1080p
+              - name: HDTV-720p
         custom_formats:
           - trash_ids:
               - 7ba05c6e0e14e793538174c679126996 # MULTi
@@ -29,11 +52,22 @@ data:
             assign_scores_to:
               - name: HD - 720p/1080p
                 score: 100
-          # Language: Not English — trash default score is -10000
+              - name: HD - 720p/1080p Anime
+                score: 100
+          # Language: Not English — trash default score is -10000.
+          # Standard profile only; never assign to the anime profile.
           - trash_ids:
               - 69aa1e159f97d860440b04cd6d590c4f
             assign_scores_to:
               - name: HD - 720p/1080p
+          # Anime: non-English audio only with English/multi subs —
+          # block raw groups (no subs) and foreign-sub releases.
+          # Trash default score is -10000.
+          - trash_ids:
+              - b4a1b3d705159cdca36d71e57ca86871 # Anime Raws
+              - 07a32f77690263bb9fda1842db7e273f # VOSTFR
+            assign_scores_to:
+              - name: HD - 720p/1080p Anime
 ---
 apiVersion: batch/v1
 kind: CronJob
