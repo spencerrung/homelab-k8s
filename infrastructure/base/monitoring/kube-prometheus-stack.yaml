@@ -84,9 +84,34 @@ spec:
           group_interval: 5m
           repeat_interval: 4h
           routes:
+            # meta-alerts that exist only for machinery, never for humans
             - receiver: 'null'
               matchers:
-                - alertname = "Watchdog"
+                - alertname =~ "Watchdog|InfoInhibitor"
+        # standard kube-prometheus-stack inhibitions (dropped when we
+        # overrode config wholesale): higher severity in a namespace mutes
+        # lower, and info alerts stay hidden unless InfoInhibitor clears
+        inhibit_rules:
+          - source_matchers:
+              - severity = critical
+            target_matchers:
+              - severity =~ warning|info
+            equal:
+              - namespace
+              - alertname
+          - source_matchers:
+              - severity = warning
+            target_matchers:
+              - severity = info
+            equal:
+              - namespace
+              - alertname
+          - source_matchers:
+              - alertname = InfoInhibitor
+            target_matchers:
+              - severity = info
+            equal:
+              - namespace
         receivers:
           - name: 'null'
           - name: matrix
