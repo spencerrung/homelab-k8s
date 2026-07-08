@@ -138,13 +138,53 @@ exactly the indexers that need challenge-solving — tagged searches take
 a few extra seconds each (headless Chromium on a Pi), so don't tag
 indexers that work without it.
 
+## Older shows: when auto-search never finds anything
+
+Recurring theme (Ed Edd n Eddy, Johnny Bravo, Kim Possible, JoJo):
+the custom-format rules are fine — old/niche shows fail for exactly
+three reasons. Diagnose in this order:
+
+1. **Dead seeds.** Interactive search shows releases but all rejected
+   `Not enough seeders`. No setting fixes a dead torrent.
+2. **Bundle-only availability.** The content only exists as a
+   multi-season / "Complete Series" pack. Sonarr structurally cannot
+   grab those — no profile or format change will ever help.
+3. **Unparseable folder names** (mostly anime: "Part 1 & Part 2").
+   The pack downloads but sits `importPending` in Activity → Queue
+   with a warning. Fix: the orange icon → Manual Import (filenames
+   are usually fine).
+
+The playbook for 1 and 2 — grab the bundle directly, import manually:
+
+```bash
+# find what actually exists (raw search across all indexers)
+curl -H "X-Api-Key: $PROWLARR_KEY" \
+  "https://prowlarr.alucard.dev/api/v1/search?query=<show>&type=search&limit=100"
+# push the chosen release's downloadUrl/magnetUrl into qbt under
+# sonarr's category (single-season packs auto-import on completion)
+curl -X POST http://qbittorrent:8080/api/v2/torrents/add \
+  --data-urlencode "urls=<url>" --data-urlencode "category=tv-sonarr"
+```
+
+Single-season pack with a clean name → Sonarr imports it like its own
+grab. Multi-season bundle → after completion use Sonarr's Manual Import
+(Wanted → Manual Import, or the API) pointed at the season subfolder;
+movies bundled inside go to Radarr the same way (add the movie first,
+unmonitored, then Manual Import). Leftover unimported seasons stay in
+`/data/downloads` — delete the torrent (with files) after seeding if
+you don't want them; imported seasons are hardlinked and unaffected.
+
+The systemic fix, if these keep annoying: a usenet indexer + client
+(SABnzbd) — old content has no seeder problem there, but it's a paid
+provider (~$5-10/mo). Slots into the existing layout; ask when wanted.
+
 ## Going further (optional, not yet installed)
 
-- **Recyclarr**: declarative TRaSH-guide quality profiles for
-  Sonarr/Radarr as a CronJob — the next IaC step if you start tuning
-  quality settings.
-- **Bazarr** (subtitles), **gluetun** VPN sidecar for qBittorrent — both
-  slot into the existing layout; ask when wanted.
+- **Bazarr** (subtitles) — slots into the existing layout; ask when
+  wanted. (Recyclarr and the gluetun VPN sidecar are now deployed:
+  `apps/media/recyclarr.yaml` syncs TRaSH language/quality policy
+  nightly, and qBittorrent notifies `#downloads:alucard.dev` on
+  completion via `apps/media/qbittorrent.yaml`.)
 - **Jellyfin**: deliberately not deployed — Pi 4 has no usable container
   transcode path. Direct-play-only is possible; running it on the UNAS
   is likely better.
