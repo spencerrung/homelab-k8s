@@ -9,8 +9,10 @@ metadata:
   annotations:
     kustomize.toolkit.fluxcd.io/prune: disabled
 spec:
+  # Declarative only — NFS CSI enforces no quota; the real limit is the
+  # UNAS filesystem (7.3T). Kept honest for humans reading this file.
   capacity:
-    storage: 1Ti
+    storage: 7Ti
   accessModes:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
