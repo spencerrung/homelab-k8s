@@ -12,6 +12,27 @@ spec:
     requests:
       storage: 1Gi
 ---
+# Posts to the matrix #downloads room on torrent completion. Wired to
+# qBittorrent's "run external program on completion" setting (runtime
+# preference, set via API). The in-cluster synapse service is reachable
+# because the gluetun killswitch allows 10.43.0.0/16 egress.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: qbittorrent-scripts
+  namespace: media
+data:
+  notify-matrix.sh: |
+    #!/bin/sh
+    # $1 = torrent name (qBittorrent passes %N)
+    TITLE=$(printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g')
+    curl -s -m 15 -X PUT \
+      -H "Authorization: Bearer ${MATRIX_TOKEN}" \
+      -H "Content-Type: application/json" \
+      -d "{\"msgtype\":\"m.text\",\"body\":\"✅ Finished downloading: ${TITLE}\"}" \
+      "http://synapse.matrix.svc.cluster.local:8008/_matrix/client/v3/rooms/${MATRIX_ROOM}/send/m.room.message/qbt$(date +%s)$$" \
+      >/dev/null
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -110,6 +131,16 @@ spec:
               value: Etc/UTC
             - name: WEBUI_PORT
               value: "8080"
+            - name: MATRIX_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: media-matrix-bot
+                  key: access_token
+            - name: MATRIX_ROOM
+              valueFrom:
+                secretKeyRef:
+                  name: media-matrix-bot
+                  key: room_id
           ports:
             - containerPort: 8080
               name: http
@@ -155,6 +186,8 @@ spec:
               mountPath: /config
             - name: media
               mountPath: /data
+            - name: scripts
+              mountPath: /scripts
       volumes:
         - name: config
           persistentVolumeClaim:
@@ -162,6 +195,10 @@ spec:
         - name: media
           persistentVolumeClaim:
             claimName: media
+        - name: scripts
+          configMap:
+            name: qbittorrent-scripts
+            defaultMode: 0755
         - name: dev-net-tun
           hostPath:
             path: /dev/net/tun
