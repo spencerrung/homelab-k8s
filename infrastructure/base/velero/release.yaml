@@ -83,6 +83,7 @@ spec:
             - authentik
             - home-assistant
             - ai
+            - homarr
       # Whole cluster weekly (manifests are in git; belt and braces),
       # kept 60 days
       weekly-full:

@@ -8,3 +8,4 @@ resources:
   - ../../media
   - ../../home-assistant
   - ../../ai
+  - ../../homarr
