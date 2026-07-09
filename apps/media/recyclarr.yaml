@@ -91,7 +91,7 @@ data:
           folder: default
           movie:
             rename: true
-            standard: default
+            standard: standard
         quality_profiles:
           - name: HD - 720p/1080p
             upgrade:
