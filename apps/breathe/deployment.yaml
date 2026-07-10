@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: docker.io/spencerrung/breathe:20260709234848-0fe0468 # {"$imagepolicy": "flux-system:breathe"}
+          image: docker.io/spencerrung/breathe:20260710000513-f6d35b2 # {"$imagepolicy": "flux-system:breathe"}
           ports:
             - containerPort: 80
               name: http
