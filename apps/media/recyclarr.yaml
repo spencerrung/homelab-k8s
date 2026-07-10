@@ -58,6 +58,43 @@ data:
                   - WEBRip-720p
               - name: HDTV-1080p
               - name: HDTV-720p
+          # Legacy profiles for pre-HD shows: accept anything from SDTV
+          # up, prefer higher; upgrades stop once a 720p+ copy lands.
+          # Same language policy split as the HD pair.
+          - name: Any - SD to 1080p
+            upgrade:
+              allowed: true
+              until_quality: Bluray-720p
+              until_score: 100
+            min_format_score: 0
+            qualities: &sd-to-1080p-tv
+              - name: Bluray-1080p
+              - name: WEB 1080p
+                qualities:
+                  - WEBDL-1080p
+                  - WEBRip-1080p
+              - name: Bluray-720p
+              - name: WEB 720p
+                qualities:
+                  - WEBDL-720p
+                  - WEBRip-720p
+              - name: HDTV-1080p
+              - name: HDTV-720p
+              - name: Bluray-576p
+              - name: Bluray-480p
+              - name: WEB 480p
+                qualities:
+                  - WEBDL-480p
+                  - WEBRip-480p
+              - name: DVD
+              - name: SDTV
+          - name: Any - SD to 1080p Anime
+            upgrade:
+              allowed: true
+              until_quality: Bluray-720p
+              until_score: 100
+            min_format_score: 0
+            qualities: *sd-to-1080p-tv
         custom_formats:
           - trash_ids:
               - 7ba05c6e0e14e793538174c679126996 # MULTi
@@ -67,12 +104,17 @@ data:
                 score: 100
               - name: HD - 720p/1080p Anime
                 score: 100
+              - name: Any - SD to 1080p
+                score: 100
+              - name: Any - SD to 1080p Anime
+                score: 100
           # Language: Not English — trash default score is -10000.
-          # Standard profile only; never assign to the anime profile.
+          # Standard profiles only; never assign to the anime profiles.
           - trash_ids:
               - 69aa1e159f97d860440b04cd6d590c4f
             assign_scores_to:
               - name: HD - 720p/1080p
+              - name: Any - SD to 1080p
           # Anime: non-English audio only with English/multi subs —
           # block raw groups (no subs) and foreign-sub releases.
           # Trash default score is -10000.
@@ -81,6 +123,7 @@ data:
               - 07a32f77690263bb9fda1842db7e273f # VOSTFR
             assign_scores_to:
               - name: HD - 720p/1080p Anime
+              - name: Any - SD to 1080p Anime
     # Same language policy as sonarr; note radarr trash_ids differ.
     radarr:
       movies:
@@ -119,6 +162,43 @@ data:
                   - WEBDL-720p
                   - WEBRip-720p
               - name: HDTV-720p
+          # Legacy profiles for pre-HD movies — see sonarr comment.
+          - name: Any - SD to 1080p
+            upgrade:
+              allowed: true
+              until_quality: Bluray-720p
+              until_score: 100
+            min_format_score: 0
+            qualities: &sd-to-1080p-movies
+              - name: Remux-1080p
+              - name: Bluray-1080p
+              - name: WEB 1080p
+                qualities:
+                  - WEBDL-1080p
+                  - WEBRip-1080p
+              - name: HDTV-1080p
+              - name: Bluray-720p
+              - name: WEB 720p
+                qualities:
+                  - WEBDL-720p
+                  - WEBRip-720p
+              - name: HDTV-720p
+              - name: Bluray-576p
+              - name: Bluray-480p
+              - name: WEB 480p
+                qualities:
+                  - WEBDL-480p
+                  - WEBRip-480p
+              - name: DVD-R
+              - name: DVD
+              - name: SDTV
+          - name: Any - SD to 1080p Anime
+            upgrade:
+              allowed: true
+              until_quality: Bluray-720p
+              until_score: 100
+            min_format_score: 0
+            qualities: *sd-to-1080p-movies
         custom_formats:
           - trash_ids:
               - 4b900e171accbfb172729b63323ea8ca # MULTi
@@ -128,17 +208,23 @@ data:
                 score: 100
               - name: HD - 720p/1080p Anime
                 score: 100
-          # Language: Not English — standard profile only
+              - name: Any - SD to 1080p
+                score: 100
+              - name: Any - SD to 1080p Anime
+                score: 100
+          # Language: Not English — standard profiles only
           - trash_ids:
               - 0dc8aec3bd1c47cd6c40c46ecd27e846
             assign_scores_to:
               - name: HD - 720p/1080p
-          # Anime Raws + VOSTFR — anime profile only
+              - name: Any - SD to 1080p
+          # Anime Raws + VOSTFR — anime profiles only
           - trash_ids:
               - 06b6542a47037d1e33b15aa3677c2365 # Anime Raws
               - 9172b2f683f6223e3a1846427b417a3d # VOSTFR
             assign_scores_to:
               - name: HD - 720p/1080p Anime
+              - name: Any - SD to 1080p Anime
 ---
 apiVersion: batch/v1
 kind: CronJob
