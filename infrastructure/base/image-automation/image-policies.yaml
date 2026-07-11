@@ -91,3 +91,33 @@ spec:
   policy:
     numerical:
       order: asc
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: newhope-web
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: newhope-web
+  filterTags:
+    pattern: '^(?P<ts>\d{14})-[a-f0-9]+$'
+    extract: '$ts'
+  policy:
+    numerical:
+      order: asc
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: newhope-views
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: newhope-views
+  filterTags:
+    pattern: '^(?P<ts>\d{14})-[a-f0-9]+$'
+    extract: '$ts'
+  policy:
+    numerical:
+      order: asc

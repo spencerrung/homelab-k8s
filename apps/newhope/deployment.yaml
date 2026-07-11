@@ -1,0 +1,42 @@
+---
+# Demo site for New Hope Counseling Group (nh.alucard.dev)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: newhope-web
+  namespace: newhope
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: newhope-web
+  template:
+    metadata:
+      labels:
+        app: newhope-web
+    spec:
+      containers:
+        - name: web
+          image: docker.io/spencerrung/newhope-web:latest # {"$imagepolicy": "flux-system:newhope-web"}
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10

@@ -1,0 +1,30 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: newhope-web
+  namespace: newhope
+spec:
+  type: ClusterIP
+  selector:
+    app: newhope-web
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: newhope-views
+  namespace: newhope
+spec:
+  type: ClusterIP
+  selector:
+    app: newhope-views
+  ports:
+    - name: http
+      port: 8787
+      targetPort: http
+      protocol: TCP

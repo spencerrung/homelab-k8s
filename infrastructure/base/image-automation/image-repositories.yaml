@@ -52,3 +52,21 @@ metadata:
 spec:
   image: docker.io/spencerrung/daily-news
   interval: 15m
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: newhope-web
+  namespace: flux-system
+spec:
+  image: docker.io/spencerrung/newhope-web
+  interval: 15m
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: newhope-views
+  namespace: flux-system
+spec:
+  image: docker.io/spencerrung/newhope-views
+  interval: 15m

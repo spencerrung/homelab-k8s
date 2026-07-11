@@ -1,0 +1,15 @@
+---
+# Persistent storage for blog view/heart counts (small JSON file).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: newhope-views-data
+  namespace: newhope
+  annotations:
+    # Never allow Flux to prune this PVC - engagement counts aren't recoverable
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 1Gi
