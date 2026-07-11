@@ -1,4 +1,3 @@
----
 # Demo site for New Hope Counseling Group (nh.alucard.dev)
 apiVersion: apps/v1
 kind: Deployment
@@ -17,7 +16,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: docker.io/spencerrung/newhope-web:latest # {"$imagepolicy": "flux-system:newhope-web"}
+          image: docker.io/spencerrung/newhope-web:20260711213528-d834b59 # {"$imagepolicy": "flux-system:newhope-web"}
           ports:
             - containerPort: 80
               name: http
