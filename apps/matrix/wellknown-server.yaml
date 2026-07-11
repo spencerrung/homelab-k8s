@@ -26,7 +26,10 @@ data:
         default_type application/json;
         add_header Access-Control-Allow-Origin *;
         add_header Cache-Control "public, max-age=3600";
-        return 200 '{"m.homeserver": {"base_url": "https://matrix.alucard.dev"}}';
+        # rtc_foci: Element's public LiveKit JWT service (same backend Element Web
+        # falls back to). Required by Cinny for MatrixRTC voice/video; swap for a
+        # self-hosted lk-jwt-service if Element ever restricts it.
+        return 200 '{"m.homeserver": {"base_url": "https://matrix.alucard.dev"}, "org.matrix.msc4143.rtc_foci": [{"type": "livekit", "livekit_service_url": "https://livekit-jwt.call.element.io"}]}';
       }
 
       location / {
