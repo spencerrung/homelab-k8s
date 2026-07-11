@@ -1,4 +1,3 @@
----
 # Blog engagement counter (views + hearts) — JSON-file persistence on a small PVC.
 # Single replica: the file store is not safe for concurrent writers.
 apiVersion: apps/v1
@@ -22,7 +21,7 @@ spec:
         fsGroup: 1000
       containers:
         - name: views
-          image: docker.io/spencerrung/newhope-views:latest # {"$imagepolicy": "flux-system:newhope-views"}
+          image: docker.io/spencerrung/newhope-views:20260711214330-d834b59 # {"$imagepolicy": "flux-system:newhope-views"}
           ports:
             - containerPort: 8787
               name: http
