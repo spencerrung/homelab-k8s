@@ -19,6 +19,10 @@ data:
         'HD - 720p/1080p': 'HD - 720p/1080p Anime',
         'Any - SD to 1080p': 'Any - SD to 1080p Anime',
     }
+    # entities whose TMDB/TVDB original-language flag misleads (e.g. a
+    # French-produced film shot in English) — guard leaves them alone
+    SKIP_TMDB = {int(x) for x in os.environ.get('SKIP_TMDB', '').split(',') if x.strip()}
+    SKIP_TVDB = {int(x) for x in os.environ.get('SKIP_TVDB', '').split(',') if x.strip()}
 
     def req(base, key, path, data=None, method=None):
         r = urllib.request.Request(f'{base}/api/v3{path}',
@@ -37,7 +41,7 @@ data:
     smap = profile_map(sonarr, skey)
     for s in req(sonarr, skey, '/series'):
         lang = (s.get('originalLanguage') or {}).get('name', 'English')
-        if lang == 'English' or s['qualityProfileId'] not in smap:
+        if lang == 'English' or s['qualityProfileId'] not in smap or s.get('tvdbId') in SKIP_TVDB:
             continue
         s['qualityProfileId'] = smap[s['qualityProfileId']]
         s['seriesType'] = 'anime'
@@ -49,7 +53,7 @@ data:
     rmap = profile_map(radarr, rkey)
     for m in req(radarr, rkey, '/movie'):
         lang = (m.get('originalLanguage') or {}).get('name', 'English')
-        if lang == 'English' or m['qualityProfileId'] not in rmap:
+        if lang == 'English' or m['qualityProfileId'] not in rmap or m.get('tmdbId') in SKIP_TMDB:
             continue
         m['qualityProfileId'] = rmap[m['qualityProfileId']]
         req(radarr, rkey, f"/movie/{m['id']}", m, 'PUT')
@@ -93,6 +97,12 @@ spec:
               image: python:3.12.13-alpine
               command: ["python3", "/scripts/guard.py"]
               env:
+                # Besson's Dracula (2025): French-flagged on TMDB but
+                # shot in English — belongs on the standard profile
+                - name: SKIP_TMDB
+                  value: "1246049"
+                - name: SKIP_TVDB
+                  value: ""
                 - name: SONARR_API_KEY
                   valueFrom:
                     secretKeyRef:
