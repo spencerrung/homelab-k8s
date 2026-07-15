@@ -1,0 +1,128 @@
+---
+# Safety net for misrouted anime: jellyseerr/manual adds sometimes land
+# Japanese-original series on the standard profiles, where the
+# "Language: Not English" format blocks every release (sonarr assumes
+# the original language for untagged releases). This job flips any
+# non-English-original series/movie to the anime variant of its
+# profile tier, fixes seriesType, searches, and notifies #downloads.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: anime-guard-script
+  namespace: media
+data:
+  guard.py: |
+    import json, os, urllib.parse, urllib.request
+
+    UA = {'User-Agent': 'anime-guard/1.0', 'Content-Type': 'application/json'}
+    PAIRS = {  # standard tier -> anime variant (resolved by name)
+        'HD - 720p/1080p': 'HD - 720p/1080p Anime',
+        'Any - SD to 1080p': 'Any - SD to 1080p Anime',
+    }
+
+    def req(base, key, path, data=None, method=None):
+        r = urllib.request.Request(f'{base}/api/v3{path}',
+            data=json.dumps(data).encode() if data is not None else None,
+            headers={**UA, 'X-Api-Key': key}, method=method)
+        return json.load(urllib.request.urlopen(r))
+
+    def profile_map(base, key):
+        profs = {p['name']: p['id'] for p in req(base, key, '/qualityprofile')}
+        return {profs[a]: profs[b] for a, b in PAIRS.items()
+                if a in profs and b in profs}
+
+    changes = []
+
+    sonarr, skey = 'http://sonarr:8989', os.environ['SONARR_API_KEY']
+    smap = profile_map(sonarr, skey)
+    for s in req(sonarr, skey, '/series'):
+        lang = (s.get('originalLanguage') or {}).get('name', 'English')
+        if lang == 'English' or s['qualityProfileId'] not in smap:
+            continue
+        s['qualityProfileId'] = smap[s['qualityProfileId']]
+        s['seriesType'] = 'anime'
+        req(sonarr, skey, f"/series/{s['id']}", s, 'PUT')
+        req(sonarr, skey, '/command', {'name': 'SeriesSearch', 'seriesId': s['id']})
+        changes.append(f"tv: {s['title']} ({lang})")
+
+    radarr, rkey = 'http://radarr:7878', os.environ['RADARR_API_KEY']
+    rmap = profile_map(radarr, rkey)
+    for m in req(radarr, rkey, '/movie'):
+        lang = (m.get('originalLanguage') or {}).get('name', 'English')
+        if lang == 'English' or m['qualityProfileId'] not in rmap:
+            continue
+        m['qualityProfileId'] = rmap[m['qualityProfileId']]
+        req(radarr, rkey, f"/movie/{m['id']}", m, 'PUT')
+        req(radarr, rkey, '/command', {'name': 'MoviesSearch', 'movieIds': [m['id']]})
+        changes.append(f"movie: {m['title']} ({lang})")
+
+    if changes:
+        body = '\U0001f6e1 Moved to anime profile + searching:\n' + '\n'.join(changes)
+        room, tok = os.environ['MATRIX_ROOM'], os.environ['MATRIX_TOKEN']
+        r = urllib.request.Request(
+            f'http://synapse.matrix.svc.cluster.local:8008/_matrix/client/v3'
+            f'/rooms/{urllib.parse.quote(room)}/send/m.room.message/guard{os.getpid()}{len(changes)}',
+            data=json.dumps({'msgtype': 'm.text', 'body': body}).encode(),
+            headers={**UA, 'Authorization': f"Bearer {tok}"}, method='PUT')
+        urllib.request.urlopen(r)
+        print(body)
+    else:
+        print('nothing to fix')
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: anime-guard
+  namespace: media
+spec:
+  schedule: "*/30 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        metadata:
+          labels:
+            app: anime-guard
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: guard
+              image: python:3.12.13-alpine
+              command: ["python3", "/scripts/guard.py"]
+              env:
+                - name: SONARR_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: media-api-keys
+                      key: sonarr
+                - name: RADARR_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: media-api-keys
+                      key: radarr
+                - name: MATRIX_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: media-matrix-bot
+                      key: access_token
+                - name: MATRIX_ROOM
+                  valueFrom:
+                    secretKeyRef:
+                      name: media-matrix-bot
+                      key: room_id
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+                limits:
+                  memory: 128Mi
+              volumeMounts:
+                - name: script
+                  mountPath: /scripts
+          volumes:
+            - name: script
+              configMap:
+                name: anime-guard-script

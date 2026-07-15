@@ -13,4 +13,5 @@ resources:
   - jellyseerr.yaml
   - flaresolverr.yaml
   - recyclarr.yaml
+  - anime-guard.yaml
   - bazarr.yaml
