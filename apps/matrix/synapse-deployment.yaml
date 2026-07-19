@@ -68,10 +68,10 @@ spec:
               mountPath: /data
           resources:
             requests:
-              cpu: 250m
+              cpu: 500m
               memory: 512Mi
             limits:
-              cpu: 1
+              cpu: 2
               memory: 1536Mi
           livenessProbe:
             httpGet:
