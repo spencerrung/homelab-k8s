@@ -56,6 +56,15 @@ spec:
 apiVersion: image.toolkit.fluxcd.io/v1beta2
 kind: ImageRepository
 metadata:
+  name: aimtrix
+  namespace: flux-system
+spec:
+  image: docker.io/spencerrung/aimtrix
+  interval: 15m
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
   name: newhope-web
   namespace: flux-system
 spec:
