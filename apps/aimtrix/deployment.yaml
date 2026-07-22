@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: docker.io/spencerrung/aimtrix:20260719232247-8370e02 # {"$imagepolicy": "flux-system:aimtrix"}
+          image: docker.io/spencerrung/aimtrix:20260722013255-80e6c33 # {"$imagepolicy": "flux-system:aimtrix"}
           ports:
             - containerPort: 8080
               name: http
