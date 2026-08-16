@@ -67,8 +67,15 @@ spec:
       resources:
         requests:
           cpu: 50m
-          memory: 96Mi
+          memory: 192Mi
         limits:
           memory: 256Mi
+    configReloader:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 50Mi
+        limits:
+          memory: 64Mi
     controller:
       type: daemonset
