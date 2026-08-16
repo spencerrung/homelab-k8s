@@ -84,7 +84,7 @@ spec:
         resources:
           requests:
             cpu: 200m
-            memory: 768Mi
+            memory: 1280Mi
           limits:
             memory: 1536Mi
 
@@ -93,7 +93,7 @@ spec:
         resources:
           requests:
             cpu: 10m
-            memory: 32Mi
+            memory: 48Mi
           limits:
             memory: 96Mi
       config:
@@ -150,6 +150,12 @@ spec:
         dashboards:
           enabled: true
           searchNamespace: ALL
+        resources:
+          requests:
+            cpu: 5m
+            memory: 96Mi
+          limits:
+            memory: 128Mi
       # Dashboards fetched from grafana.com at pod start (revisions verified
       # to exist; a bad revision fails the pod)
       dashboardProviders:
@@ -205,6 +211,13 @@ spec:
           memory: 64Mi
         limits:
           memory: 128Mi
+      prometheusConfigReloader:
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+          limits:
+            memory: 64Mi
 
     kube-state-metrics:
       resources:
@@ -218,6 +231,6 @@ spec:
       resources:
         requests:
           cpu: 10m
-          memory: 16Mi
+          memory: 24Mi
         limits:
           memory: 48Mi

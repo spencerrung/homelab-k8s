@@ -55,6 +55,14 @@ spec:
         limits:
           memory: 768Mi
 
+    sidecar:
+      resources:
+        requests:
+          cpu: 5m
+          memory: 96Mi
+        limits:
+          memory: 128Mi
+
     # Zero out the distributed-mode components and chart extras that are
     # pure overhead on a single-binary homelab install
     backend:
