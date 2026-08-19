@@ -16,4 +16,4 @@ spec:
   prune: true
   wait: true
   # first install pulls a lot of arm64 images
-  timeout: 15m0s
+  timeout: 25m0s
