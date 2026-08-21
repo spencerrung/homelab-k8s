@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: docker.io/spencerrung/aimtrix:20260821133142-1935508 # {"$imagepolicy": "flux-system:aimtrix"}
+          image: docker.io/spencerrung/aimtrix:v0.1.0@sha256:abbaab6edaccbaab9268ad541864dc21e69fc8be36100ea66535bf399d728d1e # pinned release; restore the image-policy marker after the refactor
           ports:
             - containerPort: 8080
               name: http
