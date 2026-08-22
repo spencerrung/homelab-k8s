@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: docker.io/spencerrung/aimtrix:v0.1.0@sha256:abbaab6edaccbaab9268ad541864dc21e69fc8be36100ea66535bf399d728d1e # pinned release; restore the image-policy marker after the refactor
+          image: docker.io/spencerrung/aimtrix:v0.2.2@sha256:24727d2f222224d227a87a5630734c29262fd25171bf193506f8292caa436599 # pinned release; upgrades remain deliberate
           ports:
             - containerPort: 8080
               name: http
