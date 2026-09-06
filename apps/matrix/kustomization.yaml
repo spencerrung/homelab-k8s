@@ -5,6 +5,7 @@ resources:
   # Namespace + secret plumbing
   - namespace.yaml
   - externalsecrets.yaml
+  - bsky
   # Database
   - postgresql.yaml
   - networkpolicy.yaml

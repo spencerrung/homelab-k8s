@@ -1,0 +1,102 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: bsky-notifier
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: vault-backend
+    kind: ClusterSecretStore
+  target:
+    name: bsky-notifier
+    creationPolicy: Owner
+  data:
+    - secretKey: MATRIX_ACCESS_TOKEN
+      remoteRef:
+        key: monitoring/matrix
+        property: access-token
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: bsky-notifier-data
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: bsky-notifier
+spec:
+  schedule: "* * * * *"
+  suspend: false
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 60
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 300
+      template:
+        metadata:
+          labels:
+            app: bsky-notifier
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            fsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: notifier
+              image: python:3.12.13-alpine
+              command: [python, -B, /app/watcher.py]
+              env:
+                - name: MATRIX_HOMESERVER
+                  value: http://synapse.matrix.svc.cluster.local:8008
+                - name: MATRIX_ROOM_ID
+                  value: "#bsky:alucard.dev"
+              envFrom:
+                - secretRef:
+                    name: bsky-notifier
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 32Mi
+                limits:
+                  cpu: 250m
+                  memory: 128Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: [ALL]
+              volumeMounts:
+                - name: code
+                  mountPath: /app
+                  readOnly: true
+                - name: rules
+                  mountPath: /config
+                  readOnly: true
+                - name: data
+                  mountPath: /data
+          volumes:
+            - name: code
+              configMap:
+                name: bsky-notifier-code
+            - name: rules
+              configMap:
+                name: bsky-notifier-rules
+            - name: data
+              persistentVolumeClaim:
+                claimName: bsky-notifier-data
