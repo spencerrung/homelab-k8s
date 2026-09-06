@@ -1,0 +1,24 @@
+{
+  "rules": [
+    {
+      "id": "account-keywords",
+      "actor": "example.bsky.social",
+      "keywords": ["release", "available now"],
+      "match": "any",
+      "include_replies": false
+    },
+    {
+      "id": "all-posts",
+      "actor": "another.example.com",
+      "keywords": [],
+      "include_replies": true
+    },
+    {
+      "id": "both-keywords",
+      "actor": "third.bsky.social",
+      "keywords": ["linux", "arm64"],
+      "match": "all",
+      "include_replies": false
+    }
+  ]
+}

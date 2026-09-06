@@ -14,6 +14,8 @@ client, deployed via Flux.
 
 ## Architecture
 
+Bluesky account/keyword notifications: [bsky setup and configuration](bsky/README.md).
+
 | Component | What | Where |
 |-----------|------|-------|
 | Synapse   | Matrix homeserver | `synapse-*.yaml` |
