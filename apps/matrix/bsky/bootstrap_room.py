@@ -28,7 +28,7 @@ def main():
     events = {(e["type"], e["state_key"]): e["content"] for e in state}
     if events.get(("m.room.create", ""), {}).get("type") != "m.space":
         raise ValueError("Target is not a Matrix space")
-    if events.get(("m.room.name", ""), {}).get("name") != "Alucard":
+    if events.get(("m.room.name", ""), {}).get("name", "").casefold() != "alucard":
         raise ValueError("Target space is not named Alucard")
     owner = api("/account/whoami")["user_id"]
     invitees = sorted(({args.bot_user} | set(args.room_admin)) - {owner})

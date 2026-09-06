@@ -15,7 +15,7 @@ class BootstrapTests(unittest.TestCase):
             if url.endswith("/rooms/%21space%3Aalucard.dev/state"):
                 return [
                     {"type": "m.room.create", "state_key": "", "content": {"type": "m.space"}},
-                    {"type": "m.room.name", "state_key": "", "content": {"name": "Alucard"}},
+                    {"type": "m.room.name", "state_key": "", "content": {"name": "alucard"}},
                     {"type": "m.room.power_levels", "state_key": "", "content": {"users": {bot: power}}},
                 ]
             if url.endswith("/account/whoami"):
