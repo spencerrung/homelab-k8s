@@ -17,6 +17,28 @@ data:
         base_url: http://sonarr:8989
         api_key: !env_var SONARR_API_KEY
         delete_old_custom_formats: true
+        # MB/min. Compact animation/HEVC packs can fall below Sonarr's
+        # 3 MB/min (720p) and 4 MB/min (1080p) defaults. Quality sizes
+        # are global to Sonarr, so this applies to every TV profile.
+        # Explicitly preserve the other live values: enabling the guide
+        # without these overrides would raise unrelated minimums/maxima.
+        quality_definition:
+          type: series
+          qualities:
+            - {name: HDTV-720p, min: 2, preferred: 95, max: 125}
+            - {name: HDTV-1080p, min: 3, preferred: 95, max: 125}
+            - {name: WEBRip-720p, min: 2, preferred: 95, max: 130}
+            - {name: WEBDL-720p, min: 2, preferred: 95, max: 130}
+            - {name: Bluray-720p, min: 4, preferred: 95, max: 130}
+            - {name: WEBRip-1080p, min: 3, preferred: 95, max: 130}
+            - {name: WEBDL-1080p, min: 3, preferred: 95, max: 130}
+            - {name: Bluray-1080p, min: 4, preferred: 95, max: 155}
+            - {name: Bluray-1080p Remux, min: 35, preferred: 95, max: unlimited}
+            - {name: HDTV-2160p, min: 35, preferred: 95, max: 199.9}
+            - {name: WEBRip-2160p, min: 35, preferred: 95, max: unlimited}
+            - {name: WEBDL-2160p, min: 35, preferred: 95, max: unlimited}
+            - {name: Bluray-2160p, min: 35, preferred: 95, max: unlimited}
+            - {name: Bluray-2160p Remux, min: 35, preferred: 95, max: unlimited}
         # TRaSH naming: rename on import + season folders — players
         # (plex) parse filenames, scene names misparse (e.g. anime
         # "(2025) - 01" reads as S01E01).
