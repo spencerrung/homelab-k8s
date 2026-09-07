@@ -178,6 +178,43 @@ The systemic fix, if these keep annoying: a usenet indexer + client
 (SABnzbd) — old content has no seeder problem there, but it's a paid
 provider (~$5-10/mo). Slots into the existing layout; ask when wanted.
 
+## Compact season packs rejected by size or existing episodes
+
+Archer S05/S06 exposed a separate problem from dead seeds: complete 1080p
+HEVC packs (~1.2–1.3 GiB for 13 episodes) were below Sonarr's 4 MB/min minimum.
+The S06 pack had 59 reported seeders and only a size rejection. The S05 pack
+also conflicted with the existing S05E09 WEB-DL file's higher source preference.
+
+`apps/media/recyclarr.yaml` now declares the Sonarr `series` quality definition:
+HDTV/WEB 720p minimum **2 MB/min**, HDTV/WEB 1080p minimum **3 MB/min**.
+These settings are global to all Sonarr profiles and codecs, not just Archer
+or HEVC. Maximum/preferred sizes and other quality minima retain the observed
+live values via explicit overrides. SD/Unknown/Raw-HD are outside the guide's
+series table and are not managed by this definition. Radarr is unaffected.
+The tradeoff is accepting more heavily compressed HD releases; resolution and
+language checks still apply. Recyclarr 8.6.0 supports these per-quality overrides:
+see [the configuration reference](https://recyclarr.dev/reference/configuration/quality-definition/).
+
+After PR merge and Flux reconciliation, the existing Recyclarr CronJob applies
+the settings at **05:00 UTC**. Flux updating the ConfigMap does not immediately
+change Sonarr settings. Do not create an ad-hoc Job or change Sonarr by hand to
+accelerate this; use the scheduled reconciliation. Re-run an interactive search
+after the sync to verify the size rejection is gone. Existing monitored episodes
+do not automatically get a new backlog search just because settings changed.
+
+For an immediate, explicitly approved exception, use Sonarr's **Interactive
+Search → Manual Grab** for the verified single-season pack. This overrides grab
+rejections and records the download in Sonarr history, with the `tv-sonarr`
+category for normal completed-download handling. Check qBittorrent's file list
+for all intended episode numbers and monitor Sonarr's queue after completion.
+An existing higher-preference episode may remain; that is not a reason to delete
+it. If the pack remains import-pending, inspect the individual import reasons.
+
+Lowering size minima does **not** fix `Unknown Series` (for example, misleading
+`Archer (2010)` release titles) or existing-file season-pack conflicts. Verify
+identity and contents before manually grabbing those; do not weaken global
+language/source rules or delete existing episodes to bypass the rejection.
+
 ## Going further (optional, not yet installed)
 
 - **Bazarr** (subtitles) — slots into the existing layout; ask when
