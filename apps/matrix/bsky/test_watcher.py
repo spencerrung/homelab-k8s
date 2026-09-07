@@ -1,4 +1,6 @@
 import unittest
+import json
+from pathlib import Path
 from unittest.mock import Mock
 
 from watcher import database, matches, poll, resolve_room, validate
@@ -11,6 +13,14 @@ def post(number, text="New RELEASE", **record):
 
 
 class WatcherTests(unittest.TestCase):
+    def test_active_reset_rule_includes_thread_announcements(self):
+        config = json.loads(Path(__file__).with_name("rules.json").read_text())
+        rule = next(r for r in validate(config) if r["id"] == "thsottiaux-reset")
+        announcement = post(2, "We will do a global reset of the usage for all paid subscriptions. (2/2)",
+                            reply={"root": {"uri": "at://thread"}, "parent": {"uri": "at://thread"}})
+        self.assertTrue(matches(rule, announcement))
+        self.assertFalse(matches(rule, post(3, "Thanks for reading", reply=announcement["record"]["reply"])))
+
     def setUp(self):
         self.db = database(":memory:")
         self.addCleanup(self.db.close)
