@@ -9,7 +9,9 @@ The image is the same pinned Python image used by the media anime guard.
 ## Initial setup
 
 The job watches `thsottiaux-bot.eurosky.social` for the case-insensitive substring
-`reset`, excluding replies and reposts. It resolves `#bsky:alucard.dev` each run.
+`reset`, including replies and thread continuations, but excluding reposts.
+Thread announcements such as part 2/2 are replies in Bluesky's API; excluding
+replies would silently miss matching announcements. It resolves `#bsky:alucard.dev` each run.
 It reuses `@alertmanager:alucard.dev` and the existing Vault credential at
 `secret/monitoring/matrix`, property `access-token`. ESO creates the Kubernetes
 Secret through the committed manifest; no manual Kubernetes writes are needed.

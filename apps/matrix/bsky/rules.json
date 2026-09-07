@@ -5,7 +5,7 @@
       "actor": "thsottiaux-bot.eurosky.social",
       "keywords": ["reset"],
       "match": "any",
-      "include_replies": false
+      "include_replies": true
     }
   ]
 }
