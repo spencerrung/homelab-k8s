@@ -64,19 +64,18 @@ spec:
           env:
             - name: VPN_SERVICE_PROVIDER
               value: private internet access
-            # Pi 4 (Cortex-A72) has no AES hardware; the default "strong"
-            # preset was CPU-bound at ~280KiB/s. normal = AES-128, and the
-            # MSS clamp avoids fragmentation collapse over the tunnel.
+            # PIA's TCP/443 endpoint requires the strong profile's current
+            # certificate chain. The normal profile fails certificate
+            # verification before the tunnel can start.
             - name: PRIVATE_INTERNET_ACCESS_OPENVPN_ENCRYPTION_PRESET
-              value: normal
+              value: strong
             # CRITICAL: flannel VXLAN pod interfaces are MTU 1450; OpenVPN's
             # default tun-mtu 1500 fragments every packet (~250KiB/s). 1380
             # fits inside the overlay and was worth a 6x speedup.
             - name: OPENVPN_FLAGS
               value: --tun-mtu 1380 --mssfix 1300
-            # The cluster cannot reach PIA's Toronto gateway range on any
-            # supported port. Montreal is reachable on PIA's supported
-            # OpenVPN TCP/443 endpoint and remains port-forwarding capable.
+            # This server group has been verified from the qBittorrent node:
+            # its TCP/443 endpoints establish and pass Gluetun's healthcheck.
             - name: OPENVPN_PROTOCOL
               value: tcp
             - name: OPENVPN_ENDPOINT_PORT
@@ -91,11 +90,14 @@ spec:
                 secretKeyRef:
                   name: media-vpn
                   key: password
-            # PIA offers port forwarding only outside the US; Montreal is a
-            # reachable PF-capable region. To prefer US egress instead,
+            # PIA offers port forwarding only outside the US. This Vancouver
+            # server group supports it and is reachable from the cluster. To
+            # prefer US egress instead,
             # set a US region and VPN_PORT_FORWARDING=off.
             - name: SERVER_REGIONS
-              value: CA Montreal
+              value: CA Vancouver
+            - name: SERVER_NAMES
+              value: vancouver426
             - name: FIREWALL_OUTBOUND_SUBNETS
               value: 10.42.0.0/16,10.43.0.0/16
             - name: FIREWALL_INPUT_PORTS
