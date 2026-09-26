@@ -75,12 +75,12 @@ spec:
             - name: OPENVPN_FLAGS
               value: --tun-mtu 1380 --mssfix 1300
             # UDP handshakes to the Toronto PIA gateways time out from the
-            # cluster. PIA supports TCP/443 as an alternative transport while
-            # retaining the port-forwarding-capable Toronto endpoint.
+            # cluster. PIA supports TCP/502 with the normal AES-128 profile,
+            # while retaining the port-forwarding-capable Toronto endpoint.
             - name: OPENVPN_PROTOCOL
               value: tcp
             - name: OPENVPN_ENDPOINT_PORT
-              value: "443"
+              value: "502"
             - name: OPENVPN_USER
               valueFrom:
                 secretKeyRef:

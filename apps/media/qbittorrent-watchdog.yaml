@@ -71,7 +71,7 @@ spec:
                   fi
                   echo "qBittorrent is unavailable (${available:-0}/${desired}); restarting"
                   kubectl rollout restart deployment/qbittorrent
-                  kubectl rollout status deployment/qbittorrent --timeout=240s
+                  echo "restart requested"
               resources:
                 requests:
                   cpu: 25m
