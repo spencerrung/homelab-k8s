@@ -1,0 +1,80 @@
+---
+# Restarts only the qBittorrent Deployment when Kubernetes reports no ready
+# replica. Container probes remain the first line of recovery; this catches a
+# pod that stays pending or otherwise cannot recover in place.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: qbittorrent-watchdog
+  namespace: media
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: qbittorrent-watchdog
+  namespace: media
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    resourceNames: ["qbittorrent"]
+    verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: qbittorrent-watchdog
+  namespace: media
+subjects:
+  - kind: ServiceAccount
+    name: qbittorrent-watchdog
+    namespace: media
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: qbittorrent-watchdog
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: qbittorrent-watchdog
+  namespace: media
+spec:
+  schedule: "*/5 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 300
+      template:
+        metadata:
+          labels:
+            app: qbittorrent-watchdog
+        spec:
+          serviceAccountName: qbittorrent-watchdog
+          restartPolicy: Never
+          containers:
+            - name: watchdog
+              image: rancher/kubectl:v1.29.10
+              command:
+                - sh
+                - -ec
+                - |
+                  desired=$(kubectl get deployment/qbittorrent \
+                    -o jsonpath='{.spec.replicas}')
+                  available=$(kubectl get deployment/qbittorrent \
+                    -o jsonpath='{.status.availableReplicas}')
+                  if [ "${available:-0}" -ge "${desired:-1}" ]; then
+                    echo "qBittorrent is available (${available}/${desired})"
+                    exit 0
+                  fi
+                  echo "qBittorrent is unavailable (${available:-0}/${desired}); restarting"
+                  kubectl rollout restart deployment/qbittorrent
+                  kubectl rollout status deployment/qbittorrent --timeout=240s
+              resources:
+                requests:
+                  cpu: 25m
+                  memory: 32Mi
+                limits:
+                  memory: 64Mi
