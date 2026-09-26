@@ -50,7 +50,7 @@ Create the directories once (any pod):
 ### 0. VPN (already wired)
 
 qBittorrent runs behind a gluetun sidecar: all its traffic exits via PIA
-(CA Montreal - PIA only offers port forwarding outside the US) with a
+(CA Vancouver - PIA only offers port forwarding outside the US) with a
 killswitch; the ISP sees one encrypted tunnel. Creds: Vault
 `secret/media/vpn`. Verify anytime:
 `kubectl exec -n media deploy/qbittorrent -c qbittorrent -- wget -qO- https://ipinfo.io/json`

@@ -74,9 +74,9 @@ spec:
             # fits inside the overlay and was worth a 6x speedup.
             - name: OPENVPN_FLAGS
               value: --tun-mtu 1380 --mssfix 1300
-            # The cluster cannot reach PIA's Toronto gateway range on any
-            # supported port. Montreal is reachable on PIA's supported
-            # OpenVPN TCP/443 endpoint and remains port-forwarding capable.
+            # The cluster cannot reach the Toronto or Montreal PIA gateway
+            # ranges. Every vancouver426 endpoint is reachable on PIA's
+            # supported OpenVPN TCP/443 endpoint and supports port forwarding.
             - name: OPENVPN_PROTOCOL
               value: tcp
             - name: OPENVPN_ENDPOINT_PORT
@@ -91,11 +91,14 @@ spec:
                 secretKeyRef:
                   name: media-vpn
                   key: password
-            # PIA offers port forwarding only outside the US; Montreal is a
-            # reachable PF-capable region. To prefer US egress instead,
+            # PIA offers port forwarding only outside the US; this specific
+            # Vancouver server group is reachable from the cluster. To prefer
+            # US egress instead,
             # set a US region and VPN_PORT_FORWARDING=off.
             - name: SERVER_REGIONS
-              value: CA Montreal
+              value: CA Vancouver
+            - name: SERVER_NAMES
+              value: vancouver426
             - name: FIREWALL_OUTBOUND_SUBNETS
               value: 10.42.0.0/16,10.43.0.0/16
             - name: FIREWALL_INPUT_PORTS
