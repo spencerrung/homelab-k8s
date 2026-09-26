@@ -56,7 +56,10 @@ spec:
           restartPolicy: Never
           containers:
             - name: watchdog
-              image: rancher/kubectl:v1.29.10
+              # rancher/kubectl is distroless and cannot execute the shell
+              # recovery script. This multi-arch image includes kubectl and
+              # /bin/sh and tracks the cluster's Kubernetes minor version.
+              image: alpine/k8s:1.29.10
               command:
                 - sh
                 - -ec
