@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: docker.io/spencerrung/aimtrix:v0.3.0-rc.4@sha256:ab2819a1032b13490748f553ce0b261ccf095321192c1b7b9a95ec22d8fbaab1 # pinned release candidate; upgrades remain deliberate
+          image: docker.io/spencerrung/aimtrix:v0.3.0-rc.5@sha256:563fcc3e2811f06b70a2311c00c75425214303a1ebd493383fd3cb9020274bfc # pinned release candidate; upgrades remain deliberate
           ports:
             - containerPort: 8080
               name: http
