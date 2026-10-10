@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ryans-apartments
+  namespace: ryans-apartments
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+spec:
+  tls:
+    - hosts:
+        - apt.alucard.dev
+      secretName: ryans-apartments-tls
+  rules:
+    - host: apt.alucard.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ryans-apartments
+                port:
+                  number: 80

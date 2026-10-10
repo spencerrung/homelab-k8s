@@ -5,3 +5,4 @@ resources:
   - image-repositories.yaml
   - image-policies.yaml
   - image-update-automation.yaml
+  - ryans-apartments.yaml

@@ -1,0 +1,23 @@
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: ryans-apartments
+  namespace: flux-system
+spec:
+  image: docker.io/spencerrung/ryans-apartments
+  interval: 15m
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: ryans-apartments
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: ryans-apartments
+  filterTags:
+    pattern: '^(?P<ts>\d{14})-[a-f0-9]+$'
+    extract: '$ts'
+  policy:
+    numerical:
+      order: asc
