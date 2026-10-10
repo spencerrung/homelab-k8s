@@ -21,7 +21,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: web
-          image: docker.io/spencerrung/ryans-apartments:20261010201209-48d367f # {"$imagepolicy": "flux-system:ryans-apartments"}
+          image: docker.io/spencerrung/ryans-apartments:20261010204314-6295591 # {"$imagepolicy": "flux-system:ryans-apartments"}
           ports:
             - containerPort: 8080
               name: http
