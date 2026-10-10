@@ -15,13 +15,13 @@ spec:
     spec:
       securityContext:
         runAsNonRoot: true
-        runAsUser: 101
-        runAsGroup: 101
+        runAsUser: 1000
+        runAsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
       containers:
         - name: web
-          image: docker.io/spencerrung/ryans-apartments:20261010190832-e746062 # {"$imagepolicy": "flux-system:ryans-apartments"}
+          image: docker.io/spencerrung/ryans-apartments:1.1.0 # {"$imagepolicy": "flux-system:ryans-apartments"}
           ports:
             - containerPort: 8080
               name: http
@@ -32,10 +32,10 @@ spec:
           resources:
             requests:
               cpu: 25m
-              memory: 32Mi
+              memory: 64Mi
             limits:
-              cpu: 200m
-              memory: 128Mi
+              cpu: 300m
+              memory: 256Mi
           livenessProbe:
             httpGet:
               path: /healthz
