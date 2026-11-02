@@ -86,6 +86,17 @@ Consistency notes:
 
 ## Routine operations
 
+- **Authentik backup hook reports `out of shared memory`**: inspect advisory
+  lock counts and their owning clients in `pg_locks` joined to
+  `pg_stat_activity`. During the November 2026 recovery, two long-running
+  Authentik workers held over 12,000 session advisory locks. An authorized
+  rolling restart of `deployment/authentik-worker` released them; a subsequent
+  `pg_dumpall` succeeded without changing the database lock limit. Check worker
+  rollout and Authentik readiness, then take a replacement backup and verify
+  its hook and volume-copy results. Do not treat the earlier `PartiallyFailed`
+  backup as a successful consistent database dump. If locks accumulate again,
+  investigate worker task handling rather than repeatedly raising PostgreSQL
+  limits. Never print a database dump or application records into diagnostics.
 - **Vault pod restarted / sealed**: `VAULT_UNSEAL_KEY=... ./bootstrap/vault-init.sh`
   (unseal-only takes seconds; apps keep running on rendered k8s Secrets
   meanwhile).
