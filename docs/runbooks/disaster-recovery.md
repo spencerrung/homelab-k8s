@@ -19,8 +19,8 @@ not of the break-glass credentials.
 | Data | Mechanism | Destination | Schedule / retention |
 |---|---|---|---|
 | Vault (all secrets) | raft snapshot CronJob (`infrastructure/base/vault/snapshot-cronjob.yaml`) | `b2://alucard-vault-snapshots/` | 01:30 UTC nightly / 30 days (B2 lifecycle) |
-| matrix, atproto, gitea, authentik namespaces incl. PVCs | Velero `nightly-stateful` (kopia file-level) | `b2://alucard-velero/` | 02:00 UTC nightly / 14 days |
-| whole cluster (minus kube-system, flux-system, velero) | Velero `weekly-full` | `b2://alucard-velero/` | Sun 03:00 UTC / 60 days |
+| matrix, atproto, gitea, authentik, home-assistant, ai, homarr, newhope namespaces incl. PVCs | Velero `nightly-stateful` (kopia file-level) | `b2://alucard-velero/` | 02:00 UTC nightly / 14 days |
+| whole cluster (minus kube-system, flux-system, velero, media) | Velero `weekly-full` | `b2://alucard-velero/` | Sun 03:00 UTC / 60 days |
 | everything else (manifests) | git | GitHub `spencerrung/homelab-k8s` | — |
 
 Consistency notes:

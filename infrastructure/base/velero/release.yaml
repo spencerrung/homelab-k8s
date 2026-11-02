@@ -84,6 +84,8 @@ spec:
             - home-assistant
             - ai
             - homarr
+            # Views/hearts are stored on a node-local PVC, not in Git.
+            - newhope
       # Whole cluster weekly (manifests are in git; belt and braces),
       # kept 60 days
       weekly-full:

@@ -10,7 +10,9 @@ report `Ready` while service and network-policy watches failed with
 `Unauthorized`. Restarting only the server restored administrative access but
 did not refresh the running workers. Stale networking also blocked Vault
 snapshots. The separate offline worker had stopped reporting on October 4 and
-needed a physical power-cycle; its original failure was not established.
+needed a physical power-cycle. Its previous kernel log showed SD-card read/write
+errors and an ext4 metadata-write failure. Check the previous boot's kernel log
+and secure a fresh backup before treating a recovered node as reliable.
 
 ## Diagnose without exposing credentials
 
