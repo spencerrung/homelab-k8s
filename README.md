@@ -26,6 +26,7 @@ docs/                 architecture, runbooks, decisions
   graph, secrets flow
 - Runbooks: [bootstrap](docs/runbooks/bootstrap.md) ·
   [disaster recovery](docs/runbooks/disaster-recovery.md) ·
+  [certificate recovery](docs/runbooks/certificate-recovery.md) ·
   [add an app](docs/runbooks/add-an-app.md) ·
   [monitoring](docs/runbooks/monitoring.md)
 - [Decision records](docs/decisions/)
