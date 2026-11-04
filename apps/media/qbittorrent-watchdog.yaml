@@ -1,7 +1,7 @@
 ---
 # Restarts only the qBittorrent Deployment when Kubernetes reports no ready
-# replica. Container probes remain the first line of recovery; this catches a
-# pod that stays pending or otherwise cannot recover in place.
+# replica for at least 15 minutes. Container probes remain the first line of
+# recovery; brief VPN/DNS readiness dips must not restart the entire pod.
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -72,7 +72,25 @@ spec:
                     echo "qBittorrent is available (${available}/${desired})"
                     exit 0
                   fi
-                  echo "qBittorrent is unavailable (${available:-0}/${desired}); restarting"
+                  # Availability can briefly drop while Gluetun reconnects
+                  # or its resolver retries. Allow probes to recover it first.
+                  unavailable_since=$(kubectl get deployment/qbittorrent \
+                    -o jsonpath='{.status.conditions[?(@.type=="Available")].lastTransitionTime}')
+                  availability=$(kubectl get deployment/qbittorrent \
+                    -o jsonpath='{.status.conditions[?(@.type=="Available")].status}')
+                  if [ "$availability" != "False" ] || [ -z "$unavailable_since" ]; then
+                    echo "No confirmed unavailability interval; leaving recovery to probes"
+                    exit 0
+                  fi
+                  # This format works with both BusyBox and GNU date.
+                  normalized=$(printf '%s' "$unavailable_since" | tr 'T' ' ' | tr -d 'Z')
+                  since_epoch=$(date -u -d "$normalized" +%s)
+                  age_seconds=$(( $(date -u +%s) - since_epoch ))
+                  if [ "$age_seconds" -lt 900 ]; then
+                    echo "qBittorrent unavailable for ${age_seconds}s; waiting for 900s before restarting"
+                    exit 0
+                  fi
+                  echo "qBittorrent unavailable for ${age_seconds}s (${available:-0}/${desired}); restarting"
                   kubectl rollout restart deployment/qbittorrent
                   echo "restart requested"
               resources:
