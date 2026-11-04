@@ -19,8 +19,8 @@ not of the break-glass credentials.
 | Data | Mechanism | Destination | Schedule / retention |
 |---|---|---|---|
 | Vault (all secrets) | raft snapshot CronJob (`infrastructure/base/vault/snapshot-cronjob.yaml`) | `b2://alucard-vault-snapshots/` | 01:30 UTC nightly / 30 days (B2 lifecycle) |
-| matrix, atproto, gitea, authentik namespaces incl. PVCs | Velero `nightly-stateful` (kopia file-level) | `b2://alucard-velero/` | 02:00 UTC nightly / 14 days |
-| whole cluster (minus kube-system, flux-system, velero) | Velero `weekly-full` | `b2://alucard-velero/` | Sun 03:00 UTC / 60 days |
+| matrix, atproto, gitea, authentik, home-assistant, ai, homarr, newhope namespaces incl. PVCs | Velero `nightly-stateful` (kopia file-level) | `b2://alucard-velero/` | 02:00 UTC nightly / 14 days |
+| whole cluster (minus kube-system, flux-system, velero, media) | Velero `weekly-full` | `b2://alucard-velero/` | Sun 03:00 UTC / 60 days |
 | everything else (manifests) | git | GitHub `spencerrung/homelab-k8s` | — |
 
 Consistency notes:
@@ -86,6 +86,17 @@ Consistency notes:
 
 ## Routine operations
 
+- **Authentik backup hook reports `out of shared memory`**: inspect advisory
+  lock counts and their owning clients in `pg_locks` joined to
+  `pg_stat_activity`. During the November 2026 recovery, two long-running
+  Authentik workers held over 12,000 session advisory locks. An authorized
+  rolling restart of `deployment/authentik-worker` released them; a subsequent
+  `pg_dumpall` succeeded without changing the database lock limit. Check worker
+  rollout and Authentik readiness, then take a replacement backup and verify
+  its hook and volume-copy results. Do not treat the earlier `PartiallyFailed`
+  backup as a successful consistent database dump. If locks accumulate again,
+  investigate worker task handling rather than repeatedly raising PostgreSQL
+  limits. Never print a database dump or application records into diagnostics.
 - **Vault pod restarted / sealed**: `VAULT_UNSEAL_KEY=... ./bootstrap/vault-init.sh`
   (unseal-only takes seconds; apps keep running on rendered k8s Secrets
   meanwhile).
