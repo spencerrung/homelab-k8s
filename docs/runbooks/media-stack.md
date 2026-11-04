@@ -161,6 +161,31 @@ stay in memory or the app's secret references, never in logs or committed files.
 These checks concern internal service/VPN DNS. They do not require changing
 public `alucard.dev` DNS records.
 
+### Brief Gluetun readiness failures
+
+Check container restart counts and timestamped events before interpreting a
+red readiness indicator as a VPN restart. During the November 2026 recovery,
+Gluetun logged TLS connection resets to Cloudflare at `1.1.1.1:853`, including
+one for the readiness probe's `example.com` lookup. Both containers retained
+zero restarts and the VPN had not reconnected. Resource usage was normal.
+The DNS error made the shared pod temporarily unready and removed its Service
+endpoint, even though existing peer connections could continue.
+
+The configured mitigation uses `DNS_UPSTREAM_RESOLVER_TYPE=doh` with
+`DNS_UPSTREAM_RESOLVERS=cloudflare,google`. Queries stay encrypted inside the
+VPN and use HTTPS port 443 instead of the affected DNS-over-TLS port 853.
+This is a response to the observed route failure, not proof of which network
+operator reset the connection. Neither upstream availability nor long-term
+VPN stability is guaranteed; compare logs and probe timings after deployment.
+See Gluetun's [DNS settings](https://github.com/qdm12/gluetun-wiki/blob/main/setup/options/dns.md).
+
+The availability watchdog also requires 15 continuous minutes of Deployment
+unavailability before requesting a restart. A single failed readiness check
+must not cause an unrelated five-minute CronJob to restart qBittorrent and
+interrupt all its peers. Container startup/liveness probes remain responsible
+for recovering a persistently unhealthy Gluetun container during that grace
+period. Missing or ambiguous availability timestamps do not trigger a restart.
+
 ## Verify the hardlink promise
 
 After the first completed download imports:

@@ -98,6 +98,13 @@ spec:
               value: CA Vancouver
             - name: SERVER_NAMES
               value: vancouver426
+            # DoT connections to Cloudflare:853 intermittently reset through
+            # this PIA endpoint. Keep encrypted DNS inside the VPN, using
+            # HTTPS:443 and two upstream providers instead.
+            - name: DNS_UPSTREAM_RESOLVER_TYPE
+              value: doh
+            - name: DNS_UPSTREAM_RESOLVERS
+              value: cloudflare,google
             - name: FIREWALL_OUTBOUND_SUBNETS
               value: 10.42.0.0/16,10.43.0.0/16
             - name: FIREWALL_INPUT_PORTS
