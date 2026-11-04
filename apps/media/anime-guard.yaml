@@ -101,8 +101,10 @@ spec:
                 # shot in English — belongs on the standard profile
                 - name: SKIP_TMDB
                   value: "1246049"
+                # Pokemon: explicitly requested in English; preserve its
+                # standard profile instead of switching to anime languages.
                 - name: SKIP_TVDB
-                  value: ""
+                  value: "76703"
                 - name: SONARR_API_KEY
                   valueFrom:
                     secretKeyRef:
