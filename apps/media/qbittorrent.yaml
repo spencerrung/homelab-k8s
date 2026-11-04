@@ -24,14 +24,32 @@ metadata:
 data:
   notify-matrix.sh: |
     #!/bin/sh
-    # $1 = torrent name (qBittorrent passes %N)
-    TITLE=$(printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g')
-    curl -s -m 15 -X PUT \
-      -H "Authorization: Bearer ${MATRIX_TOKEN}" \
-      -H "Content-Type: application/json" \
-      -d "{\"msgtype\":\"m.text\",\"body\":\"✅ Finished downloading: ${TITLE}\"}" \
-      "http://synapse.matrix.svc.cluster.local:8008/_matrix/client/v3/rooms/${MATRIX_ROOM}/send/m.room.message/qbt$(date +%s)$$" \
-      >/dev/null
+    set -eu
+    # $1 = torrent name (qBittorrent passes %N). jq handles quotes,
+    # backslashes and control characters without creating invalid JSON.
+    payload=$(jq -nc --arg title "$1" \
+      '{msgtype:"m.text",body:("✅ Finished downloading: " + $title)}')
+    # Gluetun replaces /etc/resolv.conf with its public VPN resolver,
+    # which cannot resolve Kubernetes service names. Use CoreDNS only
+    # for this internal Matrix request; torrent DNS stays on the VPN.
+    # The pinned qBittorrent image includes curl with c-ares support.
+    # Keep one transaction ID across retries to avoid duplicate messages.
+    txn="qbt$(date +%s)$$"
+    if ! curl --fail --silent --show-error --max-time 15 \
+      --dns-servers "${MATRIX_DNS_SERVER:-10.43.0.10}" \
+      --retry 3 --retry-all-errors --retry-delay 2 \
+      -X PUT -H "Authorization: Bearer ${MATRIX_TOKEN}" \
+      -H "Content-Type: application/json" --data "$payload" \
+      "http://synapse.matrix.svc.cluster.local:8008/_matrix/client/v3/rooms/${MATRIX_ROOM}/send/m.room.message/${txn}" \
+      >/dev/null; then
+      # Do not log tokens or media titles. qBittorrent's external-program
+      # output is not reliably included in container logs.
+      message="$(date -u +%FT%TZ) Matrix completion notification failed after retries"
+      printf '%s\n' "$message" >&2
+      mkdir -p /config/logs
+      printf '%s\n' "$message" >> /config/logs/matrix-notify.log
+      exit 1
+    fi
 ---
 apiVersion: apps/v1
 kind: Deployment

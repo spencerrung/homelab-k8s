@@ -294,3 +294,25 @@ language/source rules or delete existing episodes to bypass the rejection.
 - **Jellyfin**: deliberately not deployed — Pi 4 has no usable container
   transcode path. Direct-play-only is possible; running it on the UNAS
   is likely better.
+
+## Missing Matrix download notifications
+
+The qBittorrent completion hook sends to the internal Synapse service; it
+reports torrent completion, not Sonarr/Radarr import or Plex library updates.
+Check `autorun_enabled` and `autorun_program` through the qBittorrent API. The
+expected command is `/scripts/notify-matrix.sh "%N"`.
+
+Gluetun uses a public VPN resolver at `127.0.0.1`, which cannot resolve
+`synapse.matrix.svc.cluster.local`. The hook therefore uses curl's c-ares
+`--dns-servers` option with cluster CoreDNS (`10.43.0.10`) for this one internal
+request. Torrent DNS, VPN routing and public DNS records remain unchanged.
+If the cluster service CIDR changes, update this address. When upgrading the
+qBittorrent image, verify curl still supports `--dns-servers`.
+
+The hook treats HTTP errors as failures, retries with the same Matrix
+transaction ID, and records exhausted failures without tokens or titles in
+`/config/logs/matrix-notify.log`. It does not replay missed historical events.
+The script is mounted from a ConfigMap and updates without restarting downloads
+once Kubernetes refreshes the projected volume. Verify the mounted script after
+Flux applies it. Test connectivity with a read-only Matrix endpoint; do not
+send test or backfill messages without explicit approval.
