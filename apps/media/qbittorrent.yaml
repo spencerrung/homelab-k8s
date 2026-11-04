@@ -114,16 +114,33 @@ spec:
               memory: 256Mi
           startupProbe:
             exec:
-              command: ["/gluetun-entrypoint", "healthcheck"]
+              # Tunnel health alone can pass while the local resolver is
+              # broken, preventing tracker lookups and PIA port forwarding.
+              command:
+                - /bin/sh
+                - -ec
+                - /gluetun-entrypoint healthcheck && nslookup example.com 127.0.0.1 >/dev/null
             periodSeconds: 10
             timeoutSeconds: 8
             failureThreshold: 30
           livenessProbe:
             exec:
-              command: ["/gluetun-entrypoint", "healthcheck"]
+              command:
+                - /bin/sh
+                - -ec
+                - /gluetun-entrypoint healthcheck && nslookup example.com 127.0.0.1 >/dev/null
             periodSeconds: 60
             timeoutSeconds: 10
             failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -ec
+                - /gluetun-entrypoint healthcheck && nslookup example.com 127.0.0.1 >/dev/null
+            periodSeconds: 15
+            timeoutSeconds: 8
+            failureThreshold: 2
           volumeMounts:
             - name: dev-net-tun
               mountPath: /dev/net/tun

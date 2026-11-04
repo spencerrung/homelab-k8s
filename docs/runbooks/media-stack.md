@@ -117,6 +117,50 @@ First visit asks for auth: choose Forms, create your login. Then in each:
 | Sonarr/Radarr → qBittorrent | `http://qbittorrent:8080` | subnet whitelist |
 | Jellyseerr → Sonarr/Radarr | same as Prowlarr | same keys |
 
+## Requests accepted but nothing arrives
+
+Trace each stage before changing profiles or selecting another release:
+
+1. Check Jellyseerr's request status, then Sonarr/Radarr Activity and history.
+   An accepted request may already have a download in progress; completed
+   imports are recorded separately. Do not treat a seeding torrent as a failed
+   import without checking history.
+2. Check qBittorrent's progress, transfer rate, peers and tracker errors. A
+   stalled download can be a peer-availability problem, but DNS failures can
+   also prevent tracker discovery. Preserve the torrent and partial data while
+   restoring connectivity; reannounce trackers after recovery.
+3. Verify both tunnel health and **the VPN container's local resolver**:
+
+   ```bash
+   kubectl -n media exec deploy/qbittorrent -c gluetun -- sh -ec \
+     '/gluetun-entrypoint healthcheck && nslookup example.com 127.0.0.1 >/dev/null'
+   ```
+
+   In November 2026 the tunnel health check passed while local DNS timed out.
+   The logs showed failed public-IP discovery and PIA port-forward setup.
+   Restarting the pod restored DNS and forwarding, and the stalled movie began
+   downloading again. Gluetun's startup, readiness and liveness probes now
+   require both checks; the firewall and VPN routing remain unchanged. Startup
+   allows time for DNS filter lists to download, and liveness requires three
+   consecutive failures before restarting the container.
+4. Compare `/tmp/gluetun/forwarded_port` in Gluetun with qBittorrent's listening
+   port. A successful tunnel alone does not establish that forwarding renewed
+   or that the localhost preference-update hook succeeded.
+5. Test Prowlarr's indexer proxy and affected indexers. FlareSolverr's `/`
+   endpoint only proves that its HTTP server responds; the proxy test exercises
+   the browser. A stuck browser can leave the pod Ready while searches time out.
+   After an authorized restart, repeat the proxy and indexer tests rather than
+   disabling healthy sources or weakening quality rules.
+
+For an immediate pod restart, identify its exact name and delete only that pod
+after authorization; the Deployment recreates it with the existing PVC. Flux
+can remove a manually added rollout-restart annotation before the replacement
+is ready. Do not delete PVCs or partial downloads. Runtime API credentials must
+stay in memory or the app's secret references, never in logs or committed files.
+
+These checks concern internal service/VPN DNS. They do not require changing
+public `alucard.dev` DNS records.
+
 ## Verify the hardlink promise
 
 After the first completed download imports:
