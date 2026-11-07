@@ -335,3 +335,9 @@ After switching, verify VPN/DNS probes, renewed forwarding against the
 qBittorrent listening port, and sustained torrent progress. Preserve partial
 files and distinguish `stalledDL` from `stalledUP` (a completed torrent with no
 current upload). Do not downgrade a requested release's quality without approval.
+
+Follow-up testing showed that the unpinned TCP connection also reset on a repeat
+request, and the live TCP tunnel continued reconnecting. Switching the isolated
+pod to strong-profile OpenVPN UDP/1197 completed a 10 MB response at ~3.7 MB/s
+and passed VPN/local-DNS checks. The deployment therefore uses UDP/1197 as well
+as unpinned regional selection; removing the pin alone was insufficient.

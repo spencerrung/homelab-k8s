@@ -82,9 +82,8 @@ spec:
           env:
             - name: VPN_SERVICE_PROVIDER
               value: private internet access
-            # PIA's TCP/443 endpoint requires the strong profile's current
-            # certificate chain. The normal profile fails certificate
-            # verification before the tunnel can start.
+            # Retain the strong encryption profile and its current certificate
+            # chain; the older normal profile failed certificate verification.
             - name: PRIVATE_INTERNET_ACCESS_OPENVPN_ENCRYPTION_PRESET
               value: strong
             # CRITICAL: flannel VXLAN pod interfaces are MTU 1450; OpenVPN's
@@ -92,11 +91,12 @@ spec:
             # fits inside the overlay and was worth a 6x speedup.
             - name: OPENVPN_FLAGS
               value: --tun-mtu 1380 --mssfix 1300
-            # Keep the verified TCP/443 transport and strong certificate profile.
+            # TCP/443 repeatedly reset/stalled under load. UDP/1197 passed
+            # same-node throughput and DNS checks with the strong profile.
             - name: OPENVPN_PROTOCOL
-              value: tcp
+              value: udp
             - name: OPENVPN_ENDPOINT_PORT
-              value: "443"
+              value: "1197"
             - name: OPENVPN_USER
               valueFrom:
                 secretKeyRef:
