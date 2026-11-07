@@ -316,3 +316,22 @@ The script is mounted from a ConfigMap and updates without restarting downloads
 once Kubernetes refreshes the projected volume. Verify the mounted script after
 Flux applies it. Test connectivity with a read-only Matrix endpoint; do not
 send test or backfill messages without explicit approval.
+
+## VPN connects but downloads remain very slow
+
+A healthy tunnel and nonzero seed count do not prove usable throughput. Compare
+one bounded HTTPS transfer from the live VPN pod with an isolated Gluetun pod
+on the same node, using the same region, encryption, transport and DNS. Disable
+port forwarding in the test pod so it cannot change qBittorrent's listening port.
+
+In November 2026, the pinned `vancouver426` connection transferred only about
+0.3 MB of a 10 MB HTTPS response in 20 seconds (~15 KB/s). An unpinned Vancouver
+connection completed the same response in 3.8 seconds (~2.6 MB/s). DNS timeouts
+also persisted on the pinned connection. The manifest now selects within the
+region instead of pinning that server group. This improves selection flexibility;
+it does not guarantee every server or torrent peer will be fast.
+
+After switching, verify VPN/DNS probes, renewed forwarding against the
+qBittorrent listening port, and sustained torrent progress. Preserve partial
+files and distinguish `stalledDL` from `stalledUP` (a completed torrent with no
+current upload). Do not downgrade a requested release's quality without approval.
