@@ -16,3 +16,8 @@ resources:
   - recyclarr.yaml
   - anime-guard.yaml
   - bazarr.yaml
+configMapGenerator:
+  - name: jellyseerr-season-search-patch
+    namespace: media
+    files:
+      - jellyseerr-patch/patch.cjs
