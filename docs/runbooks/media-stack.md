@@ -341,3 +341,36 @@ request, and the live TCP tunnel continued reconnecting. Switching the isolated
 pod to strong-profile OpenVPN UDP/1197 completed a 10 MB response at ~3.7 MB/s
 and passed VPN/local-DNS checks. The deployment therefore uses UDP/1197 as well
 as unpinned regional selection; removing the pin alone was insufficient.
+
+## A season request downloads a different monitored season
+
+Compare Jellyseerr's requested seasons, Sonarr's monitored seasons, the search
+command body, and the downloaded file names. This is distinct from a parser
+matching a release to the wrong series. In November 2026 a Simpsons season-2
+request triggered `MissingEpisodeSearch` for the whole existing series while
+season 3 was also monitored. Sonarr correctly identified a season-3 pack, but
+its search scope exceeded the new request.
+
+The pinned Jellyseerr 2.7.3 deployment uses a small startup compatibility patch
+in `apps/media/jellyseerr-patch/patch.cjs`. Existing-series requests send one
+`SeasonSearch` per distinct requested season. Other seasons' monitoring settings
+are preserved; new-series creation and disabled automatic searches retain their
+existing behavior. This limits request-triggered searches, not subsequent RSS
+monitoring of seasons already monitored by the user.
+
+An init container using the same image builds the patched module into an
+`emptyDir`; only that module is mounted over the application's original file.
+It checks the expected source fragment occurs exactly once and rejects source
+drift rather than silently applying an unknown patch. On image upgrades, update
+both image references, review whether upstream still needs the patch, and run:
+
+```sh
+kubectl -n media exec deploy/jellyseerr -- cat /app/dist/api/servarr/sonarr.js > /tmp/jellyseerr-original-sonarr.js
+node apps/media/jellyseerr-patch/test.cjs /tmp/jellyseerr-original-sonarr.js
+```
+
+After deployment the mounted file is already patched; extract the original
+module from a temporary container using the pinned image when revalidating.
+Tests execute the real compiled module with mocked Sonarr calls and perform no
+live searches. Render `apps/media` and use a server-side dry run before rollout.
+A ConfigMap content change rolls the Deployment through its generated name.

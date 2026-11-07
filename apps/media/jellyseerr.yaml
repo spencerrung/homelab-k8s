@@ -29,6 +29,23 @@ spec:
       labels:
         app: jellyseerr
     spec:
+      initContainers:
+        - name: patch-season-search
+          # Keep identical to the application image: patch checks its source.
+          image: docker.io/fallenbagel/jellyseerr:2.7.3
+          command: ["node", "/patch/patch.cjs"]
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+          volumeMounts:
+            - name: season-search-patch
+              mountPath: /patch
+              readOnly: true
+            - name: patched-sonarr
+              mountPath: /patched
       containers:
         - name: jellyseerr
           image: docker.io/fallenbagel/jellyseerr:2.7.3
@@ -67,9 +84,18 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 5
           volumeMounts:
+            - name: patched-sonarr
+              mountPath: /app/dist/api/servarr/sonarr.js
+              subPath: sonarr.js
+              readOnly: true
             - name: config
               mountPath: /app/config
       volumes:
+        - name: season-search-patch
+          configMap:
+            name: jellyseerr-season-search-patch
+        - name: patched-sonarr
+          emptyDir: {}
         - name: config
           persistentVolumeClaim:
             claimName: jellyseerr-config
