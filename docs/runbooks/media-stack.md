@@ -1,8 +1,8 @@
 # Media stack: getting started
 
 The arr suite in the `media` namespace: Prowlarr (indexer manager),
-Sonarr (TV), Radarr (movies), qBittorrent (downloads), Jellyseerr
-(requests). Manifests: `apps/media/`.
+Sonarr (TV), Radarr (movies), qBittorrent (downloads), Seerr
+(requests), and Bazarr (subtitles). Manifests: `apps/media/`.
 
 ## What is IaC vs what you configure once in the UI
 
@@ -26,10 +26,11 @@ Sonarr (TV), Radarr (movies), qBittorrent (downloads), Jellyseerr
   Read a key back when a UI asks for one:
   `kubectl get secret -n media media-api-keys -o jsonpath='{.data.sonarr}' | base64 -d`
 
-**One-time UI setup (state lives in each app's SQLite on its config
-PVC, which Velero does NOT back up — media namespace is excluded; if you
-want config backed up say so and we'll add the config PVCs):** the
-connection wiring below.
+**One-time UI setup:** the connection wiring below. Sonarr/Radarr use the
+media PostgreSQL instance; the other apps retain state on their config PVCs.
+Velero excludes the media namespace. Before upgrades, take a PostgreSQL
+logical dump, config archives, and consistent SQLite snapshots; see the
+[upgrade record](media-upgrade-2026-11.md).
 
 ## Directory convention (the hardlink rule)
 
@@ -98,7 +99,7 @@ First visit asks for auth: choose Forms, create your login. Then in each:
    Sonarr/Radarr automatically — never add indexers in the arr apps
    directly.
 
-### 4. Jellyseerr — `requests.alucard.dev`
+### 4. Seerr — `requests.alucard.dev`
 
 1. First visit: sign-in setup. No Plex/Jellyfin? Choose local account
    (a media server can be attached later).
@@ -286,11 +287,6 @@ language/source rules or delete existing episodes to bypass the rejection.
 
 ## Going further (optional, not yet installed)
 
-- **Bazarr** (subtitles) — slots into the existing layout; ask when
-  wanted. (Recyclarr and the gluetun VPN sidecar are now deployed:
-  `apps/media/recyclarr.yaml` syncs TRaSH language/quality policy
-  nightly, and qBittorrent notifies `#downloads:alucard.dev` on
-  completion via `apps/media/qbittorrent.yaml`.)
 - **Jellyfin**: deliberately not deployed — Pi 4 has no usable container
   transcode path. Direct-play-only is possible; running it on the UNAS
   is likely better.
@@ -351,7 +347,8 @@ request triggered `MissingEpisodeSearch` for the whole existing series while
 season 3 was also monitored. Sonarr correctly identified a season-3 pack, but
 its search scope exceeded the new request.
 
-The pinned Jellyseerr 2.7.3 deployment uses a small startup compatibility patch
+The pinned Seerr 3.5.2 deployment (retaining the `jellyseerr` resource names)
+uses a small startup compatibility patch
 in `apps/media/jellyseerr-patch/patch.cjs`. Existing-series requests send one
 `SeasonSearch` per distinct requested season. Other seasons' monitoring settings
 are preserved; new-series creation and disabled automatic searches retain their
@@ -365,7 +362,9 @@ drift rather than silently applying an unknown patch. On image upgrades, update
 both image references, review whether upstream still needs the patch, and run:
 
 ```sh
-kubectl -n media exec deploy/jellyseerr -- cat /app/dist/api/servarr/sonarr.js > /tmp/jellyseerr-original-sonarr.js
+container=$(docker create ghcr.io/seerr-team/seerr:v3.5.2)
+docker cp "$container":/app/dist/api/servarr/sonarr.js /tmp/jellyseerr-original-sonarr.js
+docker rm "$container"
 node apps/media/jellyseerr-patch/test.cjs /tmp/jellyseerr-original-sonarr.js
 ```
 

@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
         - name: bazarr
-          image: lscr.io/linuxserver/bazarr:v1.6.0-ls354
+          image: lscr.io/linuxserver/bazarr:1.6.2
           env:
             # match the UNAS NFS anon-squash identity so client-side
             # permission checks pass on /data

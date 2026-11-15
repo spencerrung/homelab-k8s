@@ -29,10 +29,17 @@ spec:
       labels:
         app: jellyseerr
     spec:
+      # Official Seerr runs as node (1000); grant access to the existing
+      # config PVC and the init container's shared patched module.
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
       initContainers:
         - name: patch-season-search
           # Keep identical to the application image: patch checks its source.
-          image: docker.io/fallenbagel/jellyseerr:2.7.3
+          image: ghcr.io/seerr-team/seerr:v3.5.2
           command: ["node", "/patch/patch.cjs"]
           resources:
             requests:
@@ -48,7 +55,7 @@ spec:
               mountPath: /patched
       containers:
         - name: jellyseerr
-          image: docker.io/fallenbagel/jellyseerr:2.7.3
+          image: ghcr.io/seerr-team/seerr:v3.5.2
           env:
             - name: TZ
               value: Etc/UTC

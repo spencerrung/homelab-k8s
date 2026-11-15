@@ -1,4 +1,4 @@
-// Temporary compatibility patch for the pinned Jellyseerr 2.7.3 image.
+// Temporary compatibility patch for the pinned Seerr 3.5.2 image.
 // Only request-triggered searches for existing series are season-scoped.
 const fs = require('node:fs');
 const vm = require('node:vm');
@@ -12,7 +12,7 @@ function patch(source) {
                             });
                         }`;
   if (source.split(before).length !== 2) {
-    throw new Error('Unexpected Jellyseerr Sonarr module: review patch before upgrading');
+    throw new Error('Unexpected Jellyseerr/Seerr Sonarr module: review patch before upgrading');
   }
   const result = source.replace(before, after);
   new vm.Script(result, { filename: 'sonarr.js' });
