@@ -94,7 +94,7 @@ spec:
           restartPolicy: Never
           containers:
             - name: guard
-              image: python:3.12.13-alpine
+              image: python:3.12.16-alpine
               command: ["python3", "/scripts/guard.py"]
               env:
                 # Besson's Dracula (2025): French-flagged on TMDB but

@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
         - name: prowlarr
-          image: lscr.io/linuxserver/prowlarr:2.4.0
+          image: lscr.io/linuxserver/prowlarr:2.7.0
           env:
             # match the UNAS NFS anon-squash identity so client-side
             # permission checks pass on /data

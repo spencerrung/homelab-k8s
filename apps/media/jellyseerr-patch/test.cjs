@@ -10,7 +10,7 @@ const exportsObject = {};
 vm.runInNewContext(patched, {
   exports: exportsObject,
   require(name) {
-    if (name === '../../logger') return { info() {}, debug() {}, error() {} };
+    if (name === '../../logger') return { info() {}, debug() {}, error() {}, warn() {} };
     if (name === './base') return class {};
     throw new Error(`Unexpected dependency: ${name}`);
   },
@@ -23,11 +23,21 @@ async function existing(seasons, searchNow) {
     id: 45, title: 'Test series', monitored: true, tags: [],
     seasons: [{ seasonNumber: 2, monitored: false }, { seasonNumber: 3, monitored: true }, { seasonNumber: 4, monitored: false }],
   });
+  let monitoredEpisodes;
+  api.getEpisodes = async () => [
+    {id: 21, seasonNumber: 2, monitored: false},
+    {id: 22, seasonNumber: 2, monitored: true},
+    {id: 31, seasonNumber: 3, monitored: false},
+    {id: 41, seasonNumber: 4, monitored: false},
+  ];
+  api.monitorEpisodes = async ids => { monitoredEpisodes = ids; };
   let updated;
   api.axios = { put: async (_, body) => { updated = body; return { data: body }; } };
   api.runCommand = async (name, args) => commands.push({ name, ...args });
   await api.addSeries({ tvdbid: 123, seasons, searchNow });
   assert.equal(updated.seasons.find(s => s.seasonNumber === 3).monitored, true);
+  assert.deepEqual(JSON.parse(JSON.stringify(monitoredEpisodes || [])),
+    [21, 41].filter(id => seasons.includes(id === 21 ? 2 : 4)));
   return JSON.parse(JSON.stringify(commands));
 }
 (async () => {

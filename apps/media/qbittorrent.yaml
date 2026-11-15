@@ -75,7 +75,7 @@ spec:
         # and admits inbound only on the WebUI port - if the tunnel drops,
         # torrent traffic stops rather than leaking to the ISP.
         - name: gluetun
-          image: docker.io/qmcgaw/gluetun:v3.41.1
+          image: docker.io/qmcgaw/gluetun:v3.41.3
           securityContext:
             capabilities:
               add: ["NET_ADMIN"]
@@ -170,7 +170,7 @@ spec:
             - name: dev-net-tun
               mountPath: /dev/net/tun
         - name: qbittorrent
-          image: lscr.io/linuxserver/qbittorrent:5.2.2
+          image: lscr.io/linuxserver/qbittorrent:5.3.0
           env:
             # match the UNAS NFS anon-squash identity so client-side
             # permission checks pass on /data
