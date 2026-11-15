@@ -9,7 +9,7 @@ Generate controller manifests with the checksum-verified official Flux CLI
 for the exact target release; do not hand-edit `gotk-components.yaml`:
 
 ```sh
-flux install --version=v2.8.8 \
+flux install --version=v2.9.6 \
   --components-extra=image-reflector-controller,image-automation-controller \
   --export > infrastructure/flux-system/gotk-components.yaml
 ```
