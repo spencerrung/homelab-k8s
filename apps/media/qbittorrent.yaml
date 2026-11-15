@@ -157,7 +157,9 @@ spec:
               cpu: 50m
               memory: 128Mi
             limits:
-              memory: 256Mi
+              # DNS blocklist loading exceeded 256Mi after the containerd 2
+              # transition. Keep headroom for resolver startup and probes.
+              memory: 512Mi
           startupProbe:
             exec:
               # Tunnel health alone can pass while the local resolver is
