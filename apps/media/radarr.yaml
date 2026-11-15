@@ -29,6 +29,30 @@ spec:
       labels:
         app: radarr
     spec:
+      # Headless Service DNS disappears while PostgreSQL has no ready endpoint.
+      # Arr startup failures can wait for intervention instead of reconnecting.
+      initContainers:
+        - name: wait-for-postgresql
+          image: postgres:16.16-alpine
+          command:
+            - sh
+            - -ec
+            - |
+              until pg_isready -h postgresql -p 5432 -U "$POSTGRES_USER" -d postgres -t 3; do
+                sleep 3
+              done
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: media-postgresql
+                  key: username
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 64Mi
       containers:
         - name: radarr
           image: lscr.io/linuxserver/radarr:6.4.4

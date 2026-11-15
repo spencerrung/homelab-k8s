@@ -68,3 +68,13 @@ quality/custom-format/naming rules and integration settings, downloader
 connectivity, VPN DNS/forwarded port, request UI and browser-backed
 FlareSolverr response. Keep any transient indexer failures distinct from
 migration failures. Preview checks do not exercise real downloads/imports.
+
+## Startup ordering follow-up
+
+The first rollout exposed a database dependency race: Sonarr started before
+PostgreSQL's headless Service had a ready endpoint, failed DNS resolution,
+and waited for intervention instead of reconnecting. Sonarr and Radarr now
+wait in an init container for `pg_isready` before starting. This covers fresh
+pods during upgrades/node cycles; startup and liveness probes still recover
+failures after the init check has completed. The check does not change data
+or require a database password.
