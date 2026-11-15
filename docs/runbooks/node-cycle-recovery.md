@@ -101,3 +101,10 @@ servers, while Cloudflare DoH saw the TXT records. The cert-manager release
 therefore uses `--dns01-recursive-nameservers-only` with Cloudflare and Google
 DoH endpoints. This changes certificate self-checks, not general cluster DNS.
 See the [cert-manager controller flags](https://cert-manager.io/v1.20-docs/cli/controller/).
+
+After DNS is fixed, old orders can still fail with `Expired authorization`
+or `No order for ID`. Once a renewal has terminally failed, request a fresh
+attempt with `cmctl renew --namespace <namespace> <certificate>`. Check the
+new certificate's expiration/renewal timestamps; `Ready=True` alone may still
+describe the old certificate. Keep existing certificate Secrets while retrying.
+See the [cert-manager renewal FAQ](https://cert-manager.io/docs/faq/).
