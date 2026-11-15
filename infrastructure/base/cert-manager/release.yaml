@@ -19,6 +19,13 @@ spec:
     # Install CRDs with the chart
     installCRDs: true
 
+    # LAN DNS returned NXDOMAIN for publicly visible ACME TXT records,
+    # including queries addressed to public/authoritative servers on port 53.
+    # Use DoH for DNS01 discovery and self-checks, without changing app DNS.
+    extraArgs:
+      - --dns01-recursive-nameservers-only
+      - --dns01-recursive-nameservers=https://1.1.1.1/dns-query,https://8.8.8.8/dns-query
+
     # Resource limits for Raspberry Pi
     resources:
       requests:

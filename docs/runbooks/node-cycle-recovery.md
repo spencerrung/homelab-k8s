@@ -93,3 +93,11 @@ but does not confirm Cloudflare can reach the public origin.
 
 The external proxy route fragment and rollback procedure are tracked in
 [external/traefik](../../external/traefik/README.md).
+
+If Cloudflare accepts the token but DNS01 propagation checks remain pending,
+compare normal DNS answers with public DNS-over-HTTPS. During this incident,
+port-53 queries returned NXDOMAIN even when directed to public/authoritative
+servers, while Cloudflare DoH saw the TXT records. The cert-manager release
+therefore uses `--dns01-recursive-nameservers-only` with Cloudflare and Google
+DoH endpoints. This changes certificate self-checks, not general cluster DNS.
+See the [cert-manager controller flags](https://cert-manager.io/v1.20-docs/cli/controller/).
