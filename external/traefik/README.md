@@ -33,4 +33,10 @@ new public Ingress requires updating the proxy too. Unlisted hosts still use
 the proxy's existing routing. Existing HTTP middlewares are not used by these
 new TLS passthrough routes; application routing and TLS terminate in-cluster.
 
+Cinny retains its pre-existing default-origin-certificate configuration (see
+`apps/matrix/cinny-ingress.yaml`); direct origin hostname verification for
+Cinny will fail. Its public path relies on Cloudflare's existing Full mode.
+Do not treat that as evidence of a newly broken passthrough route, or claim
+that all origin certificates have been validated.
+
 See [Traefik TLS passthrough](https://doc.traefik.io/traefik/v2.11/routing/routers/).

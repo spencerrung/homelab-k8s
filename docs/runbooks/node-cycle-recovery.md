@@ -92,4 +92,4 @@ HTTPS request with the original hostname confirms ingress/application health,
 but does not confirm Cloudflare can reach the public origin.
 
 The external proxy route fragment and rollback procedure are tracked in
-[external/traefik](../../../external/traefik/README.md).
+[external/traefik](../../external/traefik/README.md).
