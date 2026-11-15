@@ -22,6 +22,27 @@ metadata:
   name: qbittorrent-scripts
   namespace: media
 data:
+  sync-qbt-port.sh: |
+    #!/bin/sh
+    set -eu
+    port=${1:?forwarded port required}
+    case "$port" in ''|*[!0-9]*) exit 1 ;; esac
+    [ "$port" -ge 1 ] && [ "$port" -le 65535 ]
+    # Gluetun can establish forwarding before the qBittorrent WebUI starts.
+    # Retry the idempotent preference update instead of keeping a stale port.
+    attempt=0
+    while [ "$attempt" -lt 60 ]; do
+      if wget -q -T 3 -t 1 -O /dev/null \
+        --post-data "json={\"listen_port\":$port}" \
+        http://127.0.0.1:8080/api/v2/app/setPreferences; then
+        echo "qBittorrent listening port synchronized"
+        exit 0
+      fi
+      attempt=$((attempt + 1))
+      sleep 2
+    done
+    echo "qBittorrent port synchronization failed after retries" >&2
+    exit 1
   notify-matrix.sh: |
     #!/bin/sh
     set -eu
@@ -130,7 +151,7 @@ spec:
             - name: VPN_PORT_FORWARDING
               value: "on"
             - name: VPN_PORT_FORWARDING_UP_COMMAND
-              value: /bin/sh -c 'wget -q -O- --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8080/api/v2/app/setPreferences'
+              value: /bin/sh /scripts/sync-qbt-port.sh {{PORT}}
           resources:
             requests:
               cpu: 50m
@@ -169,6 +190,9 @@ spec:
           volumeMounts:
             - name: dev-net-tun
               mountPath: /dev/net/tun
+            - name: scripts
+              mountPath: /scripts
+              readOnly: true
         - name: qbittorrent
           image: lscr.io/linuxserver/qbittorrent:5.3.0
           env:

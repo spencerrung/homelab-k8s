@@ -78,3 +78,10 @@ wait in an init container for `pg_isready` before starting. This covers fresh
 pods during upgrades/node cycles; startup and liveness probes still recover
 failures after the init check has completed. The check does not change data
 or require a database password.
+
+The rollout also exposed a downloader race: Gluetun established forwarding
+before qBittorrent's WebUI accepted connections, so the single-attempt hook
+failed and left the previous listening port. The forwarding hook now retries
+the idempotent update with bounded attempts/timeouts. It still only uses
+localhost and preserves VPN/firewall behavior. Verify the two ports match
+after every rollout.
