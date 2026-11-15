@@ -90,3 +90,6 @@ The token needs Zone DNS Edit and Zone Read for the managed zone; see
 Test public access separately from direct NodePort access. A successful local
 HTTPS request with the original hostname confirms ingress/application health,
 but does not confirm Cloudflare can reach the public origin.
+
+The external proxy route fragment and rollback procedure are tracked in
+[external/traefik](../../../external/traefik/README.md).

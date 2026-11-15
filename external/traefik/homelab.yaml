@@ -1,0 +1,25 @@
+# Merge into the external proxy dynamic config; not a Kubernetes resource.
+tcp:
+  routers:
+    homelab-missing-ingresses:
+      entryPoints:
+      - https
+      rule: HostSNI(`250.alucard.dev`) || HostSNI(`aimtrix.alucard.dev`) || HostSNI(`alucard.dev`) ||
+        HostSNI(`apt.alucard.dev`) || HostSNI(`auth.alucard.dev`) || HostSNI(`bazarr.alucard.dev`) ||
+        HostSNI(`breathe.alucard.dev`) || HostSNI(`chat.alucard.dev`) || HostSNI(`cinny.alucard.dev`)
+        || HostSNI(`code.alucard.dev`) || HostSNI(`dash.alucard.dev`) || HostSNI(`element.alucard.dev`)
+        || HostSNI(`grafana.alucard.dev`) || HostSNI(`home.alucard.dev`) || HostSNI(`llm.alucard.dev`)
+        || HostSNI(`news.alucard.dev`) || HostSNI(`nh.alucard.dev`) || HostSNI(`nova.alucard.dev`) ||
+        HostSNI(`pds.alucard.dev`) || HostSNI(`qbt.alucard.dev`) || HostSNI(`resume.alucard.dev`) || HostSNI(`tekton.alucard.dev`)
+      service: homelab-k8s-tls
+      tls:
+        passthrough: true
+  services:
+    homelab-k8s-tls:
+      loadBalancer:
+        servers:
+        - address: 10.10.10.230:30581
+        - address: 10.10.10.216:30581
+        - address: 10.10.10.148:30581
+        - address: 10.10.10.45:30581
+        - address: 10.10.10.25:30581
