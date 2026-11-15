@@ -2,7 +2,7 @@
 # Commits tag bumps straight to main (homelab - no PR ceremony).
 # Requires the Flux deploy key to be read-write:
 #   flux bootstrap ... --read-write-key   (see bootstrap/flux-bootstrap.sh)
-apiVersion: image.toolkit.fluxcd.io/v1beta2
+apiVersion: image.toolkit.fluxcd.io/v1
 kind: ImageUpdateAutomation
 metadata:
   name: apps

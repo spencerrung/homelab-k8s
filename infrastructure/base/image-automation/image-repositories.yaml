@@ -1,5 +1,5 @@
 ---
-apiVersion: image.toolkit.fluxcd.io/v1beta2
+apiVersion: image.toolkit.fluxcd.io/v1
 kind: ImageRepository
 metadata:
   name: alucard-web
@@ -8,7 +8,7 @@ spec:
   image: docker.io/spencerrung/alucard-web
   interval: 15m
 ---
-apiVersion: image.toolkit.fluxcd.io/v1beta2
+apiVersion: image.toolkit.fluxcd.io/v1
 kind: ImageRepository
 metadata:
   name: nova
@@ -17,7 +17,7 @@ spec:
   image: docker.io/spencerrung/nova
   interval: 15m
 ---
-apiVersion: image.toolkit.fluxcd.io/v1beta2
+apiVersion: image.toolkit.fluxcd.io/v1
 kind: ImageRepository
 metadata:
   name: finale
@@ -26,7 +26,7 @@ spec:
   image: docker.io/spencerrung/finale
   interval: 15m
 ---
-apiVersion: image.toolkit.fluxcd.io/v1beta2
+apiVersion: image.toolkit.fluxcd.io/v1
 kind: ImageRepository
 metadata:
   name: breathe
@@ -35,7 +35,7 @@ spec:
   image: docker.io/spencerrung/breathe
   interval: 15m
 ---
-apiVersion: image.toolkit.fluxcd.io/v1beta2
+apiVersion: image.toolkit.fluxcd.io/v1
 kind: ImageRepository
 metadata:
   name: resume
@@ -44,7 +44,7 @@ spec:
   image: docker.io/spencerrung/resume
   interval: 15m
 ---
-apiVersion: image.toolkit.fluxcd.io/v1beta2
+apiVersion: image.toolkit.fluxcd.io/v1
 kind: ImageRepository
 metadata:
   name: daily-news
@@ -53,7 +53,7 @@ spec:
   image: docker.io/spencerrung/daily-news
   interval: 15m
 ---
-apiVersion: image.toolkit.fluxcd.io/v1beta2
+apiVersion: image.toolkit.fluxcd.io/v1
 kind: ImageRepository
 metadata:
   name: aimtrix
@@ -62,7 +62,7 @@ spec:
   image: docker.io/spencerrung/aimtrix
   interval: 15m
 ---
-apiVersion: image.toolkit.fluxcd.io/v1beta2
+apiVersion: image.toolkit.fluxcd.io/v1
 kind: ImageRepository
 metadata:
   name: newhope-web
@@ -71,7 +71,7 @@ spec:
   image: docker.io/spencerrung/newhope-web
   interval: 15m
 ---
-apiVersion: image.toolkit.fluxcd.io/v1beta2
+apiVersion: image.toolkit.fluxcd.io/v1
 kind: ImageRepository
 metadata:
   name: newhope-views
