@@ -9,7 +9,7 @@ Generate controller manifests with the checksum-verified official Flux CLI
 for the exact target release; do not hand-edit `gotk-components.yaml`:
 
 ```sh
-flux install --version=v2.9.6 \
+flux install --version=v2.10.0 \
   --components-extra=image-reflector-controller,image-automation-controller \
   --export > infrastructure/flux-system/gotk-components.yaml
 ```
@@ -35,6 +35,11 @@ Before each minor upgrade:
 The image automation resources use `image.toolkit.fluxcd.io/v1`; beta APIs
 are removed by newer Flux releases. Notification APIs must be reviewed again
 for Flux 2.10, including deprecated summary/interval fields and secret handling.
+Install the Flux 2.10 CRDs/controllers before a separate commit promotes
+Alert and Provider manifests to v1. Their existing v1beta3 API remains served
+during this transition, so independent GitOps tiers cannot race to apply an
+API version the cluster does not serve yet. Then run the live migration again
+to update the notification resources' stored version.
 
 References:
 https://github.com/fluxcd/flux2/discussions/5572
