@@ -16,8 +16,9 @@ flux install --version=v2.10.0 \
 
 Before each minor upgrade:
 
-1. Confirm Kubernetes is supported by the target Flux release. The planned
-   path is 2.7.2 -> 2.8.8 -> 2.9.6 -> 2.10.0, alongside sequential K3s upgrades.
+1. Confirm Kubernetes is supported by the target Flux release. The upgrade
+   path used in November 2026 was 2.7.2 -> 2.8.8 -> 2.9.6 -> 2.10.0,
+   alongside sequential K3s upgrades.
 2. Back up the Kubernetes datastore and Flux resources privately. Review the
    target release notes, controller arguments, RBAC changes and ARM64 images.
 3. Use the target CLI's `flux migrate -f . --dry-run`, then migrate the repo
@@ -32,9 +33,10 @@ Before each minor upgrade:
 6. Only proceed to the next minor after health checks succeed. Keep local CLI
    versions separate so intermediate upgrades can be reproduced.
 
-The image automation resources use `image.toolkit.fluxcd.io/v1`; beta APIs
-are removed by newer Flux releases. Notification APIs must be reviewed again
-for Flux 2.10, including deprecated summary/interval fields and secret handling.
+The image automation resources use `image.toolkit.fluxcd.io/v1`, and the
+Alert/Provider manifests use `notification.toolkit.fluxcd.io/v1`. The Matrix
+provider keeps its token secret, address and channel. No deprecated summary,
+interval, proxy or TLS secret fields were present during the 2.10 migration.
 Install the Flux 2.10 CRDs/controllers before a separate commit promotes
 Alert and Provider manifests to v1. Their existing v1beta3 API remains served
 during this transition, so independent GitOps tiers cannot race to apply an

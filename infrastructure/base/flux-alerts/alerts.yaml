@@ -2,7 +2,7 @@
 # Reconciliation failures for everything Flux manages. name: '*' wildcards
 # only work within a namespace, so HelmReleases are listed per namespace -
 # add an entry when a new namespace gains a HelmRelease.
-apiVersion: notification.toolkit.fluxcd.io/v1beta3
+apiVersion: notification.toolkit.fluxcd.io/v1
 kind: Alert
 metadata:
   name: flux-errors
