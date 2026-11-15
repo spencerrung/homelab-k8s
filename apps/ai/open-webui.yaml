@@ -62,7 +62,9 @@ spec:
             initialDelaySeconds: 15
             periodSeconds: 10
             timeoutSeconds: 8
-            failureThreshold: 30
+            # Cold model imports on pi-03 exceeded five minutes after a
+            # cluster-wide reboot. Allow ten minutes before restarting.
+            failureThreshold: 60
           livenessProbe:
             httpGet:
               path: /health

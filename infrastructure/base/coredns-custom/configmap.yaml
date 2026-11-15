@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns-custom
+  namespace: kube-system
+data:
+  authentik.override: |
+    # Keep OIDC discovery/token requests inside the cluster while preserving
+    # the public issuer URL, HTTP Host and TLS certificate verification.
+    # Exact matching leaves ACME TXT queries and other public hosts alone.
+    rewrite stop name exact auth.alucard.dev traefik.traefik.svc.cluster.local

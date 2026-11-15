@@ -37,6 +37,9 @@ spec:
       containers:
         - name: postgresql
           image: postgres:15-alpine
+          # Concurrent application work and pg_dumpall exhausted the default
+          # shared lock table during nightly/weekly backups.
+          args: ["-c", "max_locks_per_transaction=256"]
           ports:
             - containerPort: 5432
               name: postgresql
