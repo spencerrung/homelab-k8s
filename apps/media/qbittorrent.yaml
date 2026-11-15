@@ -27,7 +27,7 @@ data:
     set -eu
     port=${1:?forwarded port required}
     case "$port" in ''|*[!0-9]*) exit 1 ;; esac
-    [ "$port" -ge 1 ] && [ "$port" -le 65535 ]
+    if [ "$port" -lt 1 ] || [ "$port" -gt 65535 ]; then exit 1; fi
     # Gluetun can establish forwarding before the qBittorrent WebUI starts.
     # Retry the idempotent preference update instead of keeping a stale port.
     attempt=0
