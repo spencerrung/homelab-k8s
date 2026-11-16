@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: element
-          image: vectorim/element-web:v1.12.9
+          image: vectorim/element-web:v1.12.35
           ports:
             - containerPort: 80
               name: http
