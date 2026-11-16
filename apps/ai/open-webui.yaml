@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
         - name: open-webui
-          image: ghcr.io/open-webui/open-webui:v0.10.2
+          image: ghcr.io/open-webui/open-webui:v0.13.3
           env:
             - name: OPENAI_API_BASE_URL
               value: http://litellm.ai.svc.cluster.local:4000/v1
