@@ -55,7 +55,7 @@ spec:
               memory: 64Mi
       containers:
         - name: radarr
-          image: lscr.io/linuxserver/radarr:6.4.4
+          image: lscr.io/linuxserver/radarr:7.0.3
           env:
             # match the UNAS NFS anon-squash identity so client-side
             # permission checks pass on /data
