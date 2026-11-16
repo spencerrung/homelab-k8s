@@ -16,6 +16,10 @@ spec:
         namespace: flux-system
       interval: 12h
   values:
+    # The embedded level queue shares the persistent data directory.
+    strategy:
+      type: Recreate
+      rollingUpdate: null
     # Global Gitea configuration
     gitea:
       admin:
