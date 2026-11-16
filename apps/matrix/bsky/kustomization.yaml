@@ -3,6 +3,7 @@ kind: Kustomization
 namespace: matrix
 resources:
   - resources.yaml
+  - backup.yaml
 configMapGenerator:
   - name: bsky-notifier-code
     files:
@@ -10,3 +11,6 @@ configMapGenerator:
   - name: bsky-notifier-rules
     files:
       - rules.json
+  - name: bsky-backup-code
+    files:
+      - backup_state.py

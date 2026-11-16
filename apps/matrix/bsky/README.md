@@ -85,6 +85,20 @@ the same ID resumes its saved history and can deliver posts from the pause.
 
 SQLite history is on the 1Gi `bsky-notifier-data` PVC, protected from Flux prune.
 The Matrix namespace is included in the existing nightly Velero backup schedule.
+The always-running `bsky-state-backup` helper mounts the state PVC read-only.
+A Velero pre-hook uses SQLite's online backup API to atomically create and
+integrity-check `/backup/state.sqlite3`; Velero copies that separate `emptyDir`
+volume. The short-lived notifier pods exclude their data volume from filesystem
+backup, avoiding a race with completed Job cleanup. The helper has no bot token
+and does not poll or send messages. Hook failure fails the backup.
+
+To recover history, restore the helper Pod and its `backup` volume into an
+isolated namespace (exclude the source `data` mount when restoring only the
+snapshot). Verify the restored SQLite integrity before copying
+`/backup/state.sqlite3` to the notifier PVC's `state.sqlite3` while polling is
+suspended. Preserve the old database first; do not run an isolated notifier Pod,
+which could send duplicate messages. Resume polling through GitOps afterward.
+
 Local-path storage is tied to a node; a node outage can delay polling until it
 returns or storage is restored. History grows with scanned posts; monitor PVC
 capacity over time. Do not delete the database to fix temporary HTTP failures.
