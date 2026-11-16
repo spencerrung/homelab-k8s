@@ -1,0 +1,16 @@
+---
+# Use GitHub SSH over HTTPS port to avoid intermittent outbound port 22 timeouts.
+# The flux-system Secret must trust [ssh.github.com]:443 using GitHub host keys.
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: flux-system
+  namespace: flux-system
+spec:
+  interval: 1m0s
+  timeout: 60s
+  url: ssh://git@ssh.github.com:443/spencerrung/homelab-k8s
+  ref:
+    branch: main
+  secretRef:
+    name: flux-system
