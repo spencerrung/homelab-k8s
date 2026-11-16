@@ -22,7 +22,7 @@ spec:
     global:
       image:
         repository: ghcr.io/goauthentik/server
-        tag: 2025.12.6
+        tag: 2026.2.7
         pullPolicy: IfNotPresent
 
       # Environment URLs - update these for your domain
