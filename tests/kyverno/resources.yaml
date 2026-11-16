@@ -137,3 +137,714 @@ spec:
         memory: 16Mi
       limits:
         memory: 32Mi
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: daemonset-good
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: daemonset-good
+  template:
+    metadata:
+      labels:
+        app: daemonset-good
+    spec:
+      containers:
+      - name: test
+        image: busybox:1.36.1
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 32Mi
+        livenessProbe:
+          exec:
+            command:
+            - 'true'
+        readinessProbe:
+          exec:
+            command:
+            - 'true'
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: daemonset-latest
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: daemonset-latest
+  template:
+    metadata:
+      labels:
+        app: daemonset-latest
+    spec:
+      containers:
+      - name: test
+        image: busybox:latest
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 32Mi
+        livenessProbe:
+          exec:
+            command:
+            - 'true'
+        readinessProbe:
+          exec:
+            command:
+            - 'true'
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: daemonset-missing-resources
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: daemonset-missing-resources
+  template:
+    metadata:
+      labels:
+        app: daemonset-missing-resources
+    spec:
+      containers:
+      - name: test
+        image: busybox:1.36.1
+        livenessProbe:
+          exec:
+            command:
+            - 'true'
+        readinessProbe:
+          exec:
+            command:
+            - 'true'
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-good
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: deployment-good
+  template:
+    metadata:
+      labels:
+        app: deployment-good
+    spec:
+      containers:
+      - name: test
+        image: busybox:1.36.1
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 32Mi
+        livenessProbe:
+          exec:
+            command:
+            - 'true'
+        readinessProbe:
+          exec:
+            command:
+            - 'true'
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-latest
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: deployment-latest
+  template:
+    metadata:
+      labels:
+        app: deployment-latest
+    spec:
+      containers:
+      - name: test
+        image: busybox:latest
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 32Mi
+        livenessProbe:
+          exec:
+            command:
+            - 'true'
+        readinessProbe:
+          exec:
+            command:
+            - 'true'
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-missing-resources
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: deployment-missing-resources
+  template:
+    metadata:
+      labels:
+        app: deployment-missing-resources
+    spec:
+      containers:
+      - name: test
+        image: busybox:1.36.1
+        livenessProbe:
+          exec:
+            command:
+            - 'true'
+        readinessProbe:
+          exec:
+            command:
+            - 'true'
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-good
+  namespace: default
+spec:
+  template:
+    metadata:
+      labels:
+        app: job-good
+    spec:
+      containers:
+      - name: test
+        image: busybox:1.36.1
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 32Mi
+        livenessProbe:
+          exec:
+            command:
+            - 'true'
+        readinessProbe:
+          exec:
+            command:
+            - 'true'
+      restartPolicy: Never
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-latest
+  namespace: default
+spec:
+  template:
+    metadata:
+      labels:
+        app: job-latest
+    spec:
+      containers:
+      - name: test
+        image: busybox:latest
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 32Mi
+        livenessProbe:
+          exec:
+            command:
+            - 'true'
+        readinessProbe:
+          exec:
+            command:
+            - 'true'
+      restartPolicy: Never
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-missing-resources
+  namespace: default
+spec:
+  template:
+    metadata:
+      labels:
+        app: job-missing-resources
+    spec:
+      containers:
+      - name: test
+        image: busybox:1.36.1
+        livenessProbe:
+          exec:
+            command:
+            - 'true'
+        readinessProbe:
+          exec:
+            command:
+            - 'true'
+      restartPolicy: Never
+---
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: replicaset-good
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: replicaset-good
+  template:
+    metadata:
+      labels:
+        app: replicaset-good
+    spec:
+      containers:
+      - name: test
+        image: busybox:1.36.1
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 32Mi
+        livenessProbe:
+          exec:
+            command:
+            - 'true'
+        readinessProbe:
+          exec:
+            command:
+            - 'true'
+---
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: replicaset-latest
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: replicaset-latest
+  template:
+    metadata:
+      labels:
+        app: replicaset-latest
+    spec:
+      containers:
+      - name: test
+        image: busybox:latest
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 32Mi
+        livenessProbe:
+          exec:
+            command:
+            - 'true'
+        readinessProbe:
+          exec:
+            command:
+            - 'true'
+---
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: replicaset-missing-resources
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: replicaset-missing-resources
+  template:
+    metadata:
+      labels:
+        app: replicaset-missing-resources
+    spec:
+      containers:
+      - name: test
+        image: busybox:1.36.1
+        livenessProbe:
+          exec:
+            command:
+            - 'true'
+        readinessProbe:
+          exec:
+            command:
+            - 'true'
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: replicationcontroller-good
+  namespace: default
+spec:
+  selector:
+    app: replicationcontroller-good
+  template:
+    metadata:
+      labels:
+        app: replicationcontroller-good
+    spec:
+      containers:
+      - name: test
+        image: busybox:1.36.1
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 32Mi
+        livenessProbe:
+          exec:
+            command:
+            - 'true'
+        readinessProbe:
+          exec:
+            command:
+            - 'true'
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: replicationcontroller-latest
+  namespace: default
+spec:
+  selector:
+    app: replicationcontroller-latest
+  template:
+    metadata:
+      labels:
+        app: replicationcontroller-latest
+    spec:
+      containers:
+      - name: test
+        image: busybox:latest
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 32Mi
+        livenessProbe:
+          exec:
+            command:
+            - 'true'
+        readinessProbe:
+          exec:
+            command:
+            - 'true'
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: replicationcontroller-missing-resources
+  namespace: default
+spec:
+  selector:
+    app: replicationcontroller-missing-resources
+  template:
+    metadata:
+      labels:
+        app: replicationcontroller-missing-resources
+    spec:
+      containers:
+      - name: test
+        image: busybox:1.36.1
+        livenessProbe:
+          exec:
+            command:
+            - 'true'
+        readinessProbe:
+          exec:
+            command:
+            - 'true'
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: statefulset-good
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: statefulset-good
+  template:
+    metadata:
+      labels:
+        app: statefulset-good
+    spec:
+      containers:
+      - name: test
+        image: busybox:1.36.1
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 32Mi
+        livenessProbe:
+          exec:
+            command:
+            - 'true'
+        readinessProbe:
+          exec:
+            command:
+            - 'true'
+  serviceName: statefulset-good
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: statefulset-latest
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: statefulset-latest
+  template:
+    metadata:
+      labels:
+        app: statefulset-latest
+    spec:
+      containers:
+      - name: test
+        image: busybox:latest
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 32Mi
+        livenessProbe:
+          exec:
+            command:
+            - 'true'
+        readinessProbe:
+          exec:
+            command:
+            - 'true'
+  serviceName: statefulset-latest
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: statefulset-missing-resources
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: statefulset-missing-resources
+  template:
+    metadata:
+      labels:
+        app: statefulset-missing-resources
+    spec:
+      containers:
+      - name: test
+        image: busybox:1.36.1
+        livenessProbe:
+          exec:
+            command:
+            - 'true'
+        readinessProbe:
+          exec:
+            command:
+            - 'true'
+  serviceName: statefulset-missing-resources
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cronjob-good
+  namespace: default
+spec:
+  schedule: 0 0 * * *
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: cronjob-good
+        spec:
+          containers:
+          - name: test
+            image: busybox:1.36.1
+            resources:
+              requests:
+                cpu: 10m
+                memory: 16Mi
+              limits:
+                memory: 32Mi
+            livenessProbe:
+              exec:
+                command:
+                - 'true'
+            readinessProbe:
+              exec:
+                command:
+                - 'true'
+          restartPolicy: Never
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cronjob-latest
+  namespace: default
+spec:
+  schedule: 0 0 * * *
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: cronjob-latest
+        spec:
+          containers:
+          - name: test
+            image: busybox:latest
+            resources:
+              requests:
+                cpu: 10m
+                memory: 16Mi
+              limits:
+                memory: 32Mi
+            livenessProbe:
+              exec:
+                command:
+                - 'true'
+            readinessProbe:
+              exec:
+                command:
+                - 'true'
+          restartPolicy: Never
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cronjob-missing-resources
+  namespace: default
+spec:
+  schedule: 0 0 * * *
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: cronjob-missing-resources
+        spec:
+          containers:
+          - name: test
+            image: busybox:1.36.1
+            livenessProbe:
+              exec:
+                command:
+                - 'true'
+            readinessProbe:
+              exec:
+                command:
+                - 'true'
+          restartPolicy: Never
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-excluded-kube-system
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      app: deployment-missing-resources
+  template:
+    metadata:
+      labels:
+        app: deployment-missing-resources
+    spec:
+      containers:
+      - name: test
+        image: busybox:1.36.1
+        livenessProbe:
+          exec:
+            command:
+            - 'true'
+        readinessProbe:
+          exec:
+            command:
+            - 'true'
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-excluded-tekton-pipelines
+  namespace: tekton-pipelines
+spec:
+  selector:
+    matchLabels:
+      app: deployment-missing-resources
+  template:
+    metadata:
+      labels:
+        app: deployment-missing-resources
+    spec:
+      containers:
+      - name: test
+        image: busybox:1.36.1
+        livenessProbe:
+          exec:
+            command:
+            - 'true'
+        readinessProbe:
+          exec:
+            command:
+            - 'true'
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-excluded-escape
+  namespace: escape
+spec:
+  selector:
+    matchLabels:
+      app: deployment-latest
+  template:
+    metadata:
+      labels:
+        app: deployment-latest
+    spec:
+      containers:
+      - name: test
+        image: busybox:latest
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 32Mi
+        livenessProbe:
+          exec:
+            command:
+            - 'true'
+        readinessProbe:
+          exec:
+            command:
+            - 'true'
