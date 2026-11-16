@@ -53,3 +53,21 @@ November 15 scheduled nightly and weekly backups each report one error and
 PartiallyFailed. The separate post-cycle Authentik backup completed. Investigate
 before the next stateful change. Recovery caches quarantined during the K3s
 upgrade remain intentionally retained on pi-03 and raspberrypi-51249e4e.
+
+## Completed checkpoints
+
+- PR #43: upgrade plan merged.
+- Backup recovery: November 15 failures traced to the Authentik dump hook's
+  exhausted lock table before the earlier recovery fix. Replacement backup
+  `pre-services-upgrade-20261115` completed with 851 items and no errors.
+- All five PostgreSQL dumps saved off-cluster. Authentik's dump was restored
+  into isolated PostgreSQL 15.20 with `ON_ERROR_STOP=1`, matching application
+  and provider counts. Verify transfer checksums: kubectl exec stdin transfers
+  truncated during testing; the successful restore used a verified SSH copy.
+- PR #44: Velero 1.18.4, chart 12.2.5, AWS plugin 1.14.4 deployed; server and
+  all eight worker node agents ready. Post-upgrade New Hope filesystem backup
+  completed without errors; B2 storage available.
+- PR #45: Authentik PostgreSQL 15.20 deployed. SQL readiness and SELECT 1
+  passed; max_locks_per_transaction remains 256. Login/OIDC HTTP checks passed.
+- Vault snapshot `vault-20261116-003832.snap` uploaded to B2, downloaded
+  off-cluster and verified as a readable archive.
