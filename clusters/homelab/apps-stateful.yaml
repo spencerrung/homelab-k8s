@@ -15,4 +15,5 @@ spec:
   path: ./apps/stateful/homelab
   prune: true
   wait: true
-  timeout: 5m0s
+  # Large ARM64 images and database migrations need time on Pi storage.
+  timeout: 25m0s
