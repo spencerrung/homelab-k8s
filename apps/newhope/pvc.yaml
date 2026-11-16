@@ -13,3 +13,48 @@ spec:
   resources:
     requests:
       storage: 1Gi
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: newhope-views-recovered-20261116
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-path
+  local:
+    path: /var/lib/rancher/k3s/storage/newhope-views-recovered-20261116
+  claimRef:
+    namespace: newhope
+    name: newhope-views-recovered-20261116
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - pi-02
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: newhope-views-recovered-20261116
+  namespace: newhope
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: local-path
+  volumeName: newhope-views-recovered-20261116
+  resources:
+    requests:
+      storage: 1Gi

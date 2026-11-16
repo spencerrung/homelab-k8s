@@ -78,11 +78,14 @@ spec:
             periodSeconds: 30
             timeoutSeconds: 8
           volumeMounts:
-            - name: data
+            - name: recovered-data
               mountPath: /var/lib/postgresql/data
             - name: initdb
               mountPath: /docker-entrypoint-initdb.d
       volumes:
+        - name: recovered-data
+          persistentVolumeClaim:
+            claimName: ai-postgresql-recovered-20261116
         - name: initdb
           configMap:
             name: postgresql-initdb
@@ -115,3 +118,48 @@ spec:
       ports:
         - port: 5432
           protocol: TCP
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ai-postgresql-recovered-20261116
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  capacity:
+    storage: 2Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-path
+  local:
+    path: /var/lib/rancher/k3s/storage/ai-postgresql-recovered-20261116
+  claimRef:
+    namespace: ai
+    name: ai-postgresql-recovered-20261116
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - pi-02
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ai-postgresql-recovered-20261116
+  namespace: ai
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: local-path
+  volumeName: ai-postgresql-recovered-20261116
+  resources:
+    requests:
+      storage: 2Gi
