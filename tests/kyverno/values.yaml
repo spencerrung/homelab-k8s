@@ -1,0 +1,15 @@
+apiVersion: cli.kyverno.io/v1alpha1
+kind: Values
+metadata:
+  name: namespace-exceptions
+# list of policy values
+policies:
+
+# list of global values
+globalValues:
+
+# list of namespace selectors
+namespaceSelector:
+  - name: escape
+    labels:
+      policy.alucard.dev/allow-latest: "true"

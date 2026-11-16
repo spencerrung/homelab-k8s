@@ -1,0 +1,62 @@
+apiVersion: cli.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: custom-policy-migration
+policies:
+- ../../infrastructure/base/kyverno-policies/require-requests-limits.yaml
+- ../../infrastructure/base/kyverno-policies/require-probes.yaml
+- ../../infrastructure/base/kyverno-policies/disallow-latest-tag.yaml
+resources:
+- resources.yaml
+variables: values.yaml
+results:
+- policy: disallow-latest-tag
+  kind: Pod
+  result: pass
+  resources:
+  - good
+- policy: disallow-latest-tag
+  kind: Pod
+  result: fail
+  resources:
+  - latest
+- policy: disallow-latest-tag
+  kind: Pod
+  result: fail
+  resources:
+  - untagged
+- policy: require-requests-limits
+  kind: Pod
+  result: pass
+  resources:
+  - good
+- policy: require-requests-limits
+  kind: Pod
+  result: fail
+  resources:
+  - missing-resources
+- policy: require-probes
+  kind: Deployment
+  result: pass
+  resources:
+  - good-deployment
+- policy: require-probes
+  kind: Deployment
+  result: fail
+  resources:
+  - missing-probes
+- policy: require-requests-limits
+  kind: Pod
+  result: skip
+  resources:
+  - excluded-kube-system
+- policy: require-requests-limits
+  kind: Pod
+  result: skip
+  resources:
+  - excluded-tekton-pipelines
+- policy: disallow-latest-tag
+  kind: Pod
+  result: skip
+  resources:
+  - escaped-latest
