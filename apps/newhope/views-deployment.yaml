@@ -53,4 +53,4 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: newhope-views-data
+            claimName: newhope-views-recovered-20261116
