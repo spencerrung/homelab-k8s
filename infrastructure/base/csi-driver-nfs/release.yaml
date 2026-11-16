@@ -37,6 +37,14 @@ spec:
           limits:
             memory: 128Mi
     node:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: homelab.alucard.dev/quarantined
+                    operator: NotIn
+                    values: ["true"]
       resources:
         nfs:
           requests:
