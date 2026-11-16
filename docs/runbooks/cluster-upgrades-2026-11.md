@@ -101,8 +101,10 @@ upgrade remain intentionally retained on pi-03 and raspberrypi-51249e4e.
 ## Reviewed migration preparations
 
 - Custom Kyverno policies must migrate to CEL ValidatingPolicy before Kyverno
-  1.20, which no longer executes legacy ClusterPolicy. Ten regression cases
-  passed, including namespace exceptions and existing audit behavior.
+  1.20, which no longer executes legacy ClusterPolicy. 41 regression cases
+  passed, including all seven original controller kinds, namespace exceptions and
+  existing audit behavior. PR #85 uses explicit controller matches because
+  legacy ReplicationController is not covered by CEL auto-generation.
 - Isolated migrations of current Homarr and Open WebUI databases passed health,
   integrity and retained-record checks. Homarr's four custom widgets remain.
 - LiteLLM's official migration command passed against a strict database restore.
@@ -137,3 +139,52 @@ backup bucket; full readback checksums and gzip validation gate each backup.
 K3s/PVC runtime directories are excluded from OS archives and covered by
 cluster/database backups. Take a fresh consistent control-plane SQLite/token/
 TLS backup immediately before upgrading pi-01.
+
+
+## Storage incident and recovery checkpoint (November 16, 02:50 UTC)
+
+During OS archive reads, `raspberrypi-51249e4e` (`10.10.10.29`) reported MMC
+read failures, failed writes and EXT4 buffer I/O errors, then stopped responding
+to kubelet and SSH. Its root archive failed validation; do not treat that object
+as a complete OS backup. All eight other nodes have verified root and boot/etc
+archives with full B2 readback checksums and gzip validation.
+
+The affected node remains cordoned, tainted
+`homelab.alucard.dev/storage-failed=true:NoSchedule`, and labelled
+`homelab.alucard.dev/quarantined=true`. Its OS update is excluded pending physical
+storage/power diagnosis and repair. Do not uncordon it or remove the quarantine
+label merely because it becomes reachable. Preserve its original local volumes
+and previously quarantined containerd directory for investigation.
+
+PRs #86 and #88 move two affected services onto retained, explicitly bound local
+volumes on pi-02. The same-night Velero backup restored successfully into isolated
+`ai-sd-recovery` and `newhope-sd-recovery` namespaces before cutover:
+
+- AI PostgreSQL recovery point: 02:01:47 UTC. PostgreSQL started successfully,
+  exported a complete logical dump, then stopped cleanly before copying its
+  recovered directory. The live service has 74 public tables and authenticated
+  LiteLLM model discovery returns the expected aliases.
+- New Hope engagement recovery point: 02:11:42 UTC. The JSON file parsed and the
+  public stats API matches its restored counts.
+- Changes after those recovery points cannot be verified while the original
+  node is unavailable. Original PVCs, isolated recovery copies and off-cluster
+  backups remain intact. The copied directories compared byte-for-byte before
+  either application started.
+- The PostgreSQL StatefulSet was recreated with orphan propagation to remove
+  its immutable legacy claim template. Merely changing its container mount
+  would still inject the old template-generated volume and bind scheduling to
+  the failed node. No original PVC or PV was deleted.
+
+PR #87 excludes quarantined nodes from broadly tolerated CSI and node-exporter
+DaemonSets. The other DaemonSets respect the quarantine taint. Monitoring keeps
+reporting the failed node; rollout checks identify its three kubelet targets as
+known failures and require all remaining targets to be healthy.
+
+PR #89 manages the Git source and uses GitHub SSH on port 443 after repeated
+port 22 timeouts. The new host alias was verified against an existing trusted
+GitHub host key; the deploy private key did not change. Source reconciliation
+succeeded through the new endpoint.
+
+The eight healthy nodes remain the OS upgrade scope. pi-04 is temporarily
+cordoned during application rollouts and must be uncordoned before node updates.
+No node OS package upgrades had begun at this checkpoint.
