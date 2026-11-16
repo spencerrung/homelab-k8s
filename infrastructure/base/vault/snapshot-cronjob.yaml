@@ -95,7 +95,7 @@ spec:
                   memory: 256Mi
           containers:
             - name: upload
-              image: rclone/rclone:1.74.3
+              image: rclone/rclone:1.76.0
               command:
                 - sh
                 - -ec
