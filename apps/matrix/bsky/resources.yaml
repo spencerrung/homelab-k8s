@@ -47,6 +47,9 @@ spec:
         metadata:
           labels:
             app: bsky-notifier
+          annotations:
+            # The persistent backup helper snapshots SQLite consistently.
+            backup.velero.io/backup-volumes-excludes: data
         spec:
           restartPolicy: Never
           automountServiceAccountToken: false
