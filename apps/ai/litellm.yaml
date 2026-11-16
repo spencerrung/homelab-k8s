@@ -44,9 +44,28 @@ spec:
       labels:
         app: litellm
     spec:
+      initContainers:
+        - name: migrate-schema
+          image: ghcr.io/berriai/litellm:v1.109.1
+          workingDir: /app
+          command: ["python", "litellm/proxy/prisma_migration.py"]
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: ai-postgresql
+                  key: DATABASE_URL
+            - name: DISABLE_SCHEMA_UPDATE
+              value: "false"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              memory: 2Gi
       containers:
         - name: litellm
-          image: ghcr.io/berriai/litellm:v1.91.0
+          image: ghcr.io/berriai/litellm:v1.109.1
           args:
             - --config
             - /config/config.yaml
