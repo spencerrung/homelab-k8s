@@ -108,6 +108,11 @@ spec:
     ingress:
       enabled: false
 
+    # The embedded level queue shares the persistent data directory.
+    strategy:
+      type: Recreate
+      rollingUpdate: null
+
     # Resource limits
     resources:
       requests:
