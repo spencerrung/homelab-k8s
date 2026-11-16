@@ -57,7 +57,7 @@ spec:
           restartPolicy: Never
           initContainers:
             - name: snapshot
-              image: hashicorp/vault:2.1.2
+              image: hashicorp/vault:2.2.2
               command:
                 - sh
                 - -ec

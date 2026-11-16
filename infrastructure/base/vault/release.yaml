@@ -19,7 +19,7 @@ spec:
     server:
       image:
         repository: hashicorp/vault
-        tag: "2.1.2"
+        tag: "2.2.2"
 
       dev:
         enabled: false
