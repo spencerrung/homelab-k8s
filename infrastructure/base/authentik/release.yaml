@@ -6,6 +6,8 @@ metadata:
   namespace: authentik
 spec:
   interval: 30m
+  # ARM64 image pulls and sequential database migrations can exceed five minutes.
+  timeout: 15m
   chart:
     spec:
       chart: authentik
