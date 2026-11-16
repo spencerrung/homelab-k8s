@@ -60,3 +60,158 @@ results:
   result: skip
   resources:
   - escaped-latest
+- policy: disallow-latest-tag
+  kind: DaemonSet
+  result: pass
+  resources:
+  - daemonset-good
+- policy: require-requests-limits
+  kind: DaemonSet
+  result: pass
+  resources:
+  - daemonset-good
+- policy: disallow-latest-tag
+  kind: DaemonSet
+  result: fail
+  resources:
+  - daemonset-latest
+- policy: require-requests-limits
+  kind: DaemonSet
+  result: fail
+  resources:
+  - daemonset-missing-resources
+- policy: disallow-latest-tag
+  kind: Deployment
+  result: pass
+  resources:
+  - deployment-good
+- policy: require-requests-limits
+  kind: Deployment
+  result: pass
+  resources:
+  - deployment-good
+- policy: disallow-latest-tag
+  kind: Deployment
+  result: fail
+  resources:
+  - deployment-latest
+- policy: require-requests-limits
+  kind: Deployment
+  result: fail
+  resources:
+  - deployment-missing-resources
+- policy: disallow-latest-tag
+  kind: Job
+  result: pass
+  resources:
+  - job-good
+- policy: require-requests-limits
+  kind: Job
+  result: pass
+  resources:
+  - job-good
+- policy: disallow-latest-tag
+  kind: Job
+  result: fail
+  resources:
+  - job-latest
+- policy: require-requests-limits
+  kind: Job
+  result: fail
+  resources:
+  - job-missing-resources
+- policy: disallow-latest-tag
+  kind: ReplicaSet
+  result: pass
+  resources:
+  - replicaset-good
+- policy: require-requests-limits
+  kind: ReplicaSet
+  result: pass
+  resources:
+  - replicaset-good
+- policy: disallow-latest-tag
+  kind: ReplicaSet
+  result: fail
+  resources:
+  - replicaset-latest
+- policy: require-requests-limits
+  kind: ReplicaSet
+  result: fail
+  resources:
+  - replicaset-missing-resources
+- policy: disallow-latest-tag
+  kind: ReplicationController
+  result: pass
+  resources:
+  - replicationcontroller-good
+- policy: require-requests-limits
+  kind: ReplicationController
+  result: pass
+  resources:
+  - replicationcontroller-good
+- policy: disallow-latest-tag
+  kind: ReplicationController
+  result: fail
+  resources:
+  - replicationcontroller-latest
+- policy: require-requests-limits
+  kind: ReplicationController
+  result: fail
+  resources:
+  - replicationcontroller-missing-resources
+- policy: disallow-latest-tag
+  kind: StatefulSet
+  result: pass
+  resources:
+  - statefulset-good
+- policy: require-requests-limits
+  kind: StatefulSet
+  result: pass
+  resources:
+  - statefulset-good
+- policy: disallow-latest-tag
+  kind: StatefulSet
+  result: fail
+  resources:
+  - statefulset-latest
+- policy: require-requests-limits
+  kind: StatefulSet
+  result: fail
+  resources:
+  - statefulset-missing-resources
+- policy: disallow-latest-tag
+  kind: CronJob
+  result: pass
+  resources:
+  - cronjob-good
+- policy: require-requests-limits
+  kind: CronJob
+  result: pass
+  resources:
+  - cronjob-good
+- policy: disallow-latest-tag
+  kind: CronJob
+  result: fail
+  resources:
+  - cronjob-latest
+- policy: require-requests-limits
+  kind: CronJob
+  result: fail
+  resources:
+  - cronjob-missing-resources
+- policy: require-requests-limits
+  kind: Deployment
+  result: skip
+  resources:
+  - deployment-excluded-kube-system
+- policy: require-requests-limits
+  kind: Deployment
+  result: skip
+  resources:
+  - deployment-excluded-tekton-pipelines
+- policy: disallow-latest-tag
+  kind: Deployment
+  result: skip
+  resources:
+  - deployment-excluded-escape

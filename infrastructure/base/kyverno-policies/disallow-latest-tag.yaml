@@ -19,6 +19,29 @@ spec:
       - UPDATE
       resources:
       - pods
+      - replicationcontrollers
+    - apiGroups:
+      - apps
+      apiVersions:
+      - v1
+      operations:
+      - CREATE
+      - UPDATE
+      resources:
+      - daemonsets
+      - deployments
+      - replicasets
+      - statefulsets
+    - apiGroups:
+      - batch
+      apiVersions:
+      - v1
+      operations:
+      - CREATE
+      - UPDATE
+      resources:
+      - jobs
+      - cronjobs
     namespaceSelector:
       matchExpressions:
       - key: policy.alucard.dev/allow-latest
@@ -26,7 +49,11 @@ spec:
         values:
         - 'true'
   validations:
-  - expression: object.spec.containers.all(c, c.image.contains(':'))
+  - expression: variables.podSpec.containers.all(c, c.image.contains(':'))
     message: Images must carry an explicit tag.
-  - expression: object.spec.containers.all(c, !c.image.endsWith(':latest'))
+  - expression: variables.podSpec.containers.all(c, !c.image.endsWith(':latest'))
     message: Pin an explicit tag; :latest is not reproducible.
+  variables:
+  - name: podSpec
+    expression: 'object.kind == ''CronJob'' ? object.spec.jobTemplate.spec.template.spec
+      : (object.kind == ''Pod'' ? object.spec : object.spec.template.spec)'

@@ -19,11 +19,38 @@ spec:
       - UPDATE
       resources:
       - pods
+      - replicationcontrollers
+    - apiGroups:
+      - apps
+      apiVersions:
+      - v1
+      operations:
+      - CREATE
+      - UPDATE
+      resources:
+      - daemonsets
+      - deployments
+      - replicasets
+      - statefulsets
+    - apiGroups:
+      - batch
+      apiVersions:
+      - v1
+      operations:
+      - CREATE
+      - UPDATE
+      resources:
+      - jobs
+      - cronjobs
   validations:
-  - expression: object.spec.containers.all(c, has(c.resources) && has(c.resources.requests)
+  - expression: variables.podSpec.containers.all(c, has(c.resources) && has(c.resources.requests)
       && 'cpu' in c.resources.requests && 'memory' in c.resources.requests && has(c.resources.limits)
       && 'memory' in c.resources.limits)
     message: CPU/memory requests and a memory limit are required.
   matchConditions:
   - name: exclude-system-and-tekton
     expression: '!(request.namespace in [''kube-system'', ''tekton-pipelines''])'
+  variables:
+  - name: podSpec
+    expression: 'object.kind == ''CronJob'' ? object.spec.jobTemplate.spec.template.spec
+      : (object.kind == ''Pod'' ? object.spec : object.spec.template.spec)'
