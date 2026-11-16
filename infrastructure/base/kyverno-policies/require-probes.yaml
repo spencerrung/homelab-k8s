@@ -1,29 +1,26 @@
----
-apiVersion: kyverno.io/v1
-kind: ClusterPolicy
+apiVersion: policies.kyverno.io/v1
+kind: ValidatingPolicy
 metadata:
   name: require-probes
 spec:
-  validationFailureAction: Audit
-  background: false
-  rules:
-    - name: liveness-and-readiness
-      match:
-        any:
-          - resources:
-              kinds:
-                - Deployment
-                - StatefulSet
-      validate:
-        message: "Liveness and readiness probes are required on long-running workloads."
-        foreach:
-          - list: request.object.spec.template.spec.containers[]
-            deny:
-              conditions:
-                any:
-                  - key: "{{ element.livenessProbe || '' }}"
-                    operator: Equals
-                    value: ''
-                  - key: "{{ element.readinessProbe || '' }}"
-                    operator: Equals
-                    value: ''
+  validationActions:
+  - Audit
+  evaluation:
+    background:
+      enabled: false
+  matchConstraints:
+    resourceRules:
+    - apiGroups:
+      - apps
+      apiVersions:
+      - v1
+      operations:
+      - CREATE
+      - UPDATE
+      resources:
+      - deployments
+      - statefulsets
+  validations:
+  - expression: object.spec.template.spec.containers.all(c, has(c.livenessProbe) &&
+      has(c.readinessProbe))
+    message: Liveness and readiness probes are required on long-running workloads.
