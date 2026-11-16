@@ -6,11 +6,13 @@ metadata:
   namespace: monitoring
 spec:
   interval: 30m
+  upgrade:
+    crds: CreateReplace
   timeout: 15m
   chart:
     spec:
       chart: kube-prometheus-stack
-      version: '87.10.1'
+      version: '93.3.0'
       sourceRef:
         kind: HelmRepository
         name: prometheus-community
