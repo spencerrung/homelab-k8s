@@ -48,7 +48,7 @@ spec:
     spec:
       containers:
         - name: receiver
-          image: docker.io/metio/matrix-alertmanager-receiver:2026.6.24
+          image: docker.io/metio/matrix-alertmanager-receiver:2026.9.23
           args:
             - --config-path=/config/config.yaml
           envFrom:
