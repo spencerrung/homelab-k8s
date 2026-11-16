@@ -34,6 +34,8 @@ metadata:
   namespace: ai
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: litellm
@@ -55,6 +57,10 @@ spec:
                 name: litellm-secrets
           # surface boot progress; buffered output vanishes on SIGKILL
           env:
+            # Schema changes run separately with the target image. Old proxy
+            # versions must never diff a newer schema during a restart.
+            - name: DISABLE_SCHEMA_UPDATE
+              value: "true"
             - name: PYTHONUNBUFFERED
               value: "1"
             - name: DATABASE_URL
