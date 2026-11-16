@@ -188,3 +188,16 @@ succeeded through the new endpoint.
 The eight healthy nodes remain the OS upgrade scope. pi-04 is temporarily
 cordoned during application rollouts and must be uncordoned before node updates.
 No node OS package upgrades had begun at this checkpoint.
+
+
+## LiteLLM deployment-strategy transition
+
+PR #63 changes LiteLLM to Recreate before database migrations. The live
+Deployment had defaulted `rollingUpdate` fields retained under server-side
+apply, so the API rejected the strategy change. A declarative null alone did
+not remove those existing fields. After a server dry-run, a one-time merge
+patch replaced only the strategy with `type: Recreate` and
+`rollingUpdate: null`; it did not modify the Pod template. The full proposed
+manifest then passed Flux-style server-side dry-run. PR #92 makes the intended
+absence of rolling-update settings explicit. Allow the schema guard to finish
+rolling out and pass its checks before merging the actual image/migration bump.
