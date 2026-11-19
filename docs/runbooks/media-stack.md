@@ -338,6 +338,37 @@ pod to strong-profile OpenVPN UDP/1197 completed a 10 MB response at ~3.7 MB/s
 and passed VPN/local-DNS checks. The deployment therefore uses UDP/1197 as well
 as unpinned regional selection; removing the pin alone was insufficient.
 
+## Torrents wait for metadata despite reported seeders
+
+Check qBittorrent's DHT-node count, connected peers, and tracker errors alongside
+VPN health, DNS, and the forwarded port. On November 19, 2026, both the original
+release and an alternative remained in `metaDL` with no peers and zero DHT nodes.
+Many trackers reported `Operation not permitted`, even though VPN/DNS checks
+passed and qBittorrent's listening port matched Gluetun's forwarded port.
+
+Binding qBittorrent's **Advanced → Network interface** to `tun0`, with
+**Optional IP address to bind to** set to all addresses, restored discovery.
+After reannouncing the affected torrents, DHT reached 64 nodes and the original
+release connected to 46 seeds at approximately 6.5 MB/s. The duplicate was
+paused; no download data was deleted or quality profile changed. These observed
+results establish recovery for this incident, not guaranteed peer availability.
+
+`sync-qbt-port.sh` now applies `current_network_interface: tun0` and clears
+`current_interface_address` in the same localhost API update as `listen_port`.
+Gluetun invokes it when forwarding is established, so a future port sync
+also restores the interface setting. The fixed interface name follows this
+Deployment's OpenVPN `tun0`; do not pin a tunnel IP that can change on reconnect.
+The [qBittorrent API](https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-%28qBittorrent-5.0%29)
+documents these preference fields.
+
+The live preference was already corrected during diagnosis and persists on the
+config PVC. Merging this script change does not require restarting healthy
+transfers: the ConfigMap is mounted as a directory, and the next forwarding
+callback uses the updated script after Kubernetes refreshes the mount. The hook
+is event-driven, not a continuous preference reconciler. Check the saved
+interface, DHT/peer counts, tracker responses, and sustained download progress
+after a reconnect. Preserve the VPN killswitch and partial downloads.
+
 ## A season request downloads a different monitored season
 
 Compare Jellyseerr's requested seasons, Sonarr's monitored seasons, the search

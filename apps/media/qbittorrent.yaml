@@ -30,18 +30,22 @@ data:
     if [ "$port" -lt 1 ] || [ "$port" -gt 65535 ]; then exit 1; fi
     # Gluetun can establish forwarding before the qBittorrent WebUI starts.
     # Retry the idempotent preference update instead of keeping a stale port.
+    # Bind torrent traffic to the VPN interface, not every pod interface.
+    # Clear any saved address: OpenVPN can assign a new IP after reconnecting.
+    # With an unrestricted interface, tracker requests returned EPERM and DHT
+    # stayed at zero despite healthy VPN/DNS and a matching forwarded port.
     attempt=0
     while [ "$attempt" -lt 60 ]; do
       if wget -q -T 3 -t 1 -O /dev/null \
-        --post-data "json={\"listen_port\":$port}" \
+        --post-data "json={\"listen_port\":$port,\"current_network_interface\":\"tun0\",\"current_interface_address\":\"\"}" \
         http://127.0.0.1:8080/api/v2/app/setPreferences; then
-        echo "qBittorrent listening port synchronized"
+        echo "qBittorrent VPN interface and listening port synchronized"
         exit 0
       fi
       attempt=$((attempt + 1))
       sleep 2
     done
-    echo "qBittorrent port synchronization failed after retries" >&2
+    echo "qBittorrent VPN interface and port synchronization failed after retries" >&2
     exit 1
   notify-matrix.sh: |
     #!/bin/sh
