@@ -28,16 +28,26 @@ spec:
 
     resources:
       requests:
-        cpu: 100m
-        memory: 256Mi
-      limits:
+        cpu: 150m
         memory: 512Mi
+      limits:
+        memory: 768Mi
 
     credentials:
       useSecret: true
       existingSecret: velero-b2-credentials
 
     configuration:
+      repositoryMaintenanceJob:
+        repositoryConfigData:
+          name: velero-repo-maintenance
+          global:
+            keepLatestMaintenanceJobs: 3
+            # Seven-day observed peak 373Mi; retain burst CPU for kopia.
+            podResources:
+              cpuRequest: "100m"
+              memoryRequest: "256Mi"
+              memoryLimit: "768Mi"
       backupStorageLocation:
         - name: default
           provider: aws
@@ -60,6 +70,16 @@ spec:
     # the big PVCs live on 8GB nodes where the pods run
     deployNodeAgent: true
     nodeAgent:
+      # NoSchedule does not evict an existing DaemonSet pod. Match the
+      # quarantine exclusion used by CSI and node-exporter explicitly.
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: homelab.alucard.dev/quarantined
+                    operator: NotIn
+                    values: ["true"]
       resources:
         requests:
           cpu: 50m

@@ -61,7 +61,7 @@ spec:
           resources:
             requests:
               cpu: 100m
-              memory: 512Mi
+              memory: 1536Mi
             limits:
               memory: 2Gi
       containers:
@@ -94,7 +94,7 @@ spec:
           resources:
             requests:
               cpu: 100m
-              memory: 512Mi
+              memory: 1024Mi
             # boot (prisma client generation) spikes well past steady-state
             limits:
               memory: 2Gi

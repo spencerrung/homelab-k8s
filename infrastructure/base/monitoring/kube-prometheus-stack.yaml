@@ -33,6 +33,10 @@ spec:
     kubeEtcd:
       enabled: false
     defaultRules:
+      disabled:
+        # Replaced below: retained failures from recovered serial CronJobs
+        # otherwise page every four hours indefinitely.
+        KubeJobFailed: true
       rules:
         etcd: false
         kubeScheduler: false
@@ -42,6 +46,47 @@ spec:
         kubeApiserverSlos: false
         kubeApiserverBurnrate: false
         kubeApiserverHistogram: false
+
+    # Only these serial (concurrencyPolicy: Forbid), retry-safe CronJobs may
+    # recover via a later success. Never apply this to overlapping jobs or
+    # one-off backups: an unrelated successful run must not hide their failure.
+    additionalPrometheusRulesMap:
+      homelab-job-health:
+        groups:
+          - name: homelab.jobs
+            rules:
+              - alert: KubeJobFailed
+                expr: |
+                  (kube_job_failed{job="kube-state-metrics"} > 0)
+                  unless on (namespace, job_name)
+                  (
+                    max by (namespace, job_name) (kube_job_created{job="kube-state-metrics"})
+                    < on (namespace, job_name)
+                    (
+                      max by (namespace, job_name, owner_name) (
+                        kube_job_owner{job="kube-state-metrics", owner_kind="CronJob", owner_is_controller="true"}
+                      )
+                      * on (namespace, owner_name) group_left
+                      label_replace(
+                        max by (namespace, cronjob) (
+                          kube_cronjob_status_last_successful_time{job="kube-state-metrics", namespace="matrix", cronjob="bsky-notifier"}
+                          or kube_cronjob_status_last_successful_time{job="kube-state-metrics", namespace="media", cronjob=~"anime-guard|qbittorrent-watchdog|recyclarr"}
+                          or kube_cronjob_status_last_successful_time{job="kube-state-metrics", namespace="vault", cronjob="vault-snapshot"}
+                        ), "owner_name", "$1", "cronjob", "(.+)"
+                      )
+                    )
+                  )
+                for: 15m
+                labels:
+                  severity: warning
+                annotations:
+                  summary: Job failed to complete.
+                  description: >-
+                    Job {{ $labels.namespace }}/{{ $labels.job_name }} failed.
+                    Investigate its logs and owner. For the listed Forbid-concurrency
+                    CronJobs, a later successful run clears this alert; other Jobs
+                    require investigation and cleanup.
+                  runbook_url: https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubejobfailed
 
     # ~110k of 245k series were apiserver/etcd latency histogram buckets
     # feeding SLO dashboards nobody reads on a homelab - drop at scrape
@@ -86,9 +131,9 @@ spec:
         resources:
           requests:
             cpu: 200m
-            memory: 1280Mi
-          limits:
             memory: 1536Mi
+          limits:
+            memory: 2Gi
 
     alertmanager:
       alertmanagerSpec:
@@ -202,7 +247,7 @@ spec:
       resources:
         requests:
           cpu: 50m
-          memory: 192Mi
+          memory: 384Mi
         limits:
           memory: 512Mi
 
