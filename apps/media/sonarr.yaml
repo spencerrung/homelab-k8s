@@ -93,8 +93,8 @@ spec:
               name: http
           resources:
             requests:
-              cpu: 100m
-              memory: 192Mi
+              cpu: 600m
+              memory: 384Mi
             limits:
               memory: 512Mi
           startupProbe:

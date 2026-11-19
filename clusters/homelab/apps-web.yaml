@@ -15,4 +15,5 @@ spec:
   path: ./apps/web/homelab
   prune: true
   wait: true
-  timeout: 5m0s
+  # Cold image pulls on the NFS-root Pi can exceed seven minutes.
+  timeout: 15m0s

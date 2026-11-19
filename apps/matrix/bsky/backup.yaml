@@ -40,9 +40,10 @@ spec:
           resources:
             requests:
               cpu: 5m
-              memory: 16Mi
+              memory: 32Mi
+            # Python probes/backup hooks burst briefly; a 100m CPU quota
+            # throttled ~70-78% of active periods despite ~3m average CPU.
             limits:
-              cpu: 100m
               memory: 64Mi
           securityContext:
             allowPrivilegeEscalation: false

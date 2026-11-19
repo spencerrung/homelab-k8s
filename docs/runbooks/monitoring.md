@@ -49,3 +49,24 @@ Prometheus (pi-05, 7d/8GB retention, 15Gi PVC), Loki single-binary
 stateless (dashboards from values + sidecar). k3s trims: scheduler,
 controller-manager, kube-proxy, etcd scrapes and their default rules are
 disabled — k3s folds those metrics into the apiserver endpoint.
+
+## Resource and recurring-alert review
+
+See [November 19 resource audit](resource-audit-2026-11.md) for measurements,
+proposed allocations, validation, and rollout checks. These are repository
+changes awaiting deployment; the audit is not a live-resolution claim.
+
+`KubeJobFailed` remains enabled via `additionalPrometheusRulesMap` in the stack
+values. For the explicitly listed serial (`concurrencyPolicy: Forbid`) CronJobs,
+a successful run newer than the failed Job's creation clears the alert. Failed
+Job objects/logs remain available under their existing history limits. A new
+failure, missing recovery metrics, an unlisted CronJob, or a one-off Job still
+alerts after 15 minutes. Keep the allowlist narrow: overlapping or non-retry-safe
+jobs must not inherit this recovery behavior.
+
+Validate the recovery rule with Python, PyYAML, and `promtool`:
+
+```sh
+python tests/monitoring/test_job_alerts.py
+# Or set PROMTOOL=/path/to/promtool explicitly.
+```
