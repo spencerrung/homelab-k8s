@@ -18,6 +18,9 @@ rules:
     resources: ["deployments"]
     resourceNames: ["qbittorrent"]
     verbs: ["get", "patch"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["list"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -90,6 +93,26 @@ spec:
                     echo "qBittorrent unavailable for ${age_seconds}s; waiting for 900s before restarting"
                     exit 0
                   fi
+                  # Available=False keeps its old transition time across
+                  # restarts. Give every replacement pod its own 15-minute
+                  # recovery window, including restarts initiated elsewhere.
+                  # Observe pods rather than a rollout annotation that Flux
+                  # may remove from the Deployment template.
+                  created_times=$(kubectl get pods -l app=qbittorrent \
+                    -o jsonpath='{range .items[*]}{.metadata.creationTimestamp}{"\n"}{end}')
+                  if [ -z "$created_times" ]; then
+                    echo "No qBittorrent pod exists; leaving creation/scheduling to Kubernetes"
+                    exit 0
+                  fi
+                  for created_at in $created_times; do
+                    normalized=$(printf '%s' "$created_at" | tr 'T' ' ' | tr -d 'Z')
+                    created_epoch=$(date -u -d "$normalized" +%s)
+                    pod_age=$(( $(date -u +%s) - created_epoch ))
+                    if [ "$pod_age" -lt 900 ]; then
+                      echo "Replacement pod is only ${pod_age}s old; allowing 900s before another restart"
+                      exit 0
+                    fi
+                  done
                   echo "qBittorrent unavailable for ${age_seconds}s (${available:-0}/${desired}); restarting"
                   kubectl rollout restart deployment/qbittorrent
                   echo "restart requested"
