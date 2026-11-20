@@ -187,6 +187,49 @@ interrupt all its peers. Container startup/liveness probes remain responsible
 for recovering a persistently unhealthy Gluetun container during that grace
 period. Missing or ambiguous availability timestamps do not trigger a restart.
 
+### Repeated watchdog restarts and VPN TLS timeouts
+
+On November 20, 2026, Gluetun repeatedly timed out during OpenVPN TLS negotiation
+while the qBittorrent container itself was Ready. The Deployment had remained
+unavailable since 10:29 UTC. Its `Available=False` transition timestamp survived
+each replacement, so the watchdog restarted it every five minutes after the
+initial 15-minute grace period. The watchdog now also checks the creation time
+of all matching pods and waits until every pod is at least 15 minutes old.
+Missing pods are left to the Deployment/scheduler; failed API reads do not
+trigger restarts. This guard survives Flux removing rollout annotations and
+also gives manually initiated replacement pods a recovery window.
+
+The pod's embedded PIA server list was dated April 22, 2026. Its Vancouver
+addresses did not overlap the provider's current advertised OpenVPN endpoints.
+A local test of the exact pinned Gluetun image's `update -enduser -providers
+"private internet access"` command succeeded and produced a current list with
+new Vancouver endpoints. Refreshing the list alone still timed out on the
+legacy UDP/1197 override. Removing that override uses the pinned image's
+[strong-profile UDP default of 8080](https://github.com/qdm12/gluetun/blob/v3.41.3/internal/provider/privateinternetaccess/connection.go).
+An isolated pod on the production node then completed TLS negotiation in one
+second and passed VPN/local-DNS readiness. Keep the provider defaults instead
+of carrying a historical endpoint-port override across server migrations.
+Forwarding and qBittorrent integration must also be checked after rollout.
+
+The Deployment now runs that updater in an init container before the VPN
+container/firewall starts. Both containers mount `/gluetun` from a shared
+`emptyDir`; qBittorrent does not mount it. The init container has no VPN
+credentials or NET_ADMIN capability and only fetches public provider data.
+A provider/API outage leaves initialization retrying instead of silently falling
+back to known-stale endpoints. The list survives Gluetun container restarts
+within the pod and is freshly fetched when a pod is recreated. `UPDATER_PERIOD`
+is 480 hours to refresh long-lived connections without frequent provider polling.
+See the [upstream server-update guidance](https://github.com/qdm12/gluetun-wiki/blob/main/setup/servers.md).
+The pinned 3.41.3 CLI uses `/gluetun/servers.json`; newer upstream documentation
+may describe a different storage layout, so recheck the CLI on image upgrades.
+
+Validate locally with `python tests/media/test_qbittorrent_watchdog.py` (requires
+PyYAML), then render `apps/media` and `apps/stateful/homelab`. After an approved
+GitOps rollout, verify init completion, a current PIA timestamp, successful VPN
+handshake, local DNS, forwarded-port match, `tun0` binding, and the same pod
+remaining Ready across subsequent watchdog ticks. Do not weaken the killswitch,
+delete partial downloads, or treat repeated pod recreation as proof of recovery.
+
 ## Verify the hardlink promise
 
 After the first completed download imports:
@@ -335,8 +378,10 @@ current upload). Do not downgrade a requested release's quality without approval
 Follow-up testing showed that the unpinned TCP connection also reset on a repeat
 request, and the live TCP tunnel continued reconnecting. Switching the isolated
 pod to strong-profile OpenVPN UDP/1197 completed a 10 MB response at ~3.7 MB/s
-and passed VPN/local-DNS checks. The deployment therefore uses UDP/1197 as well
-as unpinned regional selection; removing the pin alone was insufficient.
+and passed VPN/local-DNS checks at that time. On November 20, the migrated
+Vancouver pool no longer completed TLS negotiation on 1197; see the recovery
+section above. The deployment now uses the provider's strong UDP default and
+refreshes endpoint discovery, while retaining unpinned regional selection.
 
 ## Torrents wait for metadata despite reported seeders
 

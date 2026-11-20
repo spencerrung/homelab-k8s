@@ -93,6 +93,23 @@ spec:
       labels:
         app: qbittorrent
     spec:
+      # Refresh public provider endpoints before the VPN firewall starts.
+      # The image's embedded PIA list can outlive a provider server migration;
+      # periodic updates alone cannot bootstrap an already-disconnected VPN.
+      initContainers:
+        - name: refresh-vpn-servers
+          image: docker.io/qmcgaw/gluetun:v3.41.3
+          command: [/gluetun-entrypoint]
+          args: [update, -enduser, -providers, "private internet access"]
+          resources:
+            requests:
+              cpu: 50m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+          volumeMounts:
+            - name: gluetun-state
+              mountPath: /gluetun
       containers:
         # VPN sidecar: shares the pod's network namespace, so ALL of
         # qBittorrent's traffic rides the PIA tunnel. The firewall
@@ -116,12 +133,11 @@ spec:
             # fits inside the overlay and was worth a 6x speedup.
             - name: OPENVPN_FLAGS
               value: --tun-mtu 1380 --mssfix 1300
-            # TCP/443 repeatedly reset/stalled under load. UDP/1197 passed
-            # same-node throughput and DNS checks with the strong profile.
+            # Use the provider defaults for the strong UDP profile (8080 in
+            # this image). A legacy 1197 override stopped completing TLS
+            # handshakes after PIA migrated the Vancouver endpoints.
             - name: OPENVPN_PROTOCOL
               value: udp
-            - name: OPENVPN_ENDPOINT_PORT
-              value: "1197"
             - name: OPENVPN_USER
               valueFrom:
                 secretKeyRef:
@@ -138,6 +154,9 @@ spec:
             # set a US region and VPN_PORT_FORWARDING=off.
             - name: SERVER_REGIONS
               value: CA Vancouver
+            # Keep the successfully bootstrapped list fresh on long-lived pods.
+            - name: UPDATER_PERIOD
+              value: 480h
             # Let Gluetun select a server within this PF-capable region.
             # The former vancouver426 pin repeatedly timed out and limited
             # HTTPS throughput to ~15 KB/s while another server reached 2.6 MB/s.
@@ -194,6 +213,8 @@ spec:
             timeoutSeconds: 8
             failureThreshold: 2
           volumeMounts:
+            - name: gluetun-state
+              mountPath: /gluetun
             - name: dev-net-tun
               mountPath: /dev/net/tun
             - name: scripts
@@ -270,6 +291,9 @@ spec:
             - name: scripts
               mountPath: /scripts
       volumes:
+        - name: gluetun-state
+          emptyDir:
+            sizeLimit: 32Mi
         - name: config
           persistentVolumeClaim:
             claimName: qbittorrent-config
